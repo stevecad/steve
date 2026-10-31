@@ -8,6 +8,8 @@ import subprocess
 import signal
 import json
 from pathlib import Path
+from types import SimpleNamespace
+from unittest.mock import patch
 from steve_desktop.cad_process import run
 
 
@@ -79,6 +81,34 @@ class CadProcessTests(unittest.TestCase):
             time.sleep(2.2)
             self.assertEqual(errors, ['Build cancelled.'])
             self.assertFalse(child.with_suffix('.escaped').exists())
+
+    def test_blender_keeps_the_host_environment_and_cad_stays_minimal(self):
+        script = ('import json, os\n'
+                  'print(json.dumps({key: os.environ.get(key) for key in '
+                  '("STEVE_ENV_MARKER", "TMPDIR", "OMP_NUM_THREADS")}))\n')
+        with tempfile.TemporaryDirectory() as directory:
+            root = Path(directory)
+            (root / 'show.py').write_text(script)
+            temp = root / 'tmp'
+            temp.mkdir()
+            budget = SimpleNamespace(capacity=3)
+            overlay = {'STEVE_ENV_MARKER': 'visible', 'TMPDIR': str(temp), 'OMP_NUM_THREADS': '6'}
+            with patch.dict(os.environ, overlay):
+                def invoke(external):
+                    with (root / 'log').open('wb') as log:
+                        code = run([sys.executable, str(root / 'show.py')], log, threading.Event(),
+                                   external=external, budget=budget)
+                    return code, json.loads((root / 'log').read_text().strip().splitlines()[-1])
+                external_code, external = invoke(True)
+                internal_code, internal = invoke(False)
+        self.assertEqual(external_code, 0)
+        self.assertEqual(external['STEVE_ENV_MARKER'], 'visible')
+        self.assertEqual(external['TMPDIR'], str(temp))
+        self.assertEqual(external['OMP_NUM_THREADS'], '6')
+        self.assertEqual(internal_code, 0)
+        self.assertIsNone(internal['STEVE_ENV_MARKER'])
+        self.assertEqual(internal['TMPDIR'], str(temp))
+        self.assertEqual(internal['OMP_NUM_THREADS'], '1')
 
 
 if __name__ == '__main__':

@@ -13,22 +13,36 @@ import sys
 
 _spawn_lock = threading.Lock()
 
+# A CAD worker executes document Python. Keep the frozen app's library paths and
+# unrelated session variables out of that process. TMPDIR is the Unix temp
+# directory; without it, large builds ignore the user's temp location and fill /tmp.
+_CAD_ENV = {'PATH', 'PATHEXT', 'SYSTEMROOT', 'WINDIR', 'TEMP', 'TMP', 'TMPDIR', 'HOME', 'USERPROFILE',
+            'APPDATA', 'LOCALAPPDATA', 'PROGRAMFILES', 'PROGRAMFILES(X86)', 'PROGRAMDATA', 'COMSPEC',
+            'LD_LIBRARY_PATH', 'DYLD_LIBRARY_PATH'}
 
-def run(command, log, cancel, timeout=None, budget=None, cwd=None, output_limit=4_000_000, external=False):
-    allowed = {'PATH', 'PATHEXT', 'SYSTEMROOT', 'WINDIR', 'TEMP', 'TMP', 'HOME', 'USERPROFILE',
-               'APPDATA', 'LOCALAPPDATA', 'PROGRAMFILES', 'PROGRAMFILES(X86)', 'PROGRAMDATA', 'COMSPEC',
-               'LD_LIBRARY_PATH', 'DYLD_LIBRARY_PATH'}
-    inherited = os.environ
+
+def command_environment(external=False, budget=None):
+    """Environment for one CAD worker, or for an external host tool such as Blender.
+
+    CAD jobs share a machine-wide CPU budget, so each worker's numerical libraries
+    stay on one thread. Blender is one host process. Its ``--threads`` flag and,
+    on Windows, the job-object CPU cap already apply that budget. The CAD allowlist
+    would also hide TMPDIR and ``LD_LIBRARY_PATH_ORIG`` from the Linux process
+    guardian, so it could not rebuild Blender's host environment.
+    """
     if external:
         from steve_desktop.blender_runtime import environment
-        inherited = environment()
-    env = {k: v for k, v in inherited.items() if k.upper() in allowed}
+        return environment()
+    env = {key: value for key, value in os.environ.items() if key.upper() in _CAD_ENV}
     env['PYTHONUTF8'] = '1'
-    # Parallelism is scheduled across isolated CAD jobs. Avoid every numerical
-    # library spawning another machine-sized thread pool inside each worker.
     if budget is not None:
         env.update(OMP_NUM_THREADS='1', OPENBLAS_NUM_THREADS='1', MKL_NUM_THREADS='1', NUMEXPR_NUM_THREADS='1')
         env['STEVE_AREA_CACHE_WORKERS'] = str(budget.capacity)
+    return env
+
+
+def run(command, log, cancel, timeout=None, budget=None, cwd=None, output_limit=4_000_000, external=False):
+    env = command_environment(external, budget)
     start = time.monotonic()
 
     def check():
