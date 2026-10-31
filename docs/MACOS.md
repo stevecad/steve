@@ -100,3 +100,4 @@ packages. Install Blender.app yourself.
 - Intel macOS (`x86_64`), including Rosetta, stays unidentified.
 - Blender 4.5 is not downloaded for you.
 - This path is not built or tested by the existing Windows and Linux CI.
+- Git import of a repository under `/tmp` fails on macOS with "Repository source path escapes its document folder" because `/tmp` and `/var` are symlinks to `/private`. An upstream fix for symlinks above the checkout is already open; it is not in this branch.

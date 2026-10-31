@@ -32,9 +32,14 @@ class BlenderRuntimeTests(unittest.TestCase):
         with tempfile.TemporaryDirectory() as folder:
             response=io.BytesIO(b'not the official executable')
             response.headers={'Content-Length':str(len(response.getvalue()))}
-            with patch('steve_desktop.blender_runtime.urllib.request.urlopen',return_value=response):
+            # Pin a packaged platform. Darwin has no archive, so an unmocked Mac host
+            # raises before the download is hashed.
+            with patch('steve_desktop.blender_runtime.platform.system',return_value='Linux'), \
+                 patch('steve_desktop.blender_runtime.platform.machine',return_value='x86_64'), \
+                 patch('steve_desktop.blender_runtime.urllib.request.urlopen',return_value=response) as opened:
                 with self.assertRaisesRegex(ValueError,'SHA-256'):
                     install(Path(folder),threading.Event(),lambda message:None)
+                self.assertIn('linux-x64', opened.call_args.args[0])
             self.assertEqual(list(Path(folder).iterdir()),[])
 
     def _response(self, payload):
