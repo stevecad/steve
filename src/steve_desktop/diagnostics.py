@@ -17,7 +17,7 @@ def _redact(text, secrets=()):
     text = re.sub(r'https?://[^\s<>\"\']+', '[URL omitted]', text)
     text = re.sub(r'data:image/[^\s\"\']+', '[image omitted]', text)
     text = re.sub(r'(?i)(bearer\s+)[^\s,;\"\']+', r'\1[redacted]', text)
-    text = re.sub(r'(?i)([\"\']?(?:\w*token|\w*secret|password|authorization|api_key)[\"\']?\s*[:=]\s*)[\"\']?[^\s,;\"\']+', r'\1[redacted]', text)
+    text = re.sub(r'(?i)([\"\']?(?:\w*token|\w*secret|password|authorization|api[_-]?key)[\"\']?\s*[:=]\s*)[\"\']?[^\s,;\"\']+', r'\1[redacted]', text)
     text = re.sub(r'[A-Za-z0-9_+/=.-]{80,}', '[long value omitted]', text)
     return text
 
@@ -51,8 +51,22 @@ def redact_report(text, secrets=(), home=None, user=None):
     text = EMAIL.sub('[email]', text)
     for pattern, replacement in HOME_FOLDERS:
         text = pattern.sub(replacement, text)
+    homes = []
     if home and len(home) > 3:  # A home folder outside the usual locations.
-        for form in sorted({home, home.replace('\\', '/'), home.replace('\\', '\\\\')}, key=len, reverse=True):
+        homes.append(home)
+        try:
+            # Tracebacks often contain the resolved path when the home directory
+            # itself is a symlink (another disk, or a bind mount).
+            resolved = str(Path(home).resolve())
+        except OSError:
+            resolved = ''
+        if resolved and len(resolved) > 3 and resolved not in homes:
+            homes.append(resolved)
+    forms = []
+    for item in homes:
+        forms.extend((item, item.replace('\\', '/'), item.replace('\\', '\\\\')))
+    for form in sorted(set(forms), key=len, reverse=True):
+        if len(form) > 3:
             text = re.sub(re.escape(form) + r'(?![A-Za-z0-9._-])', '[home]', text, flags=re.I)
     if user and len(user) >= 3:
         text = re.sub(r'(?<![A-Za-z0-9])' + re.escape(user) + r'(?![A-Za-z0-9])', '[user]', text, flags=re.I)

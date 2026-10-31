@@ -42,6 +42,24 @@ class RedactionTests(unittest.TestCase):
         self.assertIn('[email]', result)
         self.assertEqual(redact_report(result, home='/srv/people/morgan', user='morgan'), result)  # Idempotent.
 
+    def test_resolved_home_and_hyphenated_api_keys_are_removed(self):
+        with tempfile.TemporaryDirectory() as folder:
+            base = Path(folder)
+            resolved = base / 'data' / 'disk' / 'u-9f3a'
+            resolved.mkdir(parents=True)
+            home = base / 'homes' / 'alex'
+            home.parent.mkdir()
+            home.symlink_to(resolved, target_is_directory=True)
+            text = (f'open {resolved}/bracket.step\n'
+                    'api-key: supersecretvalue\nX-API-Key: othersecretvalue\n')
+            result = redact_report(text, home=str(home), user='alex')
+            self.assertNotIn('u-9f3a', result)
+            self.assertNotIn('supersecretvalue', result)
+            self.assertNotIn('othersecretvalue', result)
+            self.assertIn('[home]/bracket.step', result)
+            self.assertIn('api-key: [redacted]', result)
+            self.assertEqual(redact_report(result, home=str(home), user='alex'), result)
+
     def test_log_is_capped_to_its_most_recent_whole_lines(self):
         log = '\n'.join(f'line {n}' for n in range(1000))
         kept, truncated = tail_bytes(log, 100)
