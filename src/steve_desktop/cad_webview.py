@@ -52,6 +52,18 @@ class CadPage(QWebEnginePage):
         print(f'CAD UI [{level.name}] {message} ({line})', flush=True)
 
 
+def install_paste_event_filter(host, view, application):
+    # Limit paste interception to the view and its keyboard focus widget.
+    # An application-wide Python filter also wraps private Qt Quick objects;
+    # PySide6 6.12 can crash while identifying those objects on Linux and macOS.
+    if sys.platform in ('linux', 'darwin'):
+        view.installEventFilter(host)
+        host.install_paste_filter()
+        view.loadFinished.connect(host.install_paste_filter)
+    else:
+        application.installEventFilter(host)
+
+
 class LocalCadWeb(QWidget):
     def __init__(self, folder, parent=None):
         super().__init__(parent)
@@ -67,15 +79,7 @@ class LocalCadWeb(QWidget):
         self.page.paste_handler = self.paste
         self.page.setBackgroundColor(QColor("#101719"))
         self.view.setPage(self.page)
-        # Limit paste interception to the view and its keyboard focus widget.
-        # An application-wide Python filter also wraps private Qt Quick objects;
-        # PySide6 6.12 can crash while identifying those objects on Linux.
-        if sys.platform == 'linux':
-            self.view.installEventFilter(self)
-            self.install_paste_filter()
-            self.view.loadFinished.connect(self.install_paste_filter)
-        else:
-            QApplication.instance().installEventFilter(self)
+        install_paste_event_filter(self, self.view, QApplication.instance())
         self.page.settings().setAttribute(QWebEngineSettings.WebAttribute.LocalContentCanAccessFileUrls, False)
         self.page.settings().setAttribute(QWebEngineSettings.WebAttribute.LocalContentCanAccessRemoteUrls, False)
         self.page.settings().setAttribute(QWebEngineSettings.WebAttribute.FullScreenSupportEnabled, True)
