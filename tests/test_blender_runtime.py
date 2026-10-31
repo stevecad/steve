@@ -1,8 +1,11 @@
+import hashlib
 import io
 import os
+import tarfile
 import threading
 import tempfile
 import unittest
+import zipfile
 from pathlib import Path
 from types import SimpleNamespace
 from unittest.mock import patch
@@ -33,6 +36,68 @@ class BlenderRuntimeTests(unittest.TestCase):
                 with self.assertRaisesRegex(ValueError,'SHA-256'):
                     install(Path(folder),threading.Event(),lambda message:None)
             self.assertEqual(list(Path(folder).iterdir()),[])
+
+    def _response(self, payload):
+        response = io.BytesIO(payload)
+        response.headers = {'Content-Length': str(len(payload))}
+        return response
+
+    def test_oversized_download_is_rejected_before_hashing(self):
+        # A zero Content-Length must not bypass the byte cap.
+        response = self._response(b'x' * 32)
+        response.headers = {'Content-Length': '0'}
+        with tempfile.TemporaryDirectory() as folder:
+            with patch('steve_desktop.blender_runtime.MAX_DOWNLOAD', 8), \
+                 patch('steve_desktop.blender_runtime.urllib.request.urlopen', return_value=response):
+                with self.assertRaisesRegex(ValueError, 'size limit'):
+                    install(Path(folder), threading.Event(), lambda message: None)
+            self.assertEqual(list(Path(folder).iterdir()), [])
+
+    def test_symlink_and_traversal_entries_are_rejected(self):
+        def zipped(name, data, mode=0):
+            buffer = io.BytesIO()
+            with zipfile.ZipFile(buffer, 'w') as archive:
+                info = zipfile.ZipInfo(name)
+                if mode:
+                    info.external_attr = mode << 16
+                archive.writestr(info, data)
+            return buffer.getvalue()
+
+        cases = (
+            zipped('escape-link', b'/tmp/outside', 0o120777),
+            zipped('../escape', b'bad'),
+            zipped('blender/../../escape', b'bad'),
+        )
+        for payload in cases:
+            digest = hashlib.sha256(payload).hexdigest()
+            with self.subTest(payload=payload[:24]):
+                with tempfile.TemporaryDirectory() as folder:
+                    with patch('steve_desktop.blender_runtime.platform.system', return_value='Windows'), \
+                         patch('steve_desktop.blender_runtime.platform.machine', return_value='AMD64'), \
+                         patch.dict('steve_desktop.blender_runtime.PACKAGES', {('Windows', 'AMD64'): ('windows-x64.zip', digest)}), \
+                         patch('steve_desktop.blender_runtime.urllib.request.urlopen', return_value=self._response(payload)):
+                        with self.assertRaisesRegex(ValueError, 'Unsafe'):
+                            install(Path(folder), threading.Event(), lambda message: None)
+                    self.assertEqual(list(Path(folder).iterdir()), [])
+
+    def test_tar_expansion_is_bounded(self):
+        buffer = io.BytesIO()
+        with tarfile.open(fileobj=buffer, mode='w:xz') as archive:
+            payload = b'x' * 64
+            info = tarfile.TarInfo('padding')
+            info.size = len(payload)
+            archive.addfile(info, io.BytesIO(payload))
+        data = buffer.getvalue()
+        digest = hashlib.sha256(data).hexdigest()
+        with tempfile.TemporaryDirectory() as folder:
+            with patch('steve_desktop.blender_runtime.platform.system', return_value='Linux'), \
+                 patch('steve_desktop.blender_runtime.platform.machine', return_value='x86_64'), \
+                 patch('steve_desktop.blender_runtime.MAX_UNPACKED', 16), \
+                 patch.dict('steve_desktop.blender_runtime.PACKAGES', {('Linux', 'x86_64'): ('linux-x64.tar.xz', digest)}), \
+                 patch('steve_desktop.blender_runtime.urllib.request.urlopen', return_value=self._response(data)):
+                with self.assertRaisesRegex(ValueError, 'expands too far'):
+                    install(Path(folder), threading.Event(), lambda message: None)
+            self.assertEqual(list(Path(folder).iterdir()), [])
 
     def test_frozen_external_runtime_uses_original_library_environment(self):
         with patch.dict(os.environ,{'LD_LIBRARY_PATH':'/frozen','LD_LIBRARY_PATH_ORIG':'/system','PYTHONHOME':'/frozen','PYTHONPATH':'/frozen'}):
