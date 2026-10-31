@@ -6,6 +6,19 @@ host, and an assistant powered by Pydantic AI. CAD builds run on this machine.
 This is pre-release software. Known coverage limits remain documented; not every
 CAD operation is certified. See `CONTRIBUTING.md` to set up a development environment.
 
+## Download
+
+Prebuilt releases are published at https://dl.stevecad.studio. You don't need to build
+from source to use Steve:
+
+- Windows 10 and 11 (64-bit): the installer, `https://dl.stevecad.studio/windows/Steve-Setup-<version>-windows-x64.exe`
+- Linux (x86-64): the AppImage, `https://dl.stevecad.studio/linux/Steve-<version>-linux-x86_64.AppImage`
+
+The current version is in each platform's `latest.json`
+(https://dl.stevecad.studio/windows/latest.json, https://dl.stevecad.studio/linux/latest.json).
+Signed in to Steve Studio, the account menu's **Steve desktop** lists the same downloads.
+Installed copies update themselves from the same place.
+
 ## Development on Windows
 
 Use Python 3.13 and Node.js with npm. Create a virtual environment, install
