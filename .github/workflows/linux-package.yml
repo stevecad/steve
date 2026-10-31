@@ -71,7 +71,9 @@ jobs:
           docker run --rm --init --mount type=bind,src="${PWD}/${steve_images[0]}",dst=/opt/Steve.AppImage,readonly --mount type=bind,src="${PWD}/tools/linux_session.py",dst=/opt/linux_session.py,readonly steve-linux-runtime-check:local > build/verification/clean-ubuntu-appimage.log 2>&1
       - name: Index unsigned artifacts for local signing
         run: python tools/package_release.py --platform linux-x64 --output dist/linux
+      # Packages are stored only for release builds, never for pull requests (see release-build.yml).
       - uses: actions/upload-artifact@v7
+        if: github.event_name != 'pull_request'
         with:
           name: Steve-linux-x86_64
           path: dist/linux/*
