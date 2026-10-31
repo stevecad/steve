@@ -1,0 +1,198 @@
+/* Set up with STEVE: the assistant beside a library form (laid out by Manufacture.module.css), and the provenance marks
+   on drafted fields. */
+
+.toggle {
+  display: inline-flex; align-items: center; gap: 6px; height: 26px; padding: 0 10px 0 6px; border-radius: var(--r-pill);
+  border: 1px solid color-mix(in srgb, var(--ws) 40%, var(--line-2)); color: var(--text-1); font-size: var(--fs-xs); font-weight: 600;
+  background: linear-gradient(135deg, color-mix(in srgb, var(--ws) 16%, transparent), transparent 70%); white-space: nowrap;
+  transition: background var(--t-fast), border-color var(--t-fast), box-shadow var(--t-fast);
+}
+.toggle:hover { border-color: var(--ws); box-shadow: 0 0 0 3px var(--ws-softer); }
+.toggle[aria-pressed='true'] { background: var(--ws); border-color: var(--ws); color: var(--ws-ink); }
+.toggle[aria-pressed='true'] .steveMark { background: var(--ws-ink); color: var(--ws); }
+
+.steveMark {
+  display: grid; place-items: center; width: 18px; height: 18px; border-radius: 5px; flex-shrink: 0;
+  background: var(--ws); color: var(--bg-0); font-size: 11px; font-weight: 800; line-height: 1;
+}
+
+/* ── The pane ── */
+.pane {
+  display: flex; flex-direction: column; min-width: 0; min-height: 0; border-left: 1px solid var(--line-2);
+  background: linear-gradient(180deg, color-mix(in srgb, var(--ws) 6%, var(--bg-1)), var(--bg-1) 160px);
+  animation: pane-in var(--t-slow, 220ms) var(--ease-out);
+}
+.paneHead { display: flex; align-items: center; gap: 8px; padding: 10px 10px 10px 12px; border-bottom: 1px solid var(--line-1); }
+.paneTitle { font-size: var(--fs-md); font-weight: 600; color: var(--text-1); white-space: nowrap; }
+.modelChip { margin-left: auto; max-width: 45%; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; padding: 1px 8px; border-radius: var(--r-pill); border: 1px solid var(--line-2); color: var(--text-3); font-size: var(--fs-2xs); }
+.close { display: grid; place-items: center; width: 24px; height: 24px; border-radius: 6px; color: var(--text-3); flex-shrink: 0; }
+.close:hover { background: var(--bg-4); color: var(--text-1); }
+.webNote { display: flex; align-items: flex-start; gap: 6px; padding: 6px 12px; border-bottom: 1px solid var(--line-1); color: var(--text-3); font-size: var(--fs-xs); line-height: 1.45; }
+.webNote svg { flex-shrink: 0; margin-top: 2px; }
+.webNote[data-off] { color: var(--warning); background: var(--warning-soft); }
+
+.transcript { flex: 1; min-height: 0; overflow: auto; padding: 12px; display: flex; flex-direction: column; gap: 14px; scroll-behavior: smooth; }
+.intro { display: flex; flex-direction: column; gap: 10px; color: var(--text-2); font-size: var(--fs-sm); line-height: 1.55; }
+.intro b { color: var(--text-1); font-weight: 600; }
+.introList { margin: 0; padding-left: 16px; display: flex; flex-direction: column; gap: 3px; color: var(--text-3); font-size: var(--fs-xs); }
+.examples { display: flex; flex-wrap: wrap; gap: 6px; }
+.example {
+  height: 26px; padding: 0 10px; border-radius: var(--r-pill); border: 1px solid var(--line-2); background: var(--bg-2);
+  color: var(--text-2); font-size: var(--fs-xs); transition: border-color var(--t-fast), color var(--t-fast), background var(--t-fast);
+}
+.example:hover { border-color: color-mix(in srgb, var(--ws) 60%, transparent); color: var(--text-1); background: var(--ws-softer); }
+
+.person {
+  align-self: flex-end; max-width: 88%; padding: 6px 10px; border-radius: 10px 10px 3px 10px; background: var(--bg-4);
+  color: var(--text-1); font-size: var(--fs-sm); line-height: 1.5; white-space: pre-wrap; overflow-wrap: anywhere; user-select: text;
+}
+.person[data-long] { max-height: 132px; overflow: auto; }
+.steve { display: flex; flex-direction: column; gap: 8px; min-width: 0; }
+
+.steps { list-style: none; margin: 0 0 0 8px; padding: 2px 0 2px 12px; border-left: 1px solid var(--line-2); display: flex; flex-direction: column; gap: 5px; }
+.step { display: grid; grid-template-columns: 14px minmax(0, 1fr); gap: 7px; align-items: start; color: var(--text-2); font-size: var(--fs-xs); line-height: 1.45; }
+.step[data-state='failed'] { color: var(--text-4); }
+.stepIcon { display: grid; place-items: center; height: 15px; color: var(--ws); }
+.step[data-state='failed'] .stepIcon { color: var(--text-4); }
+.stepText { min-width: 0; overflow-wrap: anywhere; }
+.stepText q { color: var(--text-1); quotes: '“' '”'; }
+.stepText a { color: var(--text-1); text-decoration: none; }
+.stepText a:hover { text-decoration: underline; }
+.results { display: flex; flex-wrap: wrap; gap: 4px; margin-top: 4px; }
+.result {
+  max-width: 170px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; padding: 0 7px; border-radius: var(--r-pill);
+  border: 1px solid var(--line-2); color: var(--text-3); font-size: var(--fs-2xs); line-height: 17px; text-decoration: none;
+}
+.result:hover { color: var(--text-1); border-color: var(--line-4); }
+.stepsSummary { align-self: flex-start; display: inline-flex; align-items: center; gap: 5px; margin-left: 8px; color: var(--text-3); font-size: var(--fs-xs); }
+.stepsSummary:hover { color: var(--text-1); }
+.stepsSummary svg { transition: transform var(--t-fast); }
+.stepsSummary[aria-expanded='true'] svg { transform: rotate(90deg); }
+
+/* STEVE's question: what he needs from the person before drafting. */
+.question { padding: 8px 10px; border-radius: 8px; border-left: 2px solid var(--ws); background: color-mix(in srgb, var(--ws) 7%, var(--bg-2)); color: var(--text-1); font-size: var(--fs-sm); line-height: 1.55; overflow-wrap: anywhere; user-select: text; }
+.prose { color: var(--text-1); font-size: var(--fs-sm); line-height: 1.6; overflow-wrap: anywhere; user-select: text; }
+.prose :global(p) { margin: 0 0 6px; }
+.prose :global(p:last-child) { margin-bottom: 0; }
+.prose :global(ul), .prose :global(ol) { margin: 2px 0 6px; padding-left: 16px; }
+.prose :global(code) { font-family: var(--font-mono); font-size: 0.92em; }
+.prose :global(a) { color: var(--ws); }
+
+.card {
+  display: flex; flex-direction: column; gap: 8px; padding: 10px 12px; border-radius: 10px;
+  border: 1px solid color-mix(in srgb, var(--ws) 38%, var(--line-2)); background: color-mix(in srgb, var(--ws) 7%, var(--bg-2));
+  box-shadow: var(--shadow-1);
+}
+.card[data-review='discarded'] { opacity: 0.6; border-color: var(--line-2); background: var(--bg-2); }
+.cardTitle { display: flex; align-items: center; gap: 7px; color: var(--text-1); font-size: var(--fs-sm); font-weight: 600; }
+.cardTitle svg { color: var(--ws); flex-shrink: 0; }
+.cardTitle span { min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.tally { display: flex; flex-wrap: wrap; gap: 4px 12px; color: var(--text-3); font-size: var(--fs-xs); font-variant-numeric: tabular-nums; }
+.tally b { font-weight: 600; }
+.tallySourced { color: var(--ws); }
+.tallyEstimated { color: var(--warning); }
+.notes { margin: 0; color: var(--text-2); font-size: var(--fs-xs); line-height: 1.55; white-space: pre-wrap; user-select: text; }
+.cardActions { display: flex; align-items: center; gap: 6px; }
+/* A bundle: the records a setup drafted together, each shown in the form when clicked. */
+.bundleRows { list-style: none; margin: 0; padding: 0; display: flex; flex-direction: column; gap: 4px; }
+.bundleRow {
+  display: flex; flex-direction: column; gap: 3px; width: 100%; padding: 7px 9px; border-radius: 8px; text-align: left;
+  border: 1px solid var(--line-2); background: var(--bg-1); color: var(--text-2); font-size: var(--fs-xs); line-height: 1.4;
+}
+.bundleRow:hover { border-color: var(--line-3); background: var(--bg-2); }
+.bundleRow[data-active] { border-color: var(--ws); box-shadow: inset 2px 0 0 var(--ws); }
+.bundleRow[data-state='failed'] { border-color: color-mix(in srgb, var(--danger) 55%, var(--line-2)); }
+.bundleHead { display: flex; align-items: baseline; gap: 6px; min-width: 0; }
+.bundleKind { flex-shrink: 0; color: var(--text-3); font-size: var(--fs-2xs); font-weight: 600; letter-spacing: 0.04em; text-transform: uppercase; }
+.bundleName { min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; color: var(--text-1); font-weight: 600; }
+.bundleState { margin-left: auto; flex-shrink: 0; display: inline-flex; align-items: center; gap: 3px; color: var(--ws); font-size: var(--fs-2xs); font-weight: 600; }
+.bundleState[data-state='saved'] { color: var(--success, var(--ws)); }
+.bundleState[data-state='failed'] { color: var(--danger); }
+.bundleState[data-state='saving'] { color: var(--text-3); }
+.bundleFacts { display: flex; flex-wrap: wrap; align-items: center; gap: 2px 6px; color: var(--text-3); font-variant-numeric: tabular-nums; }
+.bundleUses { color: var(--text-3); }
+.bundleUses i { font-style: normal; color: var(--text-2); }
+.bundleError { color: var(--danger); overflow-wrap: anywhere; user-select: text; }
+.cardState { color: var(--text-3); font-size: var(--fs-xs); }
+
+.error {
+  display: flex; align-items: flex-start; gap: 6px; padding: 7px 8px 7px 10px; border-radius: 8px; color: var(--text-1);
+  background: color-mix(in srgb, var(--danger) 14%, transparent); font-size: var(--fs-xs); line-height: 1.5; user-select: text;
+}
+.error > span { flex: 1; min-width: 0; overflow-wrap: anywhere; }
+.stopped { color: var(--text-3); font-size: var(--fs-xs); }
+
+.composer { display: flex; flex-direction: column; gap: 6px; padding: 10px 12px 12px; border-top: 1px solid var(--line-1); }
+.inputRow {
+  display: flex; align-items: flex-end; gap: 6px; padding: 6px 6px 6px 10px; border-radius: 10px; border: 1px solid var(--line-2);
+  background: var(--bg-1); transition: border-color var(--t-fast), box-shadow var(--t-fast);
+}
+.inputRow:focus-within { border-color: var(--ws); box-shadow: 0 0 0 3px var(--ws-softer); }
+.input {
+  flex: 1; min-height: 20px; max-height: 150px; resize: none; border: 0; outline: none; background: transparent;
+  color: var(--text-1); font: inherit; font-size: var(--fs-sm); line-height: 1.45; padding: 3px 0;
+}
+.input::placeholder { color: var(--text-4); }
+.send {
+  display: grid; place-items: center; width: 28px; height: 28px; border-radius: 8px; flex-shrink: 0;
+  background: var(--ws); color: var(--ws-ink); transition: opacity var(--t-fast), transform var(--t-fast);
+}
+.send:disabled { opacity: 0.35; cursor: default; }
+.send:not(:disabled):hover { transform: translateY(-1px); }
+.send[data-stop] { background: var(--bg-5); color: var(--text-1); }
+.fine { color: var(--text-4); font-size: var(--fs-2xs); line-height: 1.4; }
+
+/* ── Marks on drafted fields ── */
+.marks { display: inline-flex; align-items: center; gap: 3px; margin-left: 2px; vertical-align: middle; }
+.sourceMark {
+  display: inline-flex; align-items: center; gap: 1px; height: 15px; padding: 0 4px; border-radius: 4px; cursor: pointer;
+  border: 1px solid color-mix(in srgb, var(--ws) 35%, transparent); background: var(--ws-softer); color: var(--ws);
+  font-size: 8.5px; line-height: 1; animation: pop-mark var(--t-base) var(--ease-out);
+}
+.sourceMark small { font-size: 8.5px; font-weight: 600; }
+.sourceMark:hover, .sourceMark[data-state='open'] { background: var(--ws-soft); border-color: var(--ws); }
+.estimateMark {
+  display: inline-flex; align-items: center; gap: 3px; height: 15px; padding: 0 5px; border-radius: 4px; cursor: pointer;
+  background: var(--warning-soft); color: var(--warning); font-size: 9px; font-weight: 600; letter-spacing: 0.02em;
+  font-style: normal; animation: pop-mark var(--t-base) var(--ease-out);
+}
+.markCount { display: inline-flex; align-items: center; gap: 6px; margin-left: 6px; font-size: var(--fs-2xs); font-weight: 600; font-variant-numeric: tabular-nums; }
+.countSourced { color: var(--ws); }
+.countEstimated { display: inline-flex; align-items: center; gap: 2px; color: var(--warning); }
+.sourcesPop { min-width: 240px; max-width: 380px; }
+.popLabel { padding: 4px 8px 6px; }
+.sourceLink {
+  display: grid; grid-template-columns: auto minmax(0, 1fr) auto; align-items: baseline; gap: 6px; padding: 6px 8px; border-radius: 6px;
+  color: var(--text-1); font-size: var(--fs-sm); text-decoration: none;
+}
+.sourceLink small { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; color: var(--text-3); font-size: var(--fs-xs); }
+.sourceLink svg { color: var(--text-3); align-self: center; }
+.sourceLink:hover { background: var(--ws-soft); }
+.sourceLink:hover svg { color: var(--ws); }
+
+.estimateMark:hover, .estimateMark[data-state='open'] { box-shadow: inset 0 0 0 1px var(--warning); }
+/* Unmarked fields while editing: a faint ◇ on hover sets a source by hand. */
+.addSource {
+  display: inline-flex; align-items: center; height: 15px; padding: 0 3px; border-radius: 4px; cursor: pointer;
+  color: var(--text-4); font-size: 9px; opacity: 0; transition: opacity var(--t-fast) var(--ease-out);
+}
+:hover > .marks > .addSource, .addSource:focus-visible, .addSource[data-state='open'] { opacity: 1; }
+.addSource:hover, .addSource[data-state='open'] { color: var(--ws); background: var(--ws-softer); }
+.popText { padding: 2px 8px 6px; color: var(--text-2); font-size: var(--fs-xs); line-height: 1.45; white-space: pre-wrap; overflow-wrap: anywhere; }
+.popActions { display: flex; justify-content: flex-end; gap: 4px; padding: 6px 4px 2px; border-top: 1px solid var(--line-1); margin-top: 4px; }
+.sourceForm { display: flex; flex-direction: column; gap: 6px; padding: 0 4px 2px; min-width: 280px; }
+.sourceForm label { display: grid; grid-template-columns: 52px minmax(0, 1fr); align-items: center; gap: 8px; font-size: var(--fs-xs); color: var(--text-3); }
+.sourceForm label:has(textarea) { align-items: start; }
+.sourceForm input, .sourceForm select, .sourceForm textarea {
+  width: 100%; min-width: 0; height: 26px; padding: 0 7px; border-radius: 6px; border: 1px solid var(--line-2); background: var(--bg-1);
+  color: var(--text-1); font: inherit; font-size: var(--fs-sm);
+}
+.sourceForm textarea { height: auto; padding: 5px 7px; resize: vertical; }
+.sourceForm input:focus, .sourceForm select:focus, .sourceForm textarea:focus { outline: none; border-color: var(--ws); box-shadow: 0 0 0 3px var(--ws-softer); }
+.sourceForm input[data-invalid] { border-color: var(--danger); }
+.formHint { margin: -2px 0 2px 60px; color: var(--text-4); font-size: var(--fs-2xs); }
+.formError { color: var(--danger); font-size: var(--fs-xs); }
+
+@keyframes pop-mark { from { opacity: 0; transform: scale(0.7); } to { opacity: 1; transform: scale(1); } }
+@keyframes pane-in { from { opacity: 0; transform: translateX(8px); } to { opacity: 1; transform: none; } }
+@media (prefers-reduced-motion: reduce) { .sourceMark, .estimateMark, .pane { animation: none; } }

@@ -1,0 +1,46 @@
+.field { position: relative; display: flex; flex: 1; min-width: 0; }
+.input {
+  flex: 1;
+  min-width: 0;
+  height: 22px;
+  padding: 0 6px;
+  border-radius: 5px;
+  font: inherit;
+  font-size: var(--fs-sm);
+  color: var(--text-1);
+  background: var(--bg-2);
+  border: 1px solid color-mix(in srgb, var(--ws) 70%, transparent);
+  box-shadow: 0 0 0 3px var(--ws-soft);
+  outline: none;
+  transform-origin: left center;
+}
+.field[data-mono] .input { font-family: var(--font-mono); font-size: var(--fs-xs); }
+.input[data-invalid] { border-color: var(--danger); box-shadow: 0 0 0 3px var(--danger-soft); }
+.error {
+  display: block;
+  z-index: 950;
+  max-width: 260px;
+  padding: 5px 8px;
+  border-radius: 6px;
+  font-size: var(--fs-xs);
+  line-height: 1.4;
+  color: var(--danger);
+  background: var(--bg-overlay);
+  border: 1px solid color-mix(in srgb, var(--danger) 40%, var(--line-3));
+  box-shadow: var(--shadow-3);
+  backdrop-filter: blur(14px);
+  pointer-events: none;
+}
+.field[data-place='timeline'] { flex-direction: column; gap: 6px; width: 220px; }
+.field[data-place='timeline'] .input { flex: none; height: 26px; }
+.field[data-place='timeline'] .error { max-width: none; box-shadow: none; backdrop-filter: none; background: var(--danger-soft); border-color: transparent; }
+.popover {
+  z-index: 900;
+  padding: 8px;
+  border-radius: var(--r-lg);
+  background: var(--bg-overlay);
+  backdrop-filter: blur(18px) saturate(1.5);
+  border: 1px solid var(--line-3);
+  box-shadow: var(--shadow-4);
+}
+.popoverLabel { display: block; margin: 0 2px 6px; font-size: var(--fs-2xs); color: var(--text-3); }

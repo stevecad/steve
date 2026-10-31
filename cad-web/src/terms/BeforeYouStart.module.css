@@ -1,0 +1,22 @@
+.page { min-height: 100vh; display: flex; align-items: center; justify-content: center; padding: 32px 16px; background: var(--bg-1); color: var(--text-1); font-family: var(--font-sans); }
+.card { width: 100%; max-width: 560px; padding: 28px; border-radius: 14px; border: 1px solid var(--line-2); background: var(--bg-2); }
+.title { margin: 0 0 10px; font-size: var(--fs-2xl); font-weight: 600; }
+.intro { margin: 0 0 18px; color: var(--text-2); font-size: var(--fs-lg); line-height: 1.5; }
+.points { margin: 0 0 18px; padding: 0; list-style: none; display: grid; gap: 12px; }
+.points li { padding-left: 14px; border-left: 2px solid var(--mint); color: var(--text-2); font-size: var(--fs-md); line-height: 1.55; }
+.points b { color: var(--text-1); font-weight: 600; }
+.closing { margin: 0 0 20px; color: var(--text-3); font-size: var(--fs-sm); line-height: 1.55; }
+.agree { display: flex; align-items: flex-start; gap: 10px; color: var(--text-1); font-size: var(--fs-md); line-height: 1.5; cursor: pointer; }
+.agree input { margin-top: 3px; width: 16px; height: 16px; accent-color: var(--mint); flex: none; }
+.agree a, .link { color: var(--mint); }
+.error { margin: 12px 0 0; color: var(--amber); font-size: var(--fs-sm); }
+.actions { display: flex; justify-content: flex-end; margin-top: 18px; }
+.leave { margin-top: 22px; padding-top: 16px; border-top: 1px solid var(--line-1); color: var(--text-3); font-size: var(--fs-sm); line-height: 1.55; }
+.leave p { margin: 0 0 8px; }
+.leave h2 { margin: 16px 0 4px; color: var(--text-1); font-size: var(--fs-md); font-weight: 600; }
+.leave h2:first-child { margin-top: 0; }
+.link { padding: 0; border: 0; background: none; font: inherit; text-decoration: underline; cursor: pointer; }
+@media (max-width: 480px) {
+  .card { padding: 20px 16px; }
+  .actions :global(button) { width: 100%; }
+}

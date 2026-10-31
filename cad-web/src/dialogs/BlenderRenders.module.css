@@ -1,0 +1,6 @@
+.panel { display:flex; flex-direction:column; gap:16px; padding:20px; max-height:75vh; overflow:auto; }
+.actions { display:flex; align-items:center; flex-wrap:wrap; gap:10px; }
+.actions a { display:inline-flex; align-items:center; gap:6px; color:var(--ws); padding:8px 12px; border:1px solid var(--line-2); border-radius:var(--r-md); }
+.image { width:100%; max-height:48vh; object-fit:contain; background:var(--bg-1); border-radius:var(--r-lg); }
+.panel p { color:var(--text-3); font-size:var(--fs-sm); line-height:1.5; }
+.panel .error { color:var(--danger); }

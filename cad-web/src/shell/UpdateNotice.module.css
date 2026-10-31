@@ -1,0 +1,7 @@
+.notice{display:flex;align-items:center;gap:10px;padding:9px 18px;background:#1b302b;color:#d9f1e9;border-bottom:1px solid #335448;font-size:13px;flex-shrink:0}
+.notice span{flex:1}
+.notice button{background:transparent;color:inherit;border:1px solid #57796b;border-radius:5px;padding:5px 10px;cursor:pointer;white-space:nowrap}
+.notice button:hover{background:#29483c}
+.notice button.primary{background:#d9f1e9;color:#1b302b;border-color:#d9f1e9;font-weight:600}
+.notice button.primary:hover{background:#ffffff}
+.notice button:disabled{opacity:.7;cursor:default}

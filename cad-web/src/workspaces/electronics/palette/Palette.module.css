@@ -1,0 +1,92 @@
+.palette { display: flex; flex-direction: column; gap: 8px; min-height: 0; }
+
+.search {
+  position: relative; display: flex; align-items: center; gap: 6px; height: 30px; padding: 0 8px; border-radius: 7px;
+  border: 1px solid var(--line-2); background: var(--bg-1); color: var(--text-3);
+  transition: border-color var(--t-fast, 120ms), box-shadow var(--t-fast, 120ms);
+}
+.search:focus-within { border-color: var(--ws); box-shadow: 0 0 0 3px var(--ws-softer, var(--ws-soft)); }
+.search input { flex: 1; min-width: 0; height: 100%; border: 0; background: none; color: var(--text-1); font-size: var(--fs-sm); }
+.search input:focus { outline: none; }
+.search input::placeholder { color: var(--text-4); }
+.clear { display: grid; place-items: center; width: 18px; height: 18px; border-radius: 50%; border: 0; background: var(--bg-4); color: var(--text-2); cursor: pointer; }
+
+.search { flex: none; }
+/* Categories wrap onto as many lines as they need: every pill is always visible, whatever the dock width. */
+.categories { flex: none; display: flex; flex-wrap: wrap; gap: 4px; }
+.category {
+  flex: none; height: 22px; padding: 0 9px; border-radius: 11px; border: 1px solid var(--line-2); background: var(--bg-1);
+  color: var(--text-2); font-size: var(--fs-2xs); font-weight: 550; cursor: pointer; white-space: nowrap;
+  transition: color var(--t-fast, 120ms), border-color var(--t-fast, 120ms), background var(--t-fast, 120ms);
+}
+.category:hover { color: var(--text-1); border-color: var(--line-3); }
+.category[data-on] { color: var(--ws); border-color: color-mix(in srgb, var(--ws) 55%, transparent); background: var(--ws-soft); }
+
+/* The parts library: one compact row per part. */
+.list { flex: 1; min-height: 0; display: flex; flex-direction: column; gap: 10px; overflow-y: auto; margin: 0 -4px; padding: 0 4px 6px; }
+.section { display: flex; flex-direction: column; gap: 1px; }
+.heading { position: sticky; top: 0; z-index: 1; margin: 0; padding: 4px 6px 3px; color: var(--text-3); font-size: var(--fs-2xs); font-weight: 650; letter-spacing: 0.06em; text-transform: uppercase; background: var(--bg-1); }
+.row {
+  display: grid; grid-template-columns: 26px minmax(0, 1fr) auto; align-items: center; gap: 8px; min-height: 32px; padding: 3px 8px 3px 4px;
+  border-radius: 7px; border: 1px solid transparent; background: none; color: var(--text-1); text-align: left; cursor: pointer;
+  transition: background var(--t-fast, 120ms), border-color var(--t-fast, 120ms);
+}
+.row:hover { background: var(--bg-3); }
+.row:focus-visible { outline: none; border-color: var(--ws); box-shadow: 0 0 0 3px var(--ws-softer, var(--ws-soft)); }
+.row[data-armed] { background: var(--ws-soft); border-color: color-mix(in srgb, var(--ws) 50%, transparent); }
+.row:active { cursor: grabbing; }
+.rowIcon { display: grid; place-items: center; width: 26px; height: 24px; border-radius: 6px; color: var(--ws); background: color-mix(in srgb, var(--ws) 9%, transparent); }
+.rowName { min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; font-size: var(--fs-xs); font-weight: 560; }
+.rowMeta { max-width: 120px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; color: var(--text-4); font-family: var(--font-mono); font-size: 10px; }
+
+.error { display: flex; align-items: center; gap: 8px; margin: 0; padding: 6px 6px 6px 8px; border-radius: 6px; color: var(--text-1); font-size: var(--fs-xs); line-height: 1.45; background: color-mix(in srgb, var(--danger) 10%, var(--bg-1)); border: 1px solid color-mix(in srgb, var(--danger) 30%, transparent); }
+.error > span { flex: 1; min-width: 0; }
+.retry { flex: none; height: 22px; padding: 0 8px; border-radius: 5px; border: 1px solid var(--line-3); background: var(--bg-2); color: var(--text-1); font-size: var(--fs-2xs); font-weight: 600; cursor: pointer; }
+.retry:hover { border-color: color-mix(in srgb, var(--ws) 45%, var(--line-3)); color: var(--ws); }
+.retry:focus-visible { outline: 2px solid var(--ws); outline-offset: 1px; }
+.none { display: flex; align-items: center; gap: 8px; margin: 8px 0; color: var(--text-3); font-size: var(--fs-xs); line-height: 1.45; }
+.noneBlock { display: flex; flex-direction: column; align-items: flex-start; gap: 2px; }
+.noneAction { display: inline-flex; align-items: center; gap: 6px; max-width: 100%; height: 26px; padding: 0 10px; border-radius: 7px; border: 1px solid color-mix(in srgb, var(--ws) 45%, var(--line-3)); background: var(--ws-softer); color: var(--ws); font-size: var(--fs-xs); font-weight: 600; cursor: pointer; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; transition: background var(--t-fast); }
+.noneAction:hover { background: var(--ws-soft); }
+.noneAction:focus-visible { outline: 2px solid var(--ws); outline-offset: 2px; }
+
+/* JLCPCB results */
+.results { display: flex; flex-direction: column; gap: 4px; overflow-y: auto; min-height: 0; padding: 0 1px 4px; }
+.result { position: relative; display: flex; align-items: stretch; border-radius: 8px; border: 1px solid var(--line-1); background: var(--bg-1); transition: border-color var(--t-fast, 120ms), background var(--t-fast, 120ms); }
+.result:hover { border-color: color-mix(in srgb, var(--ws) 55%, transparent); background: var(--bg-2); }
+.result[data-stock='out'] { opacity: 0.6; }
+.resultMain { flex: 1; min-width: 0; display: flex; gap: 9px; padding: 8px 26px 8px 9px; background: none; border: 0; color: var(--text-1); text-align: left; cursor: pointer; border-radius: 8px; }
+.resultMain:focus-visible { outline: none; box-shadow: 0 0 0 3px var(--ws-softer, var(--ws-soft)); }
+.resultIcon { flex: none; display: grid; place-items: center; width: 28px; height: 28px; border-radius: 7px; color: var(--ws); background: var(--ws-soft); }
+.resultText { flex: 1; min-width: 0; display: flex; flex-direction: column; gap: 2px; }
+.resultTitle { display: flex; align-items: center; gap: 6px; min-width: 0; font-size: var(--fs-xs); }
+.resultTitle b { min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; font-weight: 650; }
+.value { flex: none; font-family: var(--font-mono); font-size: 10.5px; color: var(--ws); }
+.badge { flex: none; padding: 0 5px; border-radius: 4px; font-size: 9px; font-weight: 650; letter-spacing: 0.03em; line-height: 15px; text-transform: uppercase; }
+.badge[data-tone='basic'] { color: var(--success); background: color-mix(in srgb, var(--success) 14%, transparent); }
+.badge[data-tone='preferred'] { color: var(--ws); background: var(--ws-soft); }
+.resultDescription { display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; color: var(--text-3); font-size: var(--fs-2xs); line-height: 1.4; }
+.resultMeta { display: flex; flex-wrap: wrap; gap: 3px 9px; color: var(--text-3); font-size: var(--fs-2xs); }
+.resultMeta code { font-family: var(--font-mono); color: var(--text-2); }
+.stock { color: var(--success); }
+.result[data-stock='out'] .stock { color: var(--danger); }
+.resultLink { position: absolute; top: 7px; right: 7px; display: grid; place-items: center; width: 18px; height: 18px; border-radius: 4px; color: var(--text-3); }
+.resultLink:hover { color: var(--ws); background: var(--bg-4); }
+.footnote { margin: 4px 2px 0; color: var(--text-4); font-size: var(--fs-2xs); line-height: 1.45; }
+
+/* The Parts tab (right dock) */
+.parts { display: flex; flex-direction: column; height: 100%; min-height: 0; }
+.partsHead { flex: none; display: flex; padding: 10px 12px 8px; }
+.partsHead > * { flex: 1; }
+.partsBody { flex: 1; min-height: 0; display: flex; flex-direction: column; padding: 0 12px; }
+.partsBody > .palette { flex: 1; min-height: 0; }
+.partsBody .results { flex: 1; }
+.partsHelp {
+  flex: none; display: flex; gap: 7px; align-items: flex-start; margin: 0; padding: 9px 12px 10px; border-top: 1px solid var(--line-1);
+  color: var(--text-3); font-size: var(--fs-2xs); line-height: 1.45;
+}
+.partsHelp svg { flex: none; margin-top: 1px; color: var(--text-4); }
+.partsHelp b { color: var(--text-1); font-family: var(--font-mono); font-weight: 600; }
+.partsHelp[data-placing] { color: var(--text-2); background: var(--ws-soft); }
+.partsHelp[data-placing] svg { color: var(--ws); }
+.partsEmpty { margin: 16px; color: var(--text-3); font-size: var(--fs-xs); }

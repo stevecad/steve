@@ -1,0 +1,218 @@
+/* Settings (settings/SettingsDialog.tsx): sections on the left, a panel per section on the right. */
+.dialog { grid-template-columns: 224px minmax(0, 1fr); }
+/* Phones (phone/detect.ts): the sectioned dialog's strip nav over the page, as its own narrow layout intends. */
+:global(html[data-ui='phone']) .dialog { grid-template-columns: minmax(0, 1fr); }
+.navSearch { position: relative; margin: 2px 2px 8px; }
+.navSearch input { width: 100%; height: 30px; padding: 0 10px 0 28px; border-radius: 8px; border: 1px solid var(--line-2); background: var(--bg-1); color: var(--text-1); font-size: var(--fs-sm); }
+.navSearch input:focus { outline: none; border-color: var(--ws); box-shadow: 0 0 0 3px var(--ws-softer); }
+.navSearch svg { position: absolute; left: 9px; top: 50%; transform: translateY(-50%); color: var(--text-4); pointer-events: none; }
+.navEmpty { padding: 8px 10px; color: var(--text-4); font-size: var(--fs-xs); }
+
+.panel { display: flex; flex-direction: column; min-width: 0; min-height: 0; overflow: hidden; }
+.loading { display: grid; place-items: center; height: 100%; color: var(--text-3); }
+
+/* ── A section's page ── */
+.page { display: flex; flex-direction: column; height: 100%; min-height: 0; }
+.pageHead { display: flex; align-items: center; gap: 14px; padding: 18px 28px 16px; border-bottom: 1px solid var(--line-1); }
+.pageIcon { display: grid; place-items: center; flex: none; width: 38px; height: 38px; border-radius: 10px; color: var(--ws); background: var(--ws-softer); box-shadow: inset 0 0 0 1px color-mix(in srgb, var(--ws) 22%, transparent); }
+.pageTitle { flex: 1; min-width: 0; }
+.docsLink { display: inline-flex; align-items: center; gap: 6px; flex: none; height: 28px; padding: 0 10px; border-radius: var(--r-md); border: 1px solid var(--line-2); color: var(--text-2); font-size: var(--fs-sm); font-weight: 500; text-decoration: none; }
+.docsLink:hover { color: var(--text-1); border-color: var(--line-3, var(--line-2)); background: var(--bg-2); }
+.docsLink:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
+.pageTitle h2 { font-size: var(--fs-lg); font-weight: 600; letter-spacing: -0.01em; }
+.pageTitle p { margin-top: 2px; color: var(--text-3); font-size: var(--fs-sm); line-height: 1.45; max-width: 72ch; }
+.pageBody { flex: 1; min-height: 0; overflow: auto; scrollbar-gutter: stable; padding: 20px 28px 32px; display: flex; flex-direction: column; gap: 16px; }
+.pageBody > * { flex: none; max-width: 860px; width: 100%; }
+
+/* ── Cards of settings ── */
+.card { border: 1px solid var(--line-2); border-radius: var(--r-lg); background: var(--bg-1); overflow: hidden; }
+.cardHead { display: flex; align-items: flex-start; gap: 12px; padding: 14px 18px 10px; }
+.cardHead > div { flex: 1; min-width: 0; }
+.cardHead h3 { font-size: var(--fs-md); font-weight: 600; }
+/* Inter's semibold space is ~3 px at this size; with the headings' -0.01em tracking, "AI tool" read as "AItool". */
+.pageTitle h2, .cardHead h3, .aboutHero h3, .groupText b { letter-spacing: 0; word-spacing: 0.06em; }
+.cardHead p { margin-top: 3px; color: var(--text-3); font-size: var(--fs-xs); line-height: 1.5; }
+.cardBody { padding: 0 18px 8px; }
+.cardBody:empty { display: none; }
+
+/* ── Rows ── */
+.row { display: grid; grid-template-columns: minmax(0, 1fr) minmax(180px, auto); align-items: center; gap: 6px 24px; padding: 12px 0; border-top: 1px solid var(--line-1); }
+.cardHead + .cardBody > .row:first-child { border-top: 0; }
+.row[data-stack] { grid-template-columns: minmax(0, 1fr); align-items: stretch; }
+.rowText { min-width: 0; }
+.rowLabel { display: inline-flex; align-items: center; gap: 6px; color: var(--text-1); font-size: var(--fs-sm); font-weight: 500; }
+.rowHint { margin-top: 2px; color: var(--text-3); font-size: var(--fs-xs); line-height: 1.5; max-width: 60ch; }
+.rowControl { display: flex; align-items: center; justify-content: flex-end; flex-wrap: wrap; gap: 8px; min-width: 0; }
+.row[data-stack] .rowControl { justify-content: flex-start; }
+.row[data-saving] .rowControl { opacity: 0.7; }
+.reset { display: inline-grid; place-items: center; width: 18px; height: 18px; border-radius: 5px; color: var(--ws); opacity: 0.75; }
+.reset:hover { opacity: 1; background: var(--ws-softer); }
+.note { margin: 6px 0 10px; padding: 9px 12px; border-radius: 8px; background: var(--bg-3); color: var(--text-2); font-size: var(--fs-xs); line-height: 1.5; }
+.note[data-tone='warning'] { background: var(--warning-soft); color: var(--text-1); }
+.value { min-width: 46px; color: var(--text-2); font-size: var(--fs-xs); font-variant-numeric: tabular-nums; text-align: right; }
+.slider { width: 180px; }
+.link { display: inline-flex; align-items: center; gap: 4px; color: var(--ws); font-size: var(--fs-sm); }
+.link:hover { text-decoration: underline; }
+
+/* ── MCP ── */
+.urlRow { display: flex; align-items: center; gap: 8px; padding: 4px 0 12px; }
+.url { flex: 1; min-width: 0; height: 34px; padding: 0 12px; display: flex; align-items: center; border-radius: 8px; border: 1px solid var(--line-2); background: var(--code-bg); font-family: var(--font-mono); font-size: 12.5px; color: var(--text-1); overflow: hidden; text-overflow: ellipsis; white-space: nowrap; user-select: all; }
+.clients { display: flex; flex-wrap: wrap; gap: 6px; margin-bottom: 10px; }
+.steps { margin: 0 0 12px 18px; display: flex; flex-direction: column; gap: 6px; color: var(--text-2); font-size: var(--fs-sm); line-height: 1.55; }
+.steps code, .inlineCode { padding: 1px 5px; border-radius: 4px; background: var(--code-bg); font-family: var(--font-mono); font-size: 11.5px; color: var(--text-1); }
+.toolsBar { display: flex; align-items: center; gap: 10px; flex-wrap: wrap; padding: 4px 0 10px; }
+.toolSearch { position: relative; flex: 1; min-width: 200px; }
+.toolSearch input { width: 100%; height: 32px; padding: 0 10px 0 30px; border-radius: 8px; border: 1px solid var(--line-2); background: var(--bg-2); color: var(--text-1); font-size: var(--fs-sm); }
+.toolSearch input:focus { outline: none; border-color: var(--ws); box-shadow: 0 0 0 3px var(--ws-softer); }
+.toolSearch svg { position: absolute; left: 10px; top: 50%; transform: translateY(-50%); color: var(--text-4); pointer-events: none; }
+.count { color: var(--text-3); font-size: var(--fs-xs); font-variant-numeric: tabular-nums; white-space: nowrap; }
+.count b { color: var(--text-1); font-weight: 600; }
+.group { border: 1px solid var(--line-2); border-radius: var(--r-md); background: var(--bg-2); overflow: hidden; }
+.group + .group { margin-top: 12px; }
+.group[data-available='false'] { opacity: 0.72; }
+.groupHead { display: flex; align-items: center; gap: 12px; padding: 13px 16px; }
+.groupHead > button:first-child { display: flex; align-items: center; gap: 12px; flex: 1; min-width: 0; text-align: left; }
+.groupIcon { display: grid; place-items: center; flex: none; width: 28px; height: 28px; border-radius: 8px; background: var(--bg-4); color: var(--text-2); }
+.group[data-on] .groupIcon { background: var(--ws-softer); color: var(--ws); }
+.groupText { flex: 1; min-width: 0; }
+.groupText b { display: block; color: var(--text-1); font-size: var(--fs-md); font-weight: 600; }
+.groupText small { display: block; margin-top: 2px; color: var(--text-3); font-size: var(--fs-sm); line-height: 1.5; }
+.chev { flex: none; color: var(--text-4); transition: transform 0.18s var(--ease-out); }
+.group[data-open] .chev { transform: rotate(90deg); }
+.unavailable { padding: 2px 8px; border-radius: var(--r-pill); background: var(--bg-4); color: var(--text-3); font-size: var(--fs-2xs); font-weight: 600; white-space: nowrap; }
+.tools { border-top: 1px solid var(--line-1); background: var(--bg-1); }
+.tool { display: grid; grid-template-columns: minmax(0, 1fr) auto; align-items: center; gap: 6px 20px; padding: 12px 16px 12px 56px; border-top: 1px solid var(--line-1); }
+.tool:first-child { border-top: 0; }
+.tool code { font-family: var(--font-mono); font-size: 12px; color: var(--text-1); overflow-wrap: anywhere; }
+.tool p { margin-top: 3px; max-width: 72ch; color: var(--text-3); font-size: var(--fs-sm); line-height: 1.55; }
+.toolName { display: flex; align-items: center; flex-wrap: wrap; gap: 6px 10px; min-width: 0; }
+.coreWarning { display: flex; align-items: center; gap: 6px; margin-top: 5px; color: var(--warning); font-size: var(--fs-xs); line-height: 1.4; }
+.coreWarning svg { flex: none; }
+.group > .coreWarning { margin: 0; padding: 0 16px 12px 56px; }
+.lock { display: inline-flex; align-items: center; gap: 4px; color: var(--text-4); font-size: var(--fs-2xs); font-weight: 600; text-transform: uppercase; letter-spacing: 0.04em; }
+
+/* ── About ── */
+.aboutHero { display: flex; align-items: center; gap: 16px; padding: 18px; }
+.aboutMark { display: grid; place-items: center; width: 52px; height: 52px; border-radius: 14px; background: var(--ws-softer); box-shadow: inset 0 0 0 1px color-mix(in srgb, var(--ws) 22%, transparent); }
+.aboutMark img { width: 30px; height: 30px; }
+.aboutHero h3 { font-size: var(--fs-lg); font-weight: 600; }
+.aboutHero p { color: var(--text-3); font-size: var(--fs-sm); }
+.credit { display: grid; grid-template-columns: minmax(0, 1fr) auto; gap: 2px 16px; padding: 12px 0; border-top: 1px solid var(--line-1); }
+.credit:first-child { border-top: 0; }
+.credit b { color: var(--text-1); font-size: var(--fs-sm); font-weight: 600; }
+.credit p { color: var(--text-3); font-size: var(--fs-xs); line-height: 1.5; grid-column: 1; }
+.credit small { color: var(--text-4); font-size: var(--fs-xs); font-variant-numeric: tabular-nums; }
+
+/* Narrow windows: rows stack. */
+@media (max-width: 899px) {
+  .row { grid-template-columns: minmax(0, 1fr); }
+  .rowControl { justify-content: flex-start; }
+  .pageHead { padding: 14px 16px 12px; }
+  .pageBody { padding: 14px 16px 24px; }
+}
+
+/* ── Skills ── */
+.skills { display: flex; flex-direction: column; gap: 16px; }
+.skills [role='list'] { padding: 0 0 8px; overflow: visible; }
+.skillPage { display: flex; flex-direction: column; min-height: 520px; height: min(62vh, 640px); padding-bottom: 12px; }
+.preview { margin: 4px 0 12px; padding: 10px 12px; border-radius: 8px; background: var(--code-bg); color: var(--text-1); font-family: var(--font-mono); overflow: hidden; white-space: pre; text-overflow: ellipsis; }
+
+/* Settings → MCP: what the switches do, the clients' own say, and "Saved" after a change. */
+.badge { display: inline-flex; align-items: center; padding: 1px 7px; border-radius: var(--r-pill); background: var(--ws-softer); color: var(--ws); font-size: var(--fs-2xs); font-weight: 600; letter-spacing: 0.02em; white-space: nowrap; }
+.mcpGuide { display: grid; gap: 8px; margin: 2px 0 12px; padding: 0; list-style: none; }
+.mcpGuide li { display: flex; align-items: flex-start; gap: 10px; color: var(--text-2); font-size: var(--fs-sm); line-height: 1.55; }
+.mcpGuide li svg { flex: none; margin-top: 2px; color: var(--ws); }
+.mcpGuide b { color: var(--text-1); font-weight: 600; }
+.mcpHelp { margin: 0 0 14px; border: 1px solid var(--line-2); border-radius: var(--r-md); background: var(--bg-2); }
+.mcpHelp summary { display: flex; align-items: center; gap: 8px; padding: 10px 14px; color: var(--text-1); font-size: var(--fs-sm); font-weight: 600; cursor: pointer; list-style: none; }
+.mcpHelp summary::-webkit-details-marker { display: none; }
+.mcpHelp[open] .chev { transform: rotate(90deg); }
+.mcpHelpBody { padding: 0 14px 12px 36px; color: var(--text-2); font-size: var(--fs-sm); line-height: 1.55; }
+.mcpHelpBody dl { margin: 4px 0 0; }
+.mcpHelpBody dt { margin-top: 12px; color: var(--text-1); font-weight: 600; }
+.mcpHelpBody dd { margin: 2px 0 0; }
+.mcpHelpBody code { padding: 0 4px; border-radius: 4px; background: var(--bg-4); font-family: var(--font-mono); font-size: 11px; overflow-wrap: anywhere; }
+.savedHint { display: flex; align-items: center; gap: 6px; min-height: 0; margin: 0; color: var(--success); font-size: var(--fs-sm); line-height: 1.4; transition: min-height 0.18s var(--ease-out); }
+.savedHint[data-shown] { min-height: 22px; margin: 0 0 8px; }
+@media (max-width: 560px) {
+  .groupHead { flex-wrap: wrap; row-gap: 8px; padding: 12px; }
+  /* The title and description get the whole width; the count, switch and arrow sit under them on the right. */
+  .groupHead > button:first-child { flex: 1 1 100%; }
+  .groupHead > .count, .groupHead > .unavailable { margin-left: auto; }
+  .tool { padding: 12px; }
+  .group > .coreWarning { padding: 0 12px 12px; }
+  .mcpHelpBody { padding-left: 14px; }
+}
+
+/* ── Tablets and desktops: the dialog fills nearly the whole window (SettingsDialog.tsx), so the pages get room to
+   breathe: one centred column up to 1160 px, larger type, more space between and inside cards and rows. Phones keep
+   their own sheet and the rules above. ── */
+:global(html:not([data-ui='phone'])) .pageTitle h2 { font-size: var(--fs-xl); }
+:global(html:not([data-ui='phone'])) .pageTitle p { margin-top: 4px; font-size: var(--fs-md); line-height: 1.5; max-width: 90ch; }
+:global(html:not([data-ui='phone'])) .cardHead h3 { font-size: var(--fs-lg); }
+:global(html:not([data-ui='phone'])) .cardHead p { margin-top: 4px; font-size: var(--fs-sm); line-height: 1.55; max-width: 110ch; }
+:global(html:not([data-ui='phone'])) .rowLabel { font-size: var(--fs-md); }
+:global(html:not([data-ui='phone'])) .rowHint { margin-top: 4px; font-size: var(--fs-sm); line-height: 1.55; max-width: 80ch; }
+:global(html:not([data-ui='phone'])) .note { margin: 8px 0 14px; padding: 11px 14px; font-size: var(--fs-sm); line-height: 1.55; }
+:global(html:not([data-ui='phone'])) .value { font-size: var(--fs-sm); }
+:global(html:not([data-ui='phone'])) .credit p, :global(html:not([data-ui='phone'])) .credit small { font-size: var(--fs-sm); }
+:global(html:not([data-ui='phone'])) .credit b { font-size: var(--fs-md); }
+:global(html:not([data-ui='phone'])) .coreWarning { font-size: var(--fs-sm); }
+:global(html:not([data-ui='phone'])) .steps { gap: 8px; font-size: var(--fs-md); }
+:global(html:not([data-ui='phone'])) .mcpGuide li, :global(html:not([data-ui='phone'])) .mcpHelpBody { font-size: var(--fs-md); }
+@media (min-width: 760px) {
+  /* The section list: a little wider, with taller items. */
+  :global(html:not([data-ui='phone'])) .dialog > nav { padding: 14px 12px; }
+  :global(html:not([data-ui='phone'])) .dialog > nav button { height: 34px; padding: 0 10px; font-size: var(--fs-md); }
+  :global(html:not([data-ui='phone'])) .navSearch { margin: 2px 0 10px; }
+  :global(html:not([data-ui='phone'])) .navSearch input { height: 34px; font-size: var(--fs-md); }
+}
+@media (min-width: 1100px) {
+  :global(html:not([data-ui='phone'])) .dialog { grid-template-columns: 248px minmax(0, 1fr); }
+}
+@media (min-width: 900px) {
+  :global(html:not([data-ui='phone'])) .pageHead,
+  :global(html:not([data-ui='phone'])) .pageBody { padding-left: max(40px, calc((100% - 1160px) / 2)); padding-right: max(40px, calc((100% - 1160px) / 2)); }
+  :global(html:not([data-ui='phone'])) .pageHead { gap: 16px; padding-top: 24px; padding-bottom: 20px; }
+  :global(html:not([data-ui='phone'])) .pageIcon { width: 44px; height: 44px; border-radius: 12px; }
+  :global(html:not([data-ui='phone'])) .pageBody { gap: 24px; padding-top: 28px; padding-bottom: 56px; }
+  :global(html:not([data-ui='phone'])) .pageBody > * { max-width: none; }
+  :global(html:not([data-ui='phone'])) .cardHead { gap: 16px; padding: 20px 24px 12px; }
+  :global(html:not([data-ui='phone'])) .cardBody { padding: 0 24px 12px; }
+  :global(html:not([data-ui='phone'])) .row { grid-template-columns: minmax(0, 1fr) minmax(220px, auto); gap: 8px 48px; padding: 16px 0; }
+  :global(html:not([data-ui='phone'])) .rowControl { gap: 10px; }
+  :global(html:not([data-ui='phone'])) .slider { width: 240px; }
+  :global(html:not([data-ui='phone'])) .urlRow { padding: 6px 0 16px; }
+  :global(html:not([data-ui='phone'])) .toolsBar { padding: 6px 0 14px; }
+  :global(html:not([data-ui='phone'])) .group + .group { margin-top: 14px; }
+  :global(html:not([data-ui='phone'])) .groupHead { padding: 16px 20px; }
+  :global(html:not([data-ui='phone'])) .tool { gap: 8px 24px; padding: 14px 20px 14px 60px; }
+  :global(html:not([data-ui='phone'])) .group > .coreWarning { padding: 0 20px 14px 60px; }
+  :global(html:not([data-ui='phone'])) .aboutHero { gap: 20px; padding: 24px; }
+  :global(html:not([data-ui='phone'])) .credit { padding: 14px 0; }
+  /* STEVE → API keys: the providers side by side instead of one long stack. */
+  :global(html:not([data-ui='phone']) #steve-keys) > .cardBody { display: grid; grid-template-columns: repeat(auto-fill, minmax(340px, 1fr)); gap: 12px; padding-bottom: 20px; }
+  :global(html:not([data-ui='phone']) #steve-keys) > .cardBody > :not([data-provider]) { grid-column: 1 / -1; margin: 0; }
+  :global(html:not([data-ui='phone']) #steve-keys [data-provider]) { margin: 0; padding: 14px 16px; gap: 8px; }
+}
+.past { margin-top: 6px; }
+.past > summary { display: inline-flex; align-items: center; gap: 4px; list-style: none; cursor: pointer; padding: 6px 0; color: var(--text-3); font-size: var(--fs-xs); user-select: none; }
+.past > summary::-webkit-details-marker { display: none; }
+.past > summary:hover { color: var(--text-1); }
+.pastChevron { transition: transform 0.15s ease; }
+.past[open] .pastChevron { transform: rotate(90deg); }
+
+/* ── Integrations (sections/IntegrationsSection.tsx): a card per integration, and the way back from one ── */
+.backLink { display: grid; place-items: center; flex: none; width: 28px; height: 28px; margin-right: -4px; border-radius: var(--r-md); color: var(--text-3); }
+.backLink:hover { color: var(--text-1); background: var(--bg-2); }
+.backLink:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
+.integrations { display: grid; grid-template-columns: repeat(auto-fill, minmax(240px, 1fr)); gap: 12px; }
+.integration { display: flex; flex-direction: column; gap: 8px; padding: 14px 16px; border: 1px solid var(--line-2); border-radius: var(--r-lg); background: var(--bg-1); }
+.integration[data-connected] .groupIcon { background: var(--ws-softer); color: var(--ws); }
+.integrationHead { display: flex; align-items: center; gap: 10px; }
+.integrationHead b { color: var(--text-1); font-size: var(--fs-md); font-weight: 600; }
+.integration p { flex: 1; color: var(--text-3); font-size: var(--fs-sm); line-height: 1.5; }
+.integrationFoot { display: flex; align-items: center; justify-content: space-between; gap: 8px; }
+.integrationStatus { display: inline-flex; align-items: center; gap: 5px; color: var(--text-3); font-size: var(--fs-xs); }
+.integration[data-connected] .integrationStatus { color: var(--ok, var(--ws)); }
+.integration[data-attention] .integrationStatus { color: var(--warning); }

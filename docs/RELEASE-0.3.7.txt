@@ -1,0 +1,17 @@
+Steve 0.3.7
+
+Local Blender and Studio account integration
+
+- Windows updates now use a bundled, windowless Python helper, with Steve progress UI and no PowerShell dependency.
+- Create and edit local Blender scenes, including linked CAD geometry.
+- Preview scenes, render camera images/inspection views/animations, export .blend files, and open scenes in Blender.
+- Configure an existing Blender 4.5 installation or install the verified optional runtime in Settings > Blender.
+- Saving source does not render; rendering is explicit and cancellable.
+- Studio sign-in and disconnect live in the Account menu; Studio projects live in the project browser.
+- The Account menu displays the profile Studio provides. Existing Studio connections require Account > Reconnect once to grant the new profile permission.
+
+Verified on Windows x64 and Linux x64, including actual Blender execution, UI, native downloads, frozen packages, and Linux update/rollback checks.
+
+Known boundaries: linked CAD documents/assemblies are supported, individual component links are not. Edits made in native Blender do not rewrite the Python source. Blender is an optional separate download. Windows installer is not Authenticode signed; automatic-update manifests are Ed25519 signed. Private GitHub release access is required.
+
+Transition from 0.3.6: the old installed updater remains responsible for its next automatic update. Run the new 0.3.7 installer once to avoid that old PowerShell path; subsequent updates use the Python helper.

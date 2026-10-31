@@ -1,0 +1,21 @@
+[build-system]
+requires = ["setuptools==84.0.0", "pybind11==3.1.0"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "steve-sketch"
+version = "0.1.0"
+description = "STEVE 2D sketch constraint solver (FreeCAD planegcs), Solver JSON in/out"
+readme = "README.md"
+requires-python = ">=3.10"
+license = "LGPL-2.1-or-later"
+license-files = ["LICENSES/*"]
+classifiers = [
+    "Programming Language :: C++",
+    "Programming Language :: Python :: 3",
+    "Topic :: Scientific/Engineering",
+]
+
+[tool.setuptools]
+# The extension module is the only content; sources live in ../src and ../vendor.
+py-modules = []

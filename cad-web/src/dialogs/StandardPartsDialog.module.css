@@ -1,0 +1,61 @@
+/* Standard parts browser: search, category filter, a grid of catalog cards (the Open dialog's language). */
+.body { display: flex; flex-direction: column; gap: 12px; min-height: 0; }
+.searchRow { display: flex; align-items: center; gap: 10px; }
+.search { position: relative; flex: 1; display: flex; align-items: center; }
+.search > svg { position: absolute; left: 11px; color: var(--text-3); pointer-events: none; }
+.search input {
+  width: 100%; height: 36px; padding: 0 12px 0 34px; border-radius: var(--r-md); border: 1px solid var(--line-3);
+  background: var(--bg-2); color: var(--text-1); font-size: var(--fs-md);
+}
+.search input:focus { outline: none; border-color: var(--ws); box-shadow: 0 0 0 3px var(--ws-soft); }
+.count { font-size: var(--fs-xs); color: var(--text-3); font-variant-numeric: tabular-nums; white-space: nowrap; }
+
+.chips { display: flex; flex-wrap: wrap; gap: 6px; }
+.chip {
+  display: inline-flex; align-items: center; gap: 5px; height: 26px; padding: 0 10px; border-radius: 99px;
+  border: 1px solid var(--line-2); background: var(--bg-2); color: var(--text-2); font-size: var(--fs-xs); cursor: pointer;
+  transition: background var(--t-fast), border-color var(--t-fast), color var(--t-fast);
+}
+.chip:hover { background: var(--bg-3); color: var(--text-1); }
+.chip[aria-pressed='true'] { background: var(--ws-softer); border-color: color-mix(in srgb, var(--ws) 45%, transparent); color: var(--text-1); }
+.chip small { color: var(--text-3); font-variant-numeric: tabular-nums; }
+
+.results { height: min(52vh, 520px); overflow: auto; padding: 2px 2px 8px; }
+.grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(176px, 1fr)); gap: 12px; align-content: start; }
+.card {
+  display: flex; flex-direction: column; text-align: left; border-radius: var(--r-lg); background: var(--bg-3);
+  border: 1px solid var(--line-2); box-shadow: var(--shadow-1); color: var(--text-1); padding: 0; cursor: pointer;
+  transition: border-color var(--t-base), box-shadow var(--t-base) var(--ease-out), transform var(--t-base) var(--ease-out);
+  animation: card-in 0.26s var(--ease-out) backwards;
+}
+.card:hover { transform: translateY(-2px); border-color: var(--line-3); box-shadow: var(--shadow-2); }
+.card[aria-selected='true'] { border-color: color-mix(in srgb, var(--ws) 75%, transparent); box-shadow: 0 0 0 3px var(--ws-soft), var(--shadow-2); }
+.card:focus-visible { outline: none; border-color: var(--ws); box-shadow: 0 0 0 3px var(--ws-glow); }
+@keyframes card-in { from { opacity: 0; transform: translateY(6px); } }
+@media (prefers-reduced-motion: reduce) { .card { animation: none; } .card:hover { transform: none; } }
+
+.thumb {
+  position: relative; aspect-ratio: 4 / 3; margin: 5px 5px 0; border-radius: calc(var(--r-lg) - 4px); overflow: hidden;
+  display: grid; place-items: center; color: var(--text-4);
+  background: radial-gradient(120% 90% at 50% 18%, color-mix(in srgb, var(--vp-top) 100%, white 3%) 0%, transparent 65%),
+    linear-gradient(180deg, var(--vp-top) 0%, var(--vp-bottom) 100%);
+}
+.thumb img { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: contain; padding: 8px; user-select: none; }
+.info { display: flex; flex-direction: column; gap: 4px; padding: 8px 10px 10px; min-width: 0; }
+.name { font-size: var(--fs-sm); font-weight: 600; line-height: 1.3; overflow: hidden; text-overflow: ellipsis; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; }
+.kind { font-size: var(--fs-2xs); color: var(--text-3); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.facts { display: flex; flex-wrap: wrap; gap: 4px; margin-top: 2px; }
+.fact { padding: 1px 6px; border-radius: 5px; background: var(--bg-4); color: var(--text-2); font-size: 10.5px; font-variant-numeric: tabular-nums; white-space: nowrap; }
+
+.empty { display: grid; place-items: center; gap: 8px; height: 100%; min-height: 220px; text-align: center; color: var(--text-3); font-size: var(--fs-sm); }
+.empty strong { color: var(--text-1); font-weight: 600; }
+.more { display: flex; justify-content: center; margin-top: 12px; }
+.error { padding: 8px 10px; border-radius: var(--r-sm); background: var(--danger-soft, rgb(220 60 60 / 0.12)); color: var(--danger, #f07575); font-size: var(--fs-xs); line-height: 1.45; display: flex; gap: 6px; align-items: flex-start; }
+.error span { flex: 1; }
+
+.selection { display: flex; align-items: center; gap: 8px; min-width: 0; font-size: var(--fs-xs); color: var(--text-2); }
+.selection b { color: var(--text-1); font-weight: 600; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; max-width: 260px; }
+.selection a { display: inline-flex; align-items: center; gap: 3px; color: var(--ws); white-space: nowrap; }
+.selection a:hover { text-decoration: underline; }
+.credit { font-size: var(--fs-2xs); color: var(--text-4); }
+.credit a { color: var(--text-3); }

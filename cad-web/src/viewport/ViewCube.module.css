@@ -1,0 +1,93 @@
+.wrap {
+  position: absolute;
+  top: 14px;
+  right: 14px;
+  z-index: 6;
+  display: flex;
+  gap: 4px;
+  transition: opacity var(--t-slow);
+}
+.wrap[data-disabled] { opacity: 0.35; pointer-events: none; }
+
+.stage {
+  position: relative;
+  width: 118px;
+  height: 118px;
+  cursor: grab;
+  touch-action: none;
+}
+.stage[data-dragging] { cursor: grabbing; }
+.stage[data-dragging] .cell { cursor: grabbing; }
+.shadow {
+  position: absolute;
+  left: 50%;
+  top: 50%;
+  width: 104px;
+  height: 104px;
+  margin: -52px;
+  border-radius: 50%;
+  background: radial-gradient(closest-side, rgb(255 255 255 / 0.05), transparent 75%);
+  pointer-events: none;
+}
+.cube {
+  position: absolute;
+  left: 50%;
+  top: 50%;
+  width: 0;
+  height: 0;
+  transform-style: preserve-3d;
+}
+.face {
+  position: absolute;
+  backface-visibility: hidden;
+  display: grid;
+  place-items: center;
+  border-radius: 7px;
+  background: linear-gradient(160deg, color-mix(in srgb, var(--bg-5) 92%, white 8%), var(--bg-4));
+  border: 1px solid var(--line-4);
+  box-shadow: inset 0 0 0 1px rgb(255 255 255 / 0.04), inset 0 0 14px rgb(0 0 0 / 0.25);
+}
+:root[data-theme='light'] .face { background: linear-gradient(160deg, #ffffff, #e9edf0); box-shadow: inset 0 0 0 1px rgb(255 255 255 / 0.8), inset 0 0 12px rgb(20 30 40 / 0.06); }
+.face[data-active] { border-color: var(--ws-strong); box-shadow: inset 0 0 0 1px var(--ws-strong), inset 0 0 16px var(--ws-soft); }
+.face[data-active] .label { color: var(--ws); }
+.face:has(.cell[data-kind='face'][data-hover]) .label { color: var(--ws-ink); }
+.label {
+  position: relative;
+  z-index: 1;
+  font-size: 10px;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--text-2);
+  pointer-events: none;
+}
+.grid {
+  position: absolute;
+  inset: 0;
+  display: grid;
+  grid-template-columns: 13px 1fr 13px;
+  grid-template-rows: 13px 1fr 13px;
+}
+.cell { border-radius: 3px; transition: background var(--t-fast); cursor: pointer; }
+.cell[data-hover] { background: var(--ws-strong); box-shadow: 0 0 10px var(--ws-glow); }
+.cell[data-kind='face'][data-hover] { background: color-mix(in srgb, var(--ws-strong) 88%, transparent); box-shadow: none; }
+
+.controls { display: flex; flex-direction: column; gap: 2px; padding-top: 6px; }
+.control {
+  width: 22px;
+  height: 22px;
+  display: grid;
+  place-items: center;
+  border-radius: 6px;
+  color: var(--text-3);
+  background: color-mix(in srgb, var(--bg-2) 70%, transparent);
+  border: 1px solid var(--line-2);
+  backdrop-filter: blur(6px);
+  transition: color var(--t-fast), background var(--t-fast);
+}
+.control:hover { color: var(--text-1); background: var(--bg-4); }
+
+@media (max-width: 720px) {
+  .wrap { top: 6px; right: 0; transform: scale(0.78); transform-origin: top right; }
+  .controls { display: none; }
+}

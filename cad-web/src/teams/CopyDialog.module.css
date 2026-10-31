@@ -1,0 +1,9 @@
+.form { display: grid; gap: 12px; }
+.targets { border: 0; padding: 0; margin: 0; display: grid; gap: 6px; }
+.target { display: flex; gap: 8px; align-items: center; font-size: var(--fs-sm); color: var(--text-1); }
+.target small { color: var(--text-3); }
+.field { display: grid; gap: 4px; font-size: var(--fs-xs); color: var(--text-2); }
+.toggle { display: flex; gap: 8px; align-items: center; font-size: var(--fs-sm); color: var(--text-1); }
+.hint { color: var(--text-3); font-size: var(--fs-xs); line-height: 1.5; }
+.error { margin-top: 10px; color: var(--danger); font-size: var(--fs-sm); }
+.error ul { margin: 6px 0 0 18px; }

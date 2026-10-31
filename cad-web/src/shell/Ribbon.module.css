@@ -1,0 +1,155 @@
+.ribbon {
+  position: relative;
+  z-index: 15;
+  display: flex;
+  align-items: stretch;
+  padding: 0 8px;
+  background: linear-gradient(180deg, var(--bg-2), var(--bg-1));
+  border-bottom: 1px solid var(--line-2);
+  box-shadow: 0 1px 0 rgb(0 0 0 / 0.25);
+  overflow-x: auto;
+  overflow-y: hidden;
+  scrollbar-width: none;
+}
+.ribbon::-webkit-scrollbar { display: none; }
+/* More commands past an edge (Ribbon.tsx): that edge fades out. */
+.ribbon[data-more='end'] { mask-image: linear-gradient(90deg, #000 calc(100% - 40px), transparent); }
+.ribbon[data-more='start'] { mask-image: linear-gradient(90deg, transparent, #000 40px); }
+.ribbon[data-more='both'] { mask-image: linear-gradient(90deg, transparent, #000 40px, #000 calc(100% - 40px), transparent); }
+
+.accent {
+  position: absolute;
+  left: 0;
+  right: 0;
+  bottom: -1px;
+  height: 1px;
+  background: linear-gradient(90deg, transparent 0%, var(--ws) 22%, var(--ws) 30%, transparent 70%);
+  opacity: 0.55;
+  transition: background var(--t-slower);
+  pointer-events: none;
+}
+
+.groups { display: flex; align-items: stretch; }
+
+.group {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  padding: 7px 6px 0;
+}
+.group + .group::before {
+  content: '';
+  position: absolute;
+  left: 0;
+  top: 12px;
+  bottom: 12px;
+  width: 1px;
+  background: var(--line-2);
+}
+
+.items { display: flex; gap: 1px; flex: 1; }
+
+.groupTitle {
+  height: 17px;
+  text-align: center;
+  font-size: 9px;
+  font-weight: 600;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: var(--text-4);
+  white-space: nowrap;
+}
+
+.button {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 4px;
+  min-width: 50px;
+  padding: 6px 6px 4px;
+  border-radius: var(--r-sm);
+  color: var(--text-2);
+  transition: background var(--t-fast) var(--ease-standard), color var(--t-fast), transform var(--t-fast) var(--ease-standard);
+}
+.button:hover:not([aria-disabled='true']) { background: var(--bg-4); color: var(--text-1); }
+.button:hover:not([aria-disabled='true']) .icon svg { transform: translateY(-1px); }
+.button:active:not([aria-disabled='true']) { transform: scale(0.96); }
+.button[aria-disabled='true'] { color: var(--text-4); cursor: default; }
+.button[aria-disabled='true'] .icon { opacity: 0.55; }
+.button[data-active] { color: var(--ws); background: var(--ws-soft); }
+.button[data-active]::after {
+  content: '';
+  position: absolute;
+  left: 14px;
+  right: 14px;
+  bottom: -1px;
+  height: 2px;
+  border-radius: 2px;
+  background: var(--ws);
+  box-shadow: 0 0 8px var(--ws-glow);
+}
+.button[data-command='create.update'][data-active] .icon::before {
+  content: '';
+  position: absolute;
+  inset: -4px;
+  border-radius: 50%;
+  border: 1.5px solid var(--ws);
+  opacity: 0;
+  animation: ring 1.8s var(--ease-out) infinite;
+}
+@keyframes ring {
+  0% { opacity: 0.7; transform: scale(0.7); }
+  100% { opacity: 0; transform: scale(1.35); }
+}
+
+.icon { position: relative; display: grid; place-items: center; width: 24px; height: 24px; }
+.icon svg { transition: transform var(--t-base) var(--ease-out); }
+
+.soonDot {
+  position: absolute;
+  top: -1px;
+  right: -3px;
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background: var(--iris);
+  box-shadow: 0 0 0 2px var(--bg-2);
+  opacity: 0.85;
+}
+
+.label {
+  display: inline-flex;
+  align-items: center;
+  gap: 2px;
+  font-size: 10.5px;
+  font-weight: 520;
+  line-height: 1;
+  white-space: nowrap;
+  letter-spacing: 0.005em;
+}
+
+.menuButton .label svg { opacity: 0.6; }
+
+/* Contextual sketch ribbon */
+.ribbon[data-context='sketch'] { background: linear-gradient(180deg, color-mix(in srgb, #63b4ff 9%, var(--bg-2)), var(--bg-1)); }
+
+
+
+
+
+/* Desktop: hidden footprints of every group, expanded and folded, read for their widths (Ribbon.tsx). */
+.measure {
+  position: absolute;
+  left: 0;
+  top: 0;
+  width: 0;
+  height: 0;
+  overflow: hidden;
+  visibility: hidden;
+  pointer-events: none;
+}
+.footprints { display: flex; width: max-content; }
+
+/* A folded group's menu: room for why a command is unavailable. */
+.groupMenu { min-width: 220px; }

@@ -1,0 +1,6 @@
+Steve 0.4.1
+
+- Updates: a managed update feed may run on its own port, and a tampered staged update
+  under a managed feed is refused with that feed's reason.
+- First automatic update from dl.stevecad.studio: 0.4.0 installations update to this
+  version on their own.

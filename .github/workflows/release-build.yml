@@ -1,0 +1,117 @@
+name: Unsigned release builds
+
+on:
+  workflow_dispatch:
+  pull_request:
+    paths:
+      - '.github/workflows/release-build.yml'
+      - '.github/workflows/linux-package.yml'
+      - 'packaging/**'
+      - 'tools/build.py'
+      - 'tools/build.ps1'
+      - 'tools/fetch_node.py'
+      - 'tools/build_appimage.py'
+      - 'tools/package_release.py'
+      - 'tools/linux_session.py'
+      - 'tools/build_update_fixture.py'
+      - 'assets/update-channel.json'
+      - 'checks/check_package.py'
+      - 'checks/check_linux_updates.py'
+      - 'requirements.txt'
+      - 'pyproject.toml'
+      - 'src/steve_desktop/**'
+      - 'cad-web/**'
+      - 'tests/test_launch_services.py'
+      - 'tests/test_local_mcp.py'
+      - 'tests/test_linux_packaging.py'
+      - 'tests/test_linux_updates.py'
+      - 'tests/test_update_channel_keys.py'
+
+permissions:
+  contents: read
+
+jobs:
+  linux:
+    uses: ./.github/workflows/linux-package.yml
+    with:
+      source-ref: ${{ github.event.pull_request.head.sha || github.sha }}
+
+  windows:
+    runs-on: windows-2025
+    timeout-minutes: 40
+    env:
+      PYTHONUTF8: '1'
+      STEVE_GRAPHICS: d3d11
+      QT_QUICK_BACKEND: software
+      QTWEBENGINE_CHROMIUM_FLAGS: --disable-gpu
+    steps:
+      - name: Enable long source paths on the disposable runner
+        run: git config --global core.longpaths true
+      - uses: actions/checkout@v7
+        with:
+          ref: ${{ github.event.pull_request.head.sha || github.sha }}
+          persist-credentials: false
+      - uses: actions/setup-python@v7
+        with:
+          python-version: '3.13.14'
+      - uses: actions/setup-node@v7
+        with:
+          node-version: '24'
+          cache: npm
+          cache-dependency-path: cad-web/package-lock.json
+      - name: Install pinned Windows dependencies
+        run: |
+          python -m pip install --no-cache-dir -r packaging/requirements-windows.lock
+          if ($LASTEXITCODE -ne 0) { throw 'Windows dependencies failed' }
+          python -m pip install --no-cache-dir --no-deps -e .
+          if ($LASTEXITCODE -ne 0) { throw 'Project installation failed' }
+      - name: Install frontend dependencies
+        run: npm ci --no-audit --no-fund
+        working-directory: cad-web
+      - name: Test update and process services
+        run: python -m unittest tests.test_launch_services tests.test_local_mcp tests.test_hot_worker tests.test_cad_process tests.test_windows_update_helper tests.test_runtime tests.test_features
+      - name: Fetch the verified Node.js runtime for the sketch solver
+        run: python tools/fetch_node.py
+      - name: Build and verify frozen desktop and windowless updater
+        run: python tools/build.py
+      - name: Verify actual Blender execution in source and frozen app
+        run: |
+          python checks/check_local_blender.py --install build/blender --output build/verification/blender
+          if ($LASTEXITCODE -ne 0) { throw 'Blender acceptance failed' }
+          $blender = Get-ChildItem build/blender -Filter blender.exe -Recurse | Select-Object -First 1
+          if (-not $blender) { throw 'Verified Blender runtime not found' }
+          $env:STEVE_BLENDER = $blender.FullName
+          & ./dist/Steve/Steve.exe --blender-smoke build/verification/blender-frozen
+          if ($LASTEXITCODE -ne 0) { throw 'Frozen Blender verification failed' }
+      - name: Install verified Inno Setup compiler
+        run: |
+          $setup = Join-Path $env:RUNNER_TEMP 'innosetup-7.1.1-x64.exe'
+          Invoke-WebRequest 'https://github.com/jrsoftware/issrc/releases/download/is-7_1_1/innosetup-7.1.1-x64.exe' -OutFile $setup
+          if ((Get-FileHash $setup -Algorithm SHA256).Hash.ToLowerInvariant() -ne '8a5a6711c3766a6e5fb74f280ba0e3551e719ce94538d901fdbd1f8f9920b3f0') { throw 'Inno Setup checksum mismatch' }
+          $target = Join-Path $env:RUNNER_TEMP 'steve-inno-7'
+          $process = Start-Process $setup -ArgumentList @('/VERYSILENT','/SUPPRESSMSGBOXES','/NORESTART','/CURRENTUSER',"/DIR=$target") -Wait -PassThru
+          if ($process.ExitCode -ne 0) { throw 'Inno Setup installation failed' }
+      - name: Build installer and index unsigned artifacts
+        run: |
+          $compiler = Join-Path $env:RUNNER_TEMP 'steve-inno-7/ISCC.exe'
+          $version = python -c "import pathlib,tomllib; print(tomllib.loads(pathlib.Path('pyproject.toml').read_text())['project']['version'])"
+          if ($LASTEXITCODE -ne 0) { throw 'Could not read the release version' }
+          ./tools/build-installer.ps1 -Compiler $compiler -Version $version
+          python tools/package_release.py --platform windows-x64 --output dist/windows
+          if ($LASTEXITCODE -ne 0) { throw 'Release indexing failed' }
+      - uses: actions/upload-artifact@v7
+        with:
+          name: Steve-windows-x64
+          path: dist/windows/*
+          if-no-files-found: error
+          compression-level: 0
+          retention-days: 2
+          overwrite: true
+      - uses: actions/upload-artifact@v7
+        if: always()
+        with:
+          name: Steve-windows-verification
+          path: build/verification/**
+          if-no-files-found: warn
+          retention-days: 2
+          overwrite: true

@@ -1,0 +1,98 @@
+.timeline {
+  flex-shrink: 0;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 0 10px 0 12px;
+  background: var(--bg-1);
+  border-top: 1px solid var(--line-2);
+  overflow: hidden;
+}
+.label { display: flex; align-items: center; gap: 7px; color: var(--text-3); flex-shrink: 0; }
+.status { font-size: var(--fs-2xs); font-weight: 600; padding: 1px 6px; border-radius: 4px; color: var(--text-2); background: var(--bg-3); }
+.status[data-tone='ok'] { color: var(--ws); background: var(--ws-softer); }
+.track {
+  flex: 1;
+  min-width: 0;
+  display: flex;
+  align-items: center;
+  gap: 3px;
+  overflow-x: auto;
+  padding: 4px 2px;
+  scrollbar-width: none;
+  mask-image: linear-gradient(90deg, transparent 0, #000 10px, #000 calc(100% - 28px), transparent 100%);
+}
+.track::-webkit-scrollbar { display: none; }
+.step {
+  --c: var(--text-2);
+  position: relative;
+  flex-shrink: 0;
+  display: grid;
+  place-items: center;
+  width: 26px;
+  height: 26px;
+  border-radius: 7px;
+  color: var(--c);
+  background: color-mix(in srgb, var(--c) 10%, var(--bg-2));
+  border: 1px solid color-mix(in srgb, var(--c) 28%, transparent);
+  transition: transform var(--t-fast) var(--ease-standard), background var(--t-fast), box-shadow var(--t-base);
+}
+.step[data-category='sketch'] { --c: var(--azure); }
+.step[data-category='solid'] { --c: var(--mint); }
+.step[data-category='transform'] { --c: var(--amber); }
+.step[data-category='opaque'] { --c: var(--iris); }
+.step:hover { transform: translateY(-1px); background: color-mix(in srgb, var(--c) 22%, var(--bg-2)); }
+.step[data-active] { background: color-mix(in srgb, var(--c) 30%, var(--bg-2)); box-shadow: 0 0 0 2px var(--bg-1), 0 0 0 3.5px var(--c); }
+.step[data-unexecuted] { opacity: 0.4; }
+.end { flex-shrink: 0; width: 3px; height: 22px; margin-left: 6px; border-radius: 2px; background: var(--ws); box-shadow: 0 0 10px var(--ws-glow); }
+.step[data-error] { color: var(--danger); border-color: color-mix(in srgb, var(--danger) 55%, transparent); background: var(--danger-soft); }
+.status[data-tone='error'] { color: var(--danger); background: var(--danger-soft); }
+
+/* Steps past the history marker are rolled back: shown, not built. */
+.step[data-rolled] { opacity: 0.32; filter: grayscale(0.7); }
+.step[data-rolled]:hover { opacity: 0.6; }
+
+/* The history marker: a grip you drag between steps. */
+.marker {
+  position: relative;
+  flex-shrink: 0;
+  width: 12px;
+  height: 30px;
+  margin: 0 1px;
+  border-radius: 4px;
+  cursor: ew-resize;
+  touch-action: none;
+  display: grid;
+  place-items: center;
+}
+.marker::before {
+  content: '';
+  width: 4px;
+  height: 26px;
+  border-radius: 2px;
+  background: var(--ws);
+  box-shadow: 0 0 10px var(--ws-glow);
+  transition: transform var(--t-fast) var(--ease-standard), background var(--t-fast);
+}
+.marker::after {
+  content: '';
+  position: absolute;
+  top: -3px;
+  width: 10px;
+  height: 6px;
+  border-radius: 2px 2px 1px 1px;
+  background: var(--ws);
+}
+.marker:hover::before, .marker:focus-visible::before { transform: scaleX(1.5); }
+.marker:focus-visible { outline: none; box-shadow: 0 0 0 2px var(--ws-soft); }
+.marker[data-rolled]::before, .marker[data-rolled]::after { background: var(--amber); box-shadow: 0 0 10px color-mix(in srgb, var(--amber) 45%, transparent); }
+.marker:disabled { cursor: progress; opacity: 0.6; }
+
+.rolled {
+  display: inline-flex; align-items: center; gap: 6px;
+  font-size: var(--fs-2xs); font-weight: 600; padding: 2px 7px; border-radius: 4px;
+  color: var(--amber); background: color-mix(in srgb, var(--amber) 14%, transparent);
+  border: 1px solid color-mix(in srgb, var(--amber) 35%, transparent);
+}
+.rolled span { color: var(--text-1); text-decoration: underline; text-underline-offset: 2px; }
+.rolled:hover span { color: var(--ws); }

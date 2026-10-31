@@ -1,0 +1,51 @@
+{
+  "source": "Synchronized from STEVE Studio's skills.",
+  "adaptation": "Original CAD reference with overriding local execution mapping.",
+  "skills": [
+    {
+      "name": "steve-designs",
+      "source_sha256": "2fce1b060f287b89abc97659d23dbd238e29877c19072aef90d75a864f2fb969",
+      "bundled_sha256": "6767ec065017e98aac942353d0f827b601e95b2501ab8cb2991c0d69b305398c"
+    },
+    {
+      "name": "steve-drawings",
+      "source_sha256": "c6cf751abdc136e350d5312a5da5b39869a0cb3ed24b99da0ed79ccba8f571e9",
+      "bundled_sha256": "5ffd4ba4f400efdaa984ebd9f2b750eac5c5551269bb43a6c17e3e2c00a0289d"
+    },
+    {
+      "name": "steve-materials",
+      "source_sha256": "372cd31dfe67aec50137fe5166289f98ee0cec79d415a0ae870a8c6431190aa5",
+      "bundled_sha256": "cc054241ac9793d1d79d640a623b1c98564d4d7754d73eb64c41f5979bcd962b"
+    },
+    {
+      "name": "steve-motion",
+      "source_sha256": "4aa8bb1450da19b7430828ac6e98bea08fcf67d4a86692e85f2bc8d3cc7f3b4e",
+      "bundled_sha256": "b3c9a48b8810b066e79ba736f493124756b9ec06a3788eb6cf43d27e2e673252"
+    },
+    {
+      "name": "steve-sheet-metal",
+      "source_sha256": "e6fa81d697008ba0cf7208bc609ce7a744163dcabf933abe88439c386718dcd6",
+      "bundled_sha256": "210ec52bf2c2df15baa6ff6c068eb18f5a20b9203b5b6b2d45f485163afe8d23"
+    },
+    {
+      "name": "steve-standard-parts",
+      "source_sha256": "f2a500a9f30eb4b429bc7d9d8667ef43f27de2dcd834c8b09d642ed1201d5e2c",
+      "bundled_sha256": "9e9cfb4c97b79dba29ca99a3620ee515a928adfaf34260435e15fdd0b7c6c513"
+    },
+    {
+      "name": "steve-step-import",
+      "source_sha256": "9a334236899ee662901c7686aaa0706a68cabac28279f2e6f6ec3f167e8ec359",
+      "bundled_sha256": "1cdbfe01b8cb1a59ff0c4bdccb6333bcae53ebef9d7f43780dd4080882f73fc5"
+    },
+    {
+      "name": "steve-surfaces",
+      "source_sha256": "9d5f85545d8bd8776a6b87e48c0da299f556946bf4bae7bd9421e8c676db6a94",
+      "bundled_sha256": "4b07eb5464dbe95d05acb079973381266f31bb1281c6f700e0b8cf6a127266ef"
+    },
+    {
+      "name": "steve-blender",
+      "source_sha256": "a6b9979e1ba3d58f606e7c8d1436bce2b1b4d361ac533025a61964dac63606fb",
+      "bundled_sha256": "e9c3105230c5b2aa09a9f72278e083c0355ef812a9d8dbeada8d0eaefff34499"
+    }
+  ]
+}

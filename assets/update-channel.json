@@ -1,0 +1,17 @@
+{
+  "host": "dl.stevecad.studio",
+  "platforms": {
+    "windows-x64": {
+      "source": "https://dl.stevecad.studio/windows/latest.json",
+      "public_keys": [
+        "MHYwEAYHKoZIzj0CAQYFK4EEACIDYgAEAJx7jhyCmh/8lOhPy61+Pfs+kf2GpXhYvD5g4R7aIuqO9Xob9GTJi0Eos2VsvLOGle6oFrqGGcGmhnBTZqGzgqhpOZ33F/PErL+vBZ6F1qrt527HcAcqajZr3n90W+1a"
+      ]
+    },
+    "linux-x64": {
+      "source": "https://dl.stevecad.studio/linux/latest.json",
+      "public_keys": [
+        "MHYwEAYHKoZIzj0CAQYFK4EEACIDYgAEm1qxaUPvJZ26wFOQnzbCRcniMzn3zwHbFPb4Fk1QFGteD7/8PVIg9NQA+cikqXeQrQiafRMQgMQikiC4npLt6J0mu/HoYOga1RP4p8FhiU0US2xhJY00yIKMzdnEE5xD"
+      ]
+    }
+  }
+}

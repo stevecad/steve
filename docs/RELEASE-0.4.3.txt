@@ -1,0 +1,4 @@
+Steve 0.4.3
+
+- "Restart and update": when an update is ready, install it now from Settings > Updates
+  or the update banner. Steve closes as usual, installs the update and opens again.

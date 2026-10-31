@@ -1,0 +1,13 @@
+/* The Surface analysis panel's legends (AnalysisPanel.tsx). */
+.ramp { height: 10px; border-radius: 5px; border: 1px solid var(--line-2); }
+.rampLabels { display: flex; justify-content: space-between; font-size: var(--fs-xs); color: var(--text-2); margin-top: 4px; }
+.swatches { display: flex; flex-direction: column; gap: 6px; }
+.swatch { display: flex; align-items: center; gap: 8px; font-size: var(--fs-xs); color: var(--text-2); }
+.swatch > i { width: 14px; height: 14px; border-radius: 3px; border: 1px solid var(--line-2); flex: none; }
+.grade { font-size: var(--fs-sm); font-weight: 600; }
+.grade[data-grade='G2'], .grade[data-grade='G1'] { color: var(--success, #3f9a5a); }
+.grade[data-grade='none'] { color: var(--danger, #d9534f); }
+.pair { display: flex; flex-direction: column; gap: 6px; }
+.pair + .pair { border-top: 1px solid var(--line-2); padding-top: 8px; }
+.pairTitle { font-size: var(--fs-xs); color: var(--text-2); }
+.source { font-size: var(--fs-xs); color: var(--text-3, var(--text-2)); }

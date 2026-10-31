@@ -1,0 +1,162 @@
+/* The right-hand Sketch panel (shell/Dock's tool tab while a sketch is open). */
+.panel {
+  flex: 1 0 auto;
+  min-height: 100%;
+  display: flex;
+  flex-direction: column;
+}
+.head { display: flex; align-items: center; gap: 9px; padding: 10px 10px 8px 12px; border-bottom: 1px solid var(--line-1); }
+.icon { display: grid; place-items: center; width: 28px; height: 28px; border-radius: 8px; color: var(--ws); background: var(--ws-softer); flex-shrink: 0; }
+.title { flex: 1; min-width: 0; }
+.title b { display: block; font-size: var(--fs-md); font-weight: 600; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.title span { display: block; font-family: var(--font-mono); font-size: var(--fs-xs); color: var(--text-3); overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+
+.chip { display: inline-flex; align-items: center; gap: 6px; height: 22px; padding: 0 8px; border-radius: 99px; font-size: var(--fs-2xs); font-weight: 650; letter-spacing: 0.02em; color: var(--text-2); background: var(--bg-3); border: 1px solid var(--line-2); white-space: nowrap; transition: color var(--t-fast), background var(--t-fast), border-color var(--t-fast); }
+.chip i { width: 7px; height: 7px; border-radius: 50%; background: #63b4ff; box-shadow: 0 0 0 3px color-mix(in srgb, #63b4ff 22%, transparent); }
+.chip[data-tone='defined'] { color: var(--success); border-color: color-mix(in srgb, var(--success) 35%, transparent); }
+.chip[data-tone='defined'] i { background: var(--success); box-shadow: 0 0 0 3px color-mix(in srgb, var(--success) 22%, transparent); }
+.chip[data-tone='conflict'] { color: var(--danger); background: var(--danger-soft); border-color: color-mix(in srgb, var(--danger) 40%, transparent); }
+.chip[data-tone='conflict'] i { background: var(--danger); animation: pulse 1.2s var(--ease-in-out) infinite; }
+
+.body { flex: 1; display: flex; flex-direction: column; }
+.section { display: flex; flex-direction: column; gap: 8px; padding: 10px 12px 12px; border-bottom: 1px solid var(--line-1); }
+.section h3 { display: flex; align-items: center; gap: 6px; margin: 0; }
+.count { font-family: var(--font-mono); letter-spacing: 0; text-transform: none; color: var(--ws); }
+.link { margin-left: auto; font-size: var(--fs-xs); font-weight: 500; letter-spacing: 0; text-transform: none; color: var(--ws); }
+.link:hover { text-decoration: underline; }
+.empty { margin: 0; font-size: var(--fs-xs); color: var(--text-3); }
+
+/* The active tool and its options (the tools themselves are on the ribbon's Sketch tab). */
+.options { display: flex; flex-direction: column; padding: 2px 10px 6px; border-radius: 9px; background: var(--bg-1); border: 1px solid color-mix(in srgb, var(--ws) 35%, var(--line-2)); }
+.options > .field:last-child { border-bottom: 0; }
+.toolHead { display: flex; align-items: center; gap: 7px; min-height: 34px; border-bottom: 1px solid var(--line-1); color: var(--ws); }
+.toolHead:last-child { border-bottom: 0; }
+.toolHead b { font-size: var(--fs-sm); font-weight: 600; color: var(--text-1); }
+.toolHead kbd { font-size: 9.5px; }
+.toolHead .link { margin-left: auto; }
+
+/* Choosing where to sketch: the origin planes. */
+.planes { display: flex; gap: 4px; }
+.planes button { height: 28px; min-width: 44px; padding: 0 8px; border-radius: 7px; font-family: var(--font-mono); font-size: var(--fs-sm); font-weight: 600; background: var(--bg-2); border: 1px solid var(--line-3); color: var(--text-1); transition: all var(--t-fast); }
+.planes button:hover, .planes button[data-hot] { border-color: var(--ws-strong); color: var(--ws-ink); background: var(--ws-strong); box-shadow: 0 0 12px var(--ws-glow); }
+
+.tag { display: inline-flex; align-items: center; height: 20px; padding: 0 7px; border-radius: 99px; font-size: var(--fs-2xs); font-weight: 650; letter-spacing: 0.04em; color: var(--bg-0); background: #d8a860; white-space: nowrap; }
+.field { display: grid; grid-template-columns: 82px minmax(0, 1fr); align-items: center; gap: 8px; padding: 6px 0; border-bottom: 1px solid var(--line-1); }
+.label { font-size: var(--fs-sm); color: var(--text-2); }
+.control { min-width: 0; display: flex; flex-wrap: wrap; align-items: center; gap: 6px; }
+.switchRow { display: inline-flex; align-items: center; gap: 8px; }
+.switchRow small { font-size: var(--fs-xs); color: var(--text-3); }
+
+.stepper { display: inline-flex; align-items: center; height: 28px; border-radius: 7px; background: var(--bg-2); border: 1px solid var(--line-3); overflow: hidden; transition: border-color var(--t-fast), box-shadow var(--t-fast); }
+.stepper:focus-within { border-color: var(--ws); box-shadow: 0 0 0 3px var(--ws-soft); }
+.stepper button { display: grid; place-items: center; width: 26px; height: 100%; color: var(--text-2); }
+.stepper button:hover:not(:disabled) { color: var(--ws); background: var(--ws-softer); }
+.stepper button:disabled { opacity: 0.35; }
+.stepper input { width: 40px; height: 100%; text-align: center; font-family: var(--font-mono); font-size: var(--fs-sm); color: var(--text-1); background: transparent; border: 0; border-inline: 1px solid var(--line-2); outline: none; }
+
+.sizes { display: flex; flex-wrap: wrap; gap: 4px; }
+.size { display: inline-flex; align-items: center; gap: 5px; height: 28px; padding: 0 8px; border-radius: 7px; background: var(--bg-2); border: 1px solid var(--line-3); transition: border-color var(--t-fast), box-shadow var(--t-fast); }
+.size:focus-within { border-color: var(--ws); box-shadow: 0 0 0 3px var(--ws-soft); }
+.size[data-locked] { border-color: color-mix(in srgb, var(--ws) 60%, transparent); }
+.size[data-invalid] { border-color: var(--danger); }
+.size b { font-size: var(--fs-xs); color: var(--ws); }
+.size input { width: 58px; font-family: var(--font-mono); font-size: var(--fs-sm); color: var(--text-1); background: transparent; border: 0; outline: none; }
+.size em, .value em { font-style: normal; font-size: var(--fs-xs); color: var(--text-3); }
+
+/* Selection chips. */
+.chips { display: flex; flex-wrap: wrap; gap: 4px; }
+.ref { display: inline-flex; align-items: center; gap: 5px; max-width: 100%; padding: 2px 5px 2px 8px; border-radius: 99px; background: var(--sel-soft); border: 1px solid color-mix(in srgb, var(--sel) 40%, transparent); }
+.ref code { font-family: var(--font-mono); font-size: 10.5px; color: var(--text-1); overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.ref small { font-size: 10px; color: var(--text-3); white-space: nowrap; }
+.ref svg { flex-shrink: 0; opacity: 0.6; cursor: pointer; }
+.ref svg:hover { opacity: 1; }
+.actions { display: flex; gap: 4px; }
+
+/* The constraints the selection can take. */
+.apply { display: flex; flex-direction: column; gap: 6px; padding-top: 4px; }
+.applyLabel { font-size: var(--fs-xs); color: var(--text-3); }
+.constraints { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 4px; }
+.constraint {
+  display: flex;
+  align-items: center;
+  gap: 7px;
+  height: 30px;
+  padding: 0 8px;
+  border-radius: 7px;
+  font-size: var(--fs-sm);
+  color: var(--text-1);
+  background: var(--bg-2);
+  border: 1px solid var(--line-2);
+  transition: color var(--t-fast), background var(--t-fast), border-color var(--t-fast), opacity var(--t-base), transform var(--t-fast) var(--ease-spring);
+}
+.constraint span { flex: 1; min-width: 0; text-align: left; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.constraint svg { flex-shrink: 0; color: var(--ws); }
+.constraint kbd { font-size: 9.5px; }
+.constraint:hover { border-color: color-mix(in srgb, var(--ws) 55%, transparent); background: var(--ws-softer); }
+.constraint:active { transform: scale(0.97); }
+.note { display: flex; align-items: flex-start; gap: 6px; min-height: 30px; padding: 6px 8px; border-radius: 7px; font-size: var(--fs-xs); line-height: 1.4; color: var(--text-3); background: var(--bg-1); border: 1px solid var(--line-1); }
+.note[data-state='blocked'] { color: var(--warning); background: var(--warning-soft); border-color: transparent; }
+.note[data-state='blocked'] svg { flex-shrink: 0; margin-top: 1px; }
+.note code { font-family: var(--font-mono); font-size: 10.5px; color: var(--ws); white-space: pre-wrap; word-break: break-word; }
+
+/* Dimensions and constraints of the sketch. */
+.list { display: flex; flex-direction: column; gap: 2px; margin: 0; padding: 0; list-style: none; }
+.row {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  min-height: 34px;
+  padding: 3px 4px 3px 6px;
+  border-radius: 7px;
+  border: 1px solid transparent;
+  cursor: pointer;
+  transition: background var(--t-fast), border-color var(--t-fast);
+}
+.row:hover { background: var(--bg-2); }
+.row[data-selected] { background: var(--sel-soft); border-color: color-mix(in srgb, var(--sel) 40%, transparent); }
+.row[data-conflict] { background: var(--danger-soft); border-color: color-mix(in srgb, var(--danger) 35%, transparent); }
+.rowIcon { display: grid; place-items: center; width: 24px; height: 24px; flex-shrink: 0; border-radius: 6px; color: var(--ws); background: var(--bg-3); }
+.row[data-conflict] .rowIcon { color: var(--danger); background: transparent; }
+.rowText { flex: 1; min-width: 0; display: flex; flex-direction: column; line-height: 1.25; }
+.rowText b { font-size: var(--fs-sm); font-weight: 560; }
+.rowText small { font-family: var(--font-mono); font-size: 10px; color: var(--text-3); overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.rowDelete { opacity: 0; transition: opacity var(--t-fast); }
+.row:hover .rowDelete, .row[data-selected] .rowDelete, .rowDelete:focus-visible { opacity: 1; }
+
+.value { display: inline-flex; align-items: center; gap: 4px; height: 26px; padding: 0 7px; border-radius: 6px; background: var(--bg-2); border: 1px solid var(--line-3); cursor: text; transition: border-color var(--t-fast), box-shadow var(--t-fast); }
+.value:focus-within { border-color: var(--ws); box-shadow: 0 0 0 3px var(--ws-soft); }
+.value[data-invalid] { border-color: var(--danger); box-shadow: 0 0 0 3px var(--danger-soft); }
+.value[data-driven] { color: var(--text-3); font-family: var(--font-mono); font-size: var(--fs-sm); cursor: default; }
+.value input { width: 62px; font-family: var(--font-mono); font-size: var(--fs-sm); text-align: right; color: var(--text-1); background: transparent; border: 0; outline: none; }
+.value small { font-family: var(--font-mono); font-size: 10px; color: var(--ws); white-space: nowrap; }
+
+/* What to do next, the solve status and Finish, kept in view at the bottom. */
+.next { display: flex; align-items: flex-start; gap: 7px; margin: 0; font-size: var(--fs-xs); line-height: 1.45; color: var(--text-2); }
+.next svg { flex-shrink: 0; margin-top: 2px; color: var(--ws); }
+.footer { position: sticky; bottom: 0; z-index: 2; display: flex; flex-direction: column; gap: 8px; padding: 10px 12px; background: var(--bg-1); border-top: 1px solid var(--line-2); box-shadow: 0 -8px 16px -12px rgba(0, 0, 0, 0.5); }
+.status { display: flex; align-items: flex-start; gap: 8px; font-size: var(--fs-xs); color: var(--text-2); }
+.status i { width: 8px; height: 8px; margin-top: 4px; border-radius: 50%; flex-shrink: 0; background: #63b4ff; box-shadow: 0 0 0 3px color-mix(in srgb, #63b4ff 25%, transparent); transition: background var(--t-base); }
+.status span { flex: 1; min-width: 0; display: flex; flex-direction: column; gap: 1px; }
+.status b { font-size: var(--fs-sm); font-weight: 600; color: var(--text-1); }
+.status small { color: var(--text-3); }
+.status[data-tone='defined'] i { background: var(--success); box-shadow: 0 0 0 3px color-mix(in srgb, var(--success) 25%, transparent); }
+.status[data-tone='conflict'] b { color: var(--danger); }
+.status[data-tone='conflict'] i { background: var(--danger); box-shadow: 0 0 0 3px var(--danger-soft); }
+.status .link { margin-left: 0; }
+.error { display: flex; align-items: flex-start; gap: 6px; margin: 0; font-size: var(--fs-xs); color: var(--danger); }
+.error svg { flex-shrink: 0; margin-top: 1px; }
+
+.spin { animation: spin 0.9s linear infinite; }
+@keyframes spin { to { transform: rotate(360deg); } }
+@keyframes pulse { 50% { opacity: 0.4; } }
+
+@media (prefers-reduced-motion: reduce) {
+  .chip[data-tone='conflict'] i, .spin { animation: none; }
+  .constraint, .planes button { transition: none; }
+}
+.steps { display: flex; flex-direction: column; gap: 4px; margin: 2px 0 0; padding: 0; list-style: none; }
+.steps li { display: flex; align-items: center; gap: 8px; min-height: 22px; font-size: var(--fs-xs); color: var(--text-1); }
+.steps li[data-done] { color: var(--text-3); }
+.steps code { font-family: var(--font-mono); font-size: var(--fs-2xs); color: var(--ws); }
+.stepIndex { display: grid; place-items: center; width: 18px; height: 18px; flex-shrink: 0; border-radius: 50%; border: 1px solid var(--line-2); color: var(--text-2); font-size: var(--fs-2xs); }
+.steps li[data-done] .stepIndex { border-color: var(--ws); color: var(--ws); }

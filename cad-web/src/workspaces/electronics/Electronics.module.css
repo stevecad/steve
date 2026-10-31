@@ -1,0 +1,462 @@
+/* The Electronics workspace: views over the viewport, the start screen, the tree and the inspector. */
+
+/* ───── Views ───── */
+.views {
+  position: absolute;
+  inset: 0;
+  z-index: 3;
+  display: flex;
+  background:
+    radial-gradient(120% 90% at 50% 18%, color-mix(in srgb, var(--vp-top) 100%, white 2%) 0%, transparent 65%),
+    linear-gradient(180deg, var(--vp-top) 0%, var(--vp-bottom) 100%);
+}
+.pane { position: relative; flex: 1 1 0; min-width: 0; min-height: 0; display: flex; }
+.paneDivider { width: 1px; background: var(--line-2); box-shadow: 0 0 0 0.5px rgb(0 0 0 / 0.25); }
+/* Split on a canvas that isn't wide (ElectronicsViews' useSplitDirection): the board below the schematic. The view
+   switcher sits over the schematic, so the board's own tools move up to its top edge. The pane is short and clips:
+   the viewer's menus open downwards inside its toolbar, so the toolbar scrolls instead of losing its end. */
+.views[data-split='column'] { flex-direction: column; }
+.views[data-split='column'] > .paneDivider { width: auto; height: 1px; }
+.views[data-split='column'][data-view='split'] .pcb > .pcbTools { top: 10px; }
+.views[data-split='column'][data-view='split'] .pcb :global([data-toolbar-overlay]) {
+  top: 10px !important; max-height: calc(100% - 20px); overflow-y: auto; overscroll-behavior: contain;
+}
+.views[data-split='column'][data-view='split'] .routePanel { top: 44px; max-height: calc(100% - 56px); }
+
+.schematic {
+  position: relative;
+  flex: 1;
+  overflow: hidden;
+  cursor: default;
+  touch-action: none;
+  user-select: none;
+  /* A faint dot grid: drafting paper, never louder than the drawing. */
+  background-image: radial-gradient(circle at 1px 1px, color-mix(in srgb, var(--text-3) 22%, transparent) 1px, transparent 1.2px);
+  background-size: 22px 22px;
+}
+.schematic[data-grabbing] { cursor: grabbing; }
+.schematic[data-hover] { cursor: pointer; }
+.schematic :global(.steve-schematic) { position: absolute; inset: 0; }
+.schematic :global(.steve-schematic svg) { display: block; }
+.schematic :global(.steve-ring) { fill: var(--ws-softer); stroke: var(--ws); stroke-width: 1.6; pointer-events: none; }
+.schematic :global(.steve-ring-selected) { fill: var(--ws-soft); filter: drop-shadow(0 0 6px var(--ws-glow)); }
+.schematic :global(.steve-ring-hover) { fill: none; stroke-dasharray: 4 3; opacity: 0.85; }
+.schematic :global(.steve-net path), .schematic :global(.steve-net line), .schematic :global(path.steve-net) {
+  stroke: var(--ws) !important; stroke-width: 2.4 !important; filter: drop-shadow(0 0 3px var(--ws-glow));
+}
+.schematic :global(.sch-component) { transition: opacity var(--t-base); }
+/* Picks (picks.ts): a pin's end, a wire, a net label, in the workspace colour. */
+.schematic :global(.steve-pick-pin) { fill: var(--ws-soft); stroke: var(--ws); stroke-width: 2; filter: drop-shadow(0 0 5px var(--ws-glow)); pointer-events: none; }
+.schematic :global(.steve-picked path), .schematic :global(.steve-picked line), .schematic :global(path.steve-picked), .schematic :global(rect.steve-picked) {
+  stroke: var(--ws) !important; stroke-width: 3.2 !important; filter: drop-shadow(0 0 5px var(--ws-glow));
+}
+.schematic :global(rect.steve-picked) { fill: var(--ws-softer) !important; }
+.schematic :global(text.steve-picked), .schematic :global(.steve-picked text) { fill: var(--ws) !important; }
+.schematic[data-grabbing='move'] { cursor: grabbing; }
+.schematic[data-grabbing='pan'] { cursor: grabbing; }
+/* A part being dragged: a ghost of itself, in the workspace colour. */
+.schematic :global(.steve-ghost) { opacity: 0.72; filter: drop-shadow(0 0 4px var(--ws-glow)); }
+/* The Wire tool: pins are targets; the first pin and the rubber band in the workspace colour. */
+.schematic[data-tool='wire'], .schematic[data-tool='place'] { cursor: crosshair; }
+/* The part on the pointer while placing: the symbol in the workspace colour, its name and value. */
+.schematic :global(.steve-place) { pointer-events: none; }
+.schematic :global(.steve-place-line) { fill: none; stroke: var(--ws); stroke-width: 1.6; stroke-linecap: round; stroke-linejoin: round; }
+.schematic :global(.steve-place-fill) { fill: var(--ws); stroke: var(--ws); stroke-width: 1.2; }
+.schematic :global(.steve-place-box) { fill: var(--ws-soft); stroke: var(--ws); stroke-width: 1.6; }
+.schematic :global(.steve-place-label) { fill: var(--ws); font-family: var(--font-sans); font-weight: 600; }
+.schematic :global(.steve-place-ghost) { opacity: 0.85; filter: drop-shadow(0 0 5px var(--ws-glow)); }
+.schematic :global(.steve-pin) { fill: var(--ws-softer); stroke: var(--ws); stroke-width: 1.2; opacity: 0.55; cursor: pointer; transition: opacity var(--t-fast); }
+.schematic :global(.steve-pin-hover) { opacity: 1; fill: var(--ws-soft); stroke-width: 2; }
+.schematic :global(.steve-pin-from) { opacity: 1; fill: var(--ws); }
+.schematic :global(.steve-band) { stroke: var(--ws); stroke-width: 1.8; stroke-dasharray: 6 4; pointer-events: none; animation: band-march 0.6s linear infinite; }
+@keyframes band-march { to { stroke-dashoffset: -10; } }
+@media (prefers-reduced-motion: reduce) { .schematic :global(.steve-band) { animation: none; } }
+.toolHint {
+  position: absolute;
+  left: 50%;
+  /* Above the board facts and the readiness verdict. */
+  bottom: 50px;
+  translate: -50% 0;
+  z-index: 2;
+  padding: 6px 12px;
+  border-radius: 8px;
+  /* Opaque: read over a busy drawing. */
+  background: var(--bg-2);
+  border: 1px solid color-mix(in srgb, var(--ws) 35%, var(--line-3));
+  box-shadow: var(--shadow-2);
+  font-size: var(--fs-xs);
+  color: var(--text-2);
+  white-space: nowrap;
+  pointer-events: none;
+}
+.toolHint b { color: var(--text-1); font-weight: 600; }
+
+.pcb { position: relative; flex: 1; overflow: hidden; background: #0b0d10; }
+.pcb > div { height: 100%; }
+/* The viewer's own toolbar (layer, errors, rats nest…) sits below the view switcher, not against it. */
+.pcb :global([data-toolbar-overlay]) { top: 56px !important; }
+/* Ours (Move parts) on the same row, at the other side. */
+.pcb > .pcbTools { position: absolute; top: 56px; right: 12px; height: auto; z-index: 6; display: flex; gap: 6px; }
+.pcb[data-compact] > .pcbTools { right: 8px; }
+.pcbTool {
+  display: inline-flex; align-items: center; gap: 6px; height: 26px; padding: 0 10px 0 8px; border-radius: 7px;
+  background: var(--bg-2); border: 1px solid var(--line-3); color: var(--text-2);
+  font-size: var(--fs-xs); font-weight: 600; letter-spacing: 0.02em; cursor: pointer;
+  transition: color var(--t-fast), border-color var(--t-fast), background var(--t-fast);
+}
+.pcbTool:hover { color: var(--text-1); border-color: color-mix(in srgb, var(--ws) 45%, var(--line-3)); }
+.pcbTool[aria-pressed='true'] { color: var(--ws); background: color-mix(in srgb, var(--ws) 12%, var(--bg-2)); border-color: color-mix(in srgb, var(--ws) 55%, var(--line-3)); }
+/* A part's body under the pointer while Move parts is on: it can be grabbed. */
+.pcb[data-grab='part'], .pcb[data-grab='part'] * { cursor: grab !important; }
+.pcb[data-grab='moving'], .pcb[data-grab='moving'] * { cursor: grabbing !important; }
+/* tscircuit tints the part being dragged red; the selection outline (ours) already follows it. */
+.pcb :global(div[style*="rgba(255, 0, 0, 0.2)"]) { background: transparent !important; }
+
+.viewLoading { position: absolute; inset: 0; display: grid; place-items: center; color: var(--text-3); }
+.viewError { position: absolute; left: 16px; right: 16px; top: 56px; padding: 10px 12px; border-radius: var(--r-md); background: var(--danger-soft); color: var(--danger); font-size: var(--fs-sm); }
+
+.fitButton {
+  position: absolute;
+  /* Top left: the bottom belongs to the board facts and the readiness verdict. */
+  left: 12px;
+  top: 12px;
+  z-index: 2;
+  height: 26px;
+  padding: 0 10px;
+  border-radius: 7px;
+  background: var(--bg-2);
+  border: 1px solid var(--line-3);
+  color: var(--text-2);
+  font-size: var(--fs-xs);
+  font-weight: 600;
+  letter-spacing: 0.02em;
+  transition: color var(--t-fast), border-color var(--t-fast);
+}
+.fitButton:hover { color: var(--text-1); border-color: color-mix(in srgb, var(--ws) 45%, var(--line-3)); }
+.schematic[data-compact] .fitButton { left: 8px; top: 8px; }
+
+/* ───── View switcher ───── */
+.switcher {
+  position: absolute;
+  top: 12px;
+  left: 50%;
+  translate: -50% 0;
+  z-index: 6;
+  display: flex;
+  gap: 2px;
+  padding: 3px;
+  border-radius: 10px;
+  background: var(--bg-2);
+  border: 1px solid var(--line-3);
+  box-shadow: var(--shadow-2);
+}
+.switch {
+  position: relative;
+  height: 26px;
+  padding: 0 13px;
+  border-radius: 7px;
+  font-size: var(--fs-sm);
+  font-weight: 560;
+  color: var(--text-2);
+  transition: color var(--t-fast);
+}
+.switch:hover { color: var(--text-1); }
+.switch[data-active] { color: var(--ws-ink); }
+.switchThumb { position: absolute; inset: 0; border-radius: 7px; background: var(--ws); box-shadow: 0 1px 8px var(--ws-glow); }
+.switchLabel { position: relative; }
+
+/* ───── Board facts ───── */
+.factsRow { position: absolute; left: 14px; bottom: 12px; z-index: 6; display: flex; align-items: center; gap: 8px; max-width: calc(100% - 90px); }
+/* In 3D the bottom belongs to the view tools and the axes: the facts sit top left, under the view's name. */
+.factsRow[data-view='3d'] { top: 62px; bottom: auto; }
+.facts {
+  position: relative;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  height: 26px;
+  padding: 0 10px;
+  border-radius: 8px;
+  background: var(--bg-2);
+  border: 1px solid var(--line-2);
+  box-shadow: var(--shadow-2);
+  font-size: var(--fs-xs);
+  color: var(--text-2);
+  pointer-events: auto;
+}
+.facts b { color: var(--text-1); font-weight: 600; font-variant-numeric: tabular-nums; }
+.facts > span { white-space: nowrap; }
+.facts > span + span::before { content: ''; display: inline-block; width: 3px; height: 3px; border-radius: 50%; background: var(--text-3); margin: 0 10px 2px 0; vertical-align: middle; }
+.factsProblems { display: inline-flex; align-items: center; gap: 4px; padding: 0 6px; height: 18px; border-radius: 5px; font-weight: 600; }
+.factsProblems[data-tone='error'] { color: var(--danger); background: var(--danger-soft); }
+.factsProblems[data-tone='warning'] { color: var(--warning); background: color-mix(in srgb, var(--warning) 14%, transparent); }
+
+/* ───── Start screen and waiting ───── */
+.start { position: absolute; inset: 0; z-index: 3; display: grid; place-items: center; padding: 24px;
+  background:
+    radial-gradient(90% 70% at 50% 30%, var(--ws-softer), transparent 70%),
+    radial-gradient(120% 90% at 50% 18%, color-mix(in srgb, var(--vp-top) 100%, white 2%) 0%, transparent 65%),
+    linear-gradient(180deg, var(--vp-top) 0%, var(--vp-bottom) 100%); }
+.startCard { display: flex; flex-direction: column; align-items: center; text-align: center; max-width: 540px; }
+.start > .startCard { width: min(540px, 100%); }
+.startGlyph {
+  display: grid;
+  place-items: center;
+  width: 72px;
+  height: 72px;
+  margin-bottom: 18px;
+  border-radius: 20px;
+  color: var(--ws);
+  background: linear-gradient(160deg, var(--ws-soft), transparent);
+  border: 1px solid color-mix(in srgb, var(--ws) 30%, var(--line-2));
+  box-shadow: 0 0 40px var(--ws-glow);
+  animation: glyph-float 6s var(--ease-in-out) infinite;
+}
+@keyframes glyph-float { 0%, 100% { transform: translateY(0); } 50% { transform: translateY(-4px); } }
+.startCard h2 { font-size: var(--fs-2xl); font-weight: 600; letter-spacing: -0.02em; }
+.startCard p { margin-top: 8px; color: var(--text-2); font-size: var(--fs-md); max-width: 430px; line-height: 1.55; }
+.startActions { display: flex; flex-wrap: wrap; justify-content: center; gap: 8px; margin-top: 22px; }
+.startLoading { margin-top: 26px; color: var(--text-3); }
+/* Design's tiles, sized to the card (not the window) so they stay inside the start screen's padding on a phone. */
+.startCard > .startGrid { width: min(520px, 100%); }
+.recent { display: flex; flex-direction: column; gap: 2px; width: min(520px, 100%); margin-top: 28px; padding: 6px; border-radius: var(--r-lg);
+  background: color-mix(in srgb, var(--bg-2) 80%, transparent); border: 1px solid var(--line-2); backdrop-filter: blur(8px); text-align: left; }
+.recentTitle { padding: 6px 8px 4px; font-size: var(--fs-2xs); font-weight: 650; letter-spacing: 0.06em; text-transform: uppercase; color: var(--text-3); }
+.recentRow { display: flex; align-items: center; gap: 9px; height: 32px; padding: 0 9px; border-radius: 7px; color: var(--text-1); font-size: var(--fs-sm); text-align: left; transition: background var(--t-fast); }
+.recentRow svg { color: var(--ws); flex: none; }
+.recentRow span { flex: 1; min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.recentRow small { color: var(--text-3); font-size: var(--fs-xs); }
+.recentRow:hover { background: var(--bg-4); }
+
+.waiting { position: absolute; inset: 0; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 8px; color: var(--text-2); text-align: center; padding: 24px; }
+.waiting h3 { font-size: var(--fs-lg); font-weight: 600; color: var(--text-1); margin-top: 6px; }
+.waiting p { font-size: var(--fs-sm); color: var(--text-3); max-width: 360px; }
+.waiting[data-tone='error'] > svg { color: var(--danger); }
+
+/* ───── Tree ───── */
+.partMeta { display: inline-flex; gap: 6px; max-width: 150px; overflow: hidden; font-size: var(--fs-2xs); color: var(--text-3); font-family: var(--font-mono); white-space: nowrap; }
+.partMeta > span { overflow: hidden; text-overflow: ellipsis; }
+.partMeta b { color: var(--text-2); font-weight: 500; font-family: var(--font-sans); }
+.problemIcon[data-severity='error'] { color: var(--danger); }
+.problemIcon[data-severity='warning'] { color: var(--warning); }
+.problemIcon[data-severity='info'] { color: var(--info); }
+.problemText { display: -webkit-box; -webkit-box-orient: vertical; -webkit-line-clamp: 3; overflow: hidden; white-space: normal; line-height: 1.35; font-size: var(--fs-xs); }
+.netSwatch { display: inline-block; width: 8px; height: 8px; border-radius: 2px; background: var(--ws); box-shadow: 0 0 0 2px var(--ws-softer); }
+.netSwatch[data-kind='ground'] { background: var(--text-3); }
+.netSwatch[data-kind='power'] { background: var(--danger); box-shadow: 0 0 0 2px var(--danger-soft); }
+
+/* ───── Inspector ───── */
+.inspector { display: flex; flex-direction: column; gap: 14px; padding: 14px; }
+.inspectorHead { display: flex; align-items: center; gap: 10px; }
+.inspectorGlyph { display: grid; place-items: center; width: 34px; height: 34px; border-radius: 9px; color: var(--ws); background: var(--ws-softer); border: 1px solid color-mix(in srgb, var(--ws) 25%, var(--line-2)); flex: none; }
+.inspectorHead h3 { font-size: var(--fs-md); font-weight: 650; }
+.inspectorHead p { font-size: var(--fs-xs); color: var(--text-3); }
+.facts2 { display: grid; grid-template-columns: auto 1fr; gap: 6px 14px; font-size: var(--fs-sm); }
+.facts2 dt { color: var(--text-3); }
+.facts2 dd { color: var(--text-1); font-variant-numeric: tabular-nums; min-width: 0; overflow-wrap: anywhere; }
+.pins { display: flex; flex-wrap: wrap; gap: 4px; }
+.pin { display: inline-flex; align-items: center; gap: 4px; height: 20px; padding: 0 7px; border-radius: 5px; background: var(--bg-3); border: 1px solid var(--line-2); font-size: var(--fs-2xs); font-family: var(--font-mono); color: var(--text-2); }
+.pin b { color: var(--text-1); font-weight: 500; }
+.sectionTitle { font-size: var(--fs-2xs); font-weight: 650; letter-spacing: 0.06em; text-transform: uppercase; color: var(--text-3); }
+.inspectorNote { font-size: var(--fs-xs); color: var(--text-3); line-height: 1.5; }
+.inspectorProblem { display: flex; gap: 8px; padding: 8px 10px; border-radius: var(--r-md); font-size: var(--fs-sm); line-height: 1.45; }
+.inspectorProblem[data-severity='error'] { background: var(--danger-soft); color: var(--text-1); }
+.inspectorProblem[data-severity='error'] svg { color: var(--danger); flex: none; margin-top: 2px; }
+.inspectorProblem[data-severity='warning'] { background: color-mix(in srgb, var(--warning) 12%, transparent); }
+.inspectorProblem[data-severity='warning'] svg { color: var(--warning); flex: none; margin-top: 2px; }
+
+@media (max-width: 720px) {
+  .facts > span:nth-child(n + 3) { display: none; }
+  .switch { padding: 0 9px; }
+}
+/* Phones: the panel rails float over both edges (PanelRail); the start screen stays clear of them. Split stacks the
+   schematic over the board, and the board keeps only our own tools on top (tscircuit's layer bar would sit on them). */
+@media (max-width: 600px) {
+  .start { padding-inline: 46px; }
+  .recent { width: min(420px, 100%); }
+  .views { flex-direction: column; }
+  .paneDivider { width: auto; height: 1px; }
+  .pcb :global([data-toolbar-overlay]) { display: none !important; }
+}
+
+/* A part from the Place gallery over a view: the view lights up and says what a drop does. */
+.schematic[data-drop], .pcb[data-drop] { box-shadow: inset 0 0 0 2px var(--ws), inset 0 0 40px var(--ws-softer); }
+.dropHint {
+  position: absolute;
+  left: 50%;
+  top: 56px;
+  translate: -50% 0;
+  z-index: 4;
+  padding: 6px 12px;
+  border-radius: 8px;
+  background: var(--ws);
+  color: var(--ws-ink);
+  font-size: var(--fs-xs);
+  font-weight: 600;
+  white-space: nowrap;
+  pointer-events: none;
+  box-shadow: 0 4px 18px var(--ws-glow);
+}
+
+/* ───── Readiness: the verdict chip and the list ───── */
+/* In 3D it opens down from the chip, top left. */
+.readiness[data-view='3d'] { top: 100px; bottom: auto; transform-origin: top left; }
+.verdict {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  height: 26px;
+  padding: 0 11px 0 9px;
+  border-radius: 99px;
+  font-size: var(--fs-xs);
+  font-weight: 650;
+  white-space: nowrap;
+  border: 1px solid transparent;
+  box-shadow: var(--shadow-2);
+  transition: transform var(--t-fast) var(--ease-out), box-shadow var(--t-fast), background var(--t-fast);
+}
+.verdict:hover { transform: translateY(-1px); }
+.verdict small { font-weight: 500; opacity: 0.75; }
+.verdict[data-tone='ready'] { color: #062b17; background: var(--success); box-shadow: 0 2px 14px color-mix(in srgb, var(--success) 40%, transparent); }
+.verdict[data-tone='blocked'] { color: #fff; background: var(--danger); box-shadow: 0 2px 14px color-mix(in srgb, var(--danger) 40%, transparent); }
+.verdict[data-tone='empty'] { color: var(--text-2); background: var(--bg-2); border-color: var(--line-3); }
+.verdict[data-tone='checking'] { color: var(--text-2); background: var(--bg-2); border-color: var(--line-3); }
+:root[data-theme='light'] .verdict[data-tone='ready'] { color: #fff; }
+.verdict[data-open] { outline: 2px solid color-mix(in srgb, currentColor 35%, transparent); outline-offset: 2px; }
+
+.readiness {
+  position: absolute;
+  left: 14px;
+  bottom: 50px;
+  transform-origin: bottom left;
+  z-index: 8;
+  display: flex;
+  flex-direction: column;
+  width: min(440px, calc(100% - 28px));
+  max-height: calc(100% - 120px);
+  border-radius: var(--r-lg);
+  /* Solid: it's read closely, over a busy drawing. */
+  background: var(--bg-2);
+  border: 1px solid var(--line-3);
+  box-shadow: var(--shadow-3);
+  overflow: hidden;
+  transform-origin: 20% 100%;
+}
+.readinessHead { display: flex; align-items: flex-start; justify-content: space-between; gap: 12px; padding: 14px 12px 10px 16px; border-bottom: 1px solid var(--line-2); }
+.readinessHead h3 { font-size: var(--fs-md); font-weight: 650; }
+.readinessHead[data-tone='ready'] h3 { color: var(--success); }
+.readinessHead[data-tone='blocked'] h3 { color: var(--danger); }
+.readinessHead p { margin-top: 2px; font-size: var(--fs-xs); color: var(--text-3); }
+.readinessBar { display: flex; align-items: center; justify-content: space-between; gap: 10px; padding: 8px 16px; border-bottom: 1px solid var(--line-2); font-size: var(--fs-xs); color: var(--text-2); }
+.quantity { display: inline-flex; align-items: center; gap: 6px; }
+.quantity input { width: 64px; height: 24px; padding: 0 7px; border-radius: 6px; border: 1px solid var(--line-2); background: var(--bg-2); color: var(--text-1);
+  font-family: var(--font-mono); font-size: var(--fs-xs); }
+.quantity input:focus { outline: none; border-color: var(--ws); box-shadow: 0 0 0 3px var(--ws-softer); }
+.stockNote { display: inline-flex; align-items: center; gap: 5px; color: var(--text-3); text-align: right; }
+.readinessBody { overflow-y: auto; padding: 4px 0 10px; }
+.readinessSection { display: flex; align-items: center; justify-content: space-between; gap: 8px; padding: 10px 16px 6px; }
+.readinessSection > span { font-size: var(--fs-2xs); font-weight: 650; letter-spacing: 0.06em; text-transform: uppercase; color: var(--text-3); }
+.issues { list-style: none; margin: 0; padding: 0 8px; display: flex; flex-direction: column; gap: 2px; }
+.issue { display: flex; gap: 10px; padding: 9px 8px; border-radius: 8px; transition: background var(--t-fast); }
+.issue:hover { background: var(--bg-3); }
+.issueIcon { flex: none; margin-top: 1px; }
+.issue[data-severity='blocking'] .issueIcon { color: var(--danger); }
+.issue[data-severity='advisory'] .issueIcon { color: var(--warning); }
+.issue[data-severity='info'] .issueIcon { color: var(--info); }
+.issueBody { min-width: 0; flex: 1; display: flex; flex-direction: column; gap: 4px; }
+.issueMessage { font-size: var(--fs-sm); color: var(--text-1); line-height: 1.45; }
+.issueFix { font-size: var(--fs-xs); color: var(--text-2); line-height: 1.45; overflow-wrap: anywhere; }
+.issueFix b { color: var(--text-1); font-weight: 600; margin-right: 4px; }
+.issueMeasured { font-size: var(--fs-2xs); font-family: var(--font-mono); color: var(--text-3); }
+.issueActions { display: flex; flex-wrap: wrap; gap: 4px; margin-top: 2px; }
+.issueActions > button, .issueActions > a {
+  display: inline-flex; align-items: center; gap: 4px; height: 22px; padding: 0 7px; border-radius: 6px;
+  font-size: var(--fs-2xs); color: var(--text-2); background: var(--bg-3); border: 1px solid var(--line-2); text-decoration: none;
+  transition: color var(--t-fast), border-color var(--t-fast);
+}
+.issueActions > button:hover, .issueActions > a:hover { color: var(--text-1); border-color: color-mix(in srgb, var(--ws) 45%, var(--line-3)); }
+.issueActions > .issueSteve { color: var(--ws); }
+.readinessOk { display: flex; gap: 12px; align-items: flex-start; padding: 14px 16px; font-size: var(--fs-sm); color: var(--text-2); line-height: 1.5; }
+.readinessOkIcon { flex: none; display: grid; place-items: center; width: 30px; height: 30px; border-radius: 50%; color: #062b17; background: var(--success); }
+
+/* A one-click fix: the code-rewrite engine writes it. */
+.issueActions > .issueQuick { color: var(--ws-ink); background: var(--ws); border-color: transparent; font-weight: 600; }
+.issueActions > .issueQuick:hover { color: var(--ws-ink); filter: brightness(1.08); }
+.inspectorProblemText { display: flex; flex-direction: column; gap: 4px; min-width: 0; }
+.inspectorProblemText small { font-size: var(--fs-xs); color: var(--text-2); }
+.inspectorProblemText small b { color: var(--text-1); margin-right: 4px; }
+.inspectorProblem[data-severity='info'] { background: var(--bg-3); }
+
+/* A board with no parts yet: the next step, centred over the (empty) views, which stay visible around it. */
+.emptyBoard { position: absolute; inset: 0; display: grid; place-items: center; pointer-events: none; z-index: 4; }
+.emptyBoard > * { pointer-events: auto; max-width: min(540px, calc(100% - 48px)); }
+
+/* The PCB view's picks (picks.ts) and selected parts, over tscircuit's canvas: drawn with the viewer's own transform. */
+.pcbOverlay { position: absolute; inset: 0; width: 100%; height: 100%; pointer-events: none; z-index: 5; overflow: visible; }
+.pcbOverlay :global(.steve-pcb-part) { fill: color-mix(in srgb, var(--ws) 10%, transparent); stroke: var(--ws); stroke-width: 1.6; filter: drop-shadow(0 0 6px var(--ws-glow)); }
+.pcbOverlay :global(.steve-pcb-pick) { fill: color-mix(in srgb, var(--ws) 18%, transparent); stroke: var(--ws); stroke-width: 2; filter: drop-shadow(0 0 6px var(--ws-glow)); }
+.pcbOverlay :global(.steve-pcb-copper) { stroke: color-mix(in srgb, var(--ws) 55%, transparent); stroke-linecap: round; filter: drop-shadow(0 0 5px var(--ws-glow)); }
+.pcbOverlay :global(.steve-pcb-board) { fill: none; stroke: var(--ws); stroke-width: 2.2; stroke-dasharray: 8 5; filter: drop-shadow(0 0 5px var(--ws-glow)); }
+
+/* A pick's inspector (PickInspector.tsx): names that select what they name. */
+.linkButton { padding: 0; border: 0; background: none; color: var(--ws); font: inherit; cursor: pointer; text-decoration: underline; text-decoration-color: color-mix(in srgb, var(--ws) 40%, transparent); text-underline-offset: 2px; }
+.linkButton:hover { text-decoration-color: var(--ws); }
+button.pin { cursor: pointer; transition: border-color var(--t-fast), color var(--t-fast); }
+button.pin:hover { color: var(--text-1); border-color: color-mix(in srgb, var(--ws) 45%, var(--line-3)); }
+
+/* ───── Routing (Routing.tsx): the badge over the board, its panel, and the status bar's clock ───── */
+.routeBadge {
+  position: relative; display: inline-flex; align-items: stretch; height: 26px; border-radius: 7px; overflow: hidden;
+  background: var(--bg-2); border: 1px solid var(--line-3); color: var(--text-2); font-size: var(--fs-xs); font-weight: 600; letter-spacing: 0.01em;
+}
+.routeBadge > button, .routeBadge > span > button { display: inline-flex; align-items: center; gap: 6px; height: 100%; padding: 0 9px; color: inherit; cursor: pointer; transition: background var(--t-fast), color var(--t-fast); }
+.routeBadge button:hover { background: var(--bg-3); }
+.routeBadge small { font-family: var(--font-mono); font-size: var(--fs-2xs); font-weight: 500; opacity: 0.8; }
+.routeBadge[data-tone='quiet'] .routeStatus { color: var(--text-3); font-weight: 550; }
+.routeDot { width: 6px; height: 6px; border-radius: 50%; border: 1.5px dashed currentColor; }
+.routeAction { border-left: 1px solid var(--line-2); color: var(--ws) !important; }
+.routeAction:hover { background: color-mix(in srgb, var(--ws) 12%, var(--bg-2)) !important; }
+.routeBadge[data-tone='running'] { color: var(--text-1); border-color: color-mix(in srgb, var(--ws) 50%, var(--line-3)); }
+.routeBadge[data-tone='ok'] { color: var(--success); border-color: color-mix(in srgb, var(--success) 40%, var(--line-3)); }
+.routeBadge[data-tone='warn'] { color: var(--warning); border-color: color-mix(in srgb, var(--warning) 45%, var(--line-3)); }
+.routeBadge[data-tone='danger'] { color: var(--danger); border-color: color-mix(in srgb, var(--danger) 45%, var(--line-3)); }
+.routeClock { font-family: var(--font-mono); font-size: var(--fs-2xs); font-weight: 500; color: var(--text-2); font-variant-numeric: tabular-nums; }
+.routeMeter { position: absolute; left: 0; bottom: 0; height: 2px; background: var(--ws); box-shadow: 0 0 6px var(--ws-glow); transition: width 1s linear; }
+
+.pcb > .routePanel { height: auto; }
+.routePanel {
+  position: absolute; top: 90px; right: 12px; z-index: 9; width: min(340px, calc(100% - 24px));
+  border-radius: var(--r-lg); background: var(--bg-2); border: 1px solid var(--line-3); box-shadow: var(--shadow-3);
+  transform-origin: 90% 0; overflow: hidden auto; max-height: calc(100% - 102px);
+}
+.pcb[data-compact] .routePanel { right: 8px; }
+.routePanel > header { display: flex; align-items: center; justify-content: space-between; gap: 10px; padding: 11px 10px 9px 14px; border-bottom: 1px solid var(--line-2); }
+.routePanel h3 { font-size: var(--fs-sm); font-weight: 650; color: var(--text-1); }
+.routePanel[data-status='routed'] h3 { color: var(--success); }
+.routePanel[data-status='incomplete'] h3 { color: var(--warning); }
+.routePanel[data-status='failed'] h3 { color: var(--danger); }
+.routeRunning, .routeResult { display: flex; flex-direction: column; gap: 10px; padding: 12px 14px 14px; font-size: var(--fs-xs); color: var(--text-2); line-height: 1.5; }
+.routeResult > p:first-child { font-size: var(--fs-sm); color: var(--text-1); font-weight: 600; }
+.routeTrack { position: relative; height: 4px; border-radius: 2px; background: var(--bg-3); overflow: hidden; }
+.routeTrack > span { position: absolute; inset: 0 auto 0 0; border-radius: 2px; background: var(--ws); transition: width 1s linear; }
+.routeTrack > span[data-indeterminate] { width: 30%; animation: routeSweep 1.6s ease-in-out infinite; }
+@keyframes routeSweep { from { left: -30%; } to { left: 100%; } }
+@media (prefers-reduced-motion: reduce) { .routeTrack > span[data-indeterminate] { animation: none; left: 0; width: 100%; opacity: 0.35; } }
+.routeFacts { display: grid; grid-template-columns: auto 1fr; gap: 3px 14px; margin: 0; }
+.routeFacts dt { color: var(--text-3); }
+.routeFacts dd { margin: 0; color: var(--text-1); font-variant-numeric: tabular-nums; }
+.routeNote { color: var(--text-3); }
+.routeMessage { padding: 8px 10px; border-radius: 8px; background: color-mix(in srgb, var(--warning) 10%, var(--bg-2)); color: var(--text-1); }
+.routePanel[data-status='failed'] .routeMessage { background: var(--danger-soft); }
+.routeStepsTitle { font-size: var(--fs-2xs); font-weight: 650; letter-spacing: 0.06em; text-transform: uppercase; color: var(--text-3); margin-bottom: -4px; }
+.routeSteps { margin: 0; padding-left: 16px; display: flex; flex-direction: column; gap: 4px; color: var(--text-1); }
+.routeStatusBar { display: inline-flex; align-items: center; gap: 6px; height: 20px; padding: 0 8px; border-radius: 5px; color: var(--text-1); font-size: var(--fs-xs); cursor: pointer; }
+.routeStatusBar:hover { background: var(--bg-3); }
+.routeStatusBar > span { font-family: var(--font-mono); font-size: var(--fs-2xs); color: var(--text-2); font-variant-numeric: tabular-nums; }
+.issueActions > button[data-route]:disabled { color: var(--text-2); background: var(--bg-3); border-color: var(--line-2); cursor: default; filter: none; }
+
+/* Readiness: the copper checks that wait for the routed board. */
+.afterRouting { list-style: none; margin: 0; padding: 0 16px 4px; display: flex; flex-direction: column; gap: 6px; }
+.afterRouting li { display: flex; align-items: center; gap: 8px; font-size: var(--fs-xs); color: var(--text-2); }
+.afterRouting li svg { color: var(--text-3); flex: none; }
+.afterRouting li small { margin-left: auto; color: var(--text-3); font-size: var(--fs-2xs); }

@@ -1,0 +1,6 @@
+Source: synchronized from STEVE Studio's Blender runtime.
+Runtime reused with project owner permission. Local adaptations are tracked in git.
+
+Local adaptations: cancellable Windows/Linux process supervision; no hosted job deadline; camera PNG renders at scene resolution; animation respects scene resolution instead of the hosted 1080p cap. CPU Cycles rendering matches upstream.
+
+Local save mode exports preview and native .blend without rendering inspection views or animation.

@@ -1,0 +1,84 @@
+/* Presentation view's player (PresentationBar.tsx), like the viewport's nav bar, at the bottom centre. */
+.bar {
+  position: absolute;
+  left: 50%;
+  bottom: calc(18px + env(safe-area-inset-bottom));
+  translate: -50% 0;
+  z-index: 6;
+  display: flex;
+  align-items: center;
+  gap: 2px;
+  width: max-content;
+  max-width: calc(100% - 24px);
+  padding: 4px;
+  border-radius: 12px;
+  background: var(--bg-overlay);
+  backdrop-filter: blur(16px) saturate(1.5);
+  border: 1px solid var(--line-3);
+  box-shadow: var(--shadow-3), var(--inset-hi);
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 360ms ease;
+}
+.bar[data-awake] { opacity: 1; pointer-events: auto; transition-duration: 140ms; }
+
+.button {
+  display: grid;
+  place-items: center;
+  width: 30px;
+  height: 30px;
+  border-radius: var(--r-sm);
+  color: var(--text-2);
+  transition: background var(--t-fast), color var(--t-fast);
+}
+.button:hover, .button[data-state='open'] { background: var(--bg-4); color: var(--text-1); }
+
+.scrub {
+  position: relative;
+  flex: 1 1 260px;
+  min-width: 90px;
+  width: 260px;
+  height: 30px;
+  margin: 0 6px;
+  cursor: pointer;
+  touch-action: none;
+  outline: none;
+}
+.rail { position: absolute; left: 0; right: 0; top: 50%; height: 4px; margin-top: -2px; border-radius: 2px; background: var(--line-3); overflow: hidden; }
+.fill { position: absolute; left: 0; top: 0; bottom: 0; background: var(--ws); }
+.thumb {
+  position: absolute;
+  top: 50%;
+  width: 12px;
+  height: 12px;
+  margin: -6px 0 0 -6px;
+  border-radius: 50%;
+  background: var(--text-1);
+  box-shadow: 0 1px 3px rgb(0 0 0 / 0.4);
+}
+.scrub:focus-visible .thumb { box-shadow: 0 0 0 3px var(--ws-glow); }
+
+.time { min-width: 76px; font-size: var(--fs-sm); font-variant-numeric: tabular-nums; color: var(--text-2); white-space: nowrap; }
+.take { max-width: 160px; }
+.speed {
+  min-width: 34px;
+  height: 30px;
+  padding: 0 6px;
+  border-radius: var(--r-sm);
+  font-size: var(--fs-sm);
+  font-weight: 600;
+  color: var(--text-2);
+}
+.speed:hover, .speed[data-state='open'] { background: var(--bg-4); color: var(--text-1); }
+.record svg { color: #ff5d5d; }
+.sep { width: 1px; height: 18px; margin: 0 3px; background: var(--line-2); }
+
+/* Phones and narrow windows: the scrubber gives way first, then the time. */
+@media (max-width: 560px) {
+  .scrub { width: 120px; flex-basis: 80px; margin: 0 2px; }
+  .time { min-width: 0; font-size: var(--fs-xs); }
+  .take { max-width: 96px; }
+}
+@media (max-width: 400px) {
+  .time { display: none; }
+}

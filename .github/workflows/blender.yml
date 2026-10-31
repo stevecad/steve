@@ -1,0 +1,61 @@
+name: Local Blender acceptance
+
+on:
+  workflow_dispatch:
+  pull_request:
+    paths:
+      - '.github/workflows/blender.yml'
+      - 'src/steve_desktop/**'
+      - 'vendor/blender/**'
+      - 'checks/check_local_blender.py'
+      - 'checks/check_blender_*.py'
+      - 'checks/check_studio_navigation.py'
+      - 'cad-web/**'
+      - 'tests/test_blender_runtime.py'
+
+permissions:
+  contents: read
+
+jobs:
+  linux-blender:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@v7
+      - uses: actions/setup-python@v7
+        with:
+          python-version: '3.13.14'
+      - uses: actions/setup-node@v7
+        with:
+          node-version: '24'
+          cache: npm
+          cache-dependency-path: cad-web/package-lock.json
+      - name: Install Linux runtime dependencies
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y xvfb xauth dbus-x11 gnome-keyring libegl1 libgl1 libopengl0 libxrender1 libxi6 libxfixes3 libxkbcommon0 libsm6 libice6 libxxf86vm1 libwayland-client0 libwayland-cursor0 libwayland-egl1 libnss3 libasound2t64 libxkbcommon-x11-0 libxcb-cursor0 libxcb-icccm4 libxcb-keysyms1 libxcb-shape0 libxcb-xinerama0 libxcomposite1 libxdamage1 libxrandr2 libxtst6 libxss1
+          python -m pip install -r packaging/requirements-linux.lock
+          python -m pip install --no-deps -e .
+      - name: Test runtime discovery and process integration
+        run: python tools/linux_session.py -- python -m unittest tests.test_blender_runtime tests.test_cad_process
+      - name: Verify official Blender download and actual local workflow
+        run: python tools/linux_session.py -- python checks/check_local_blender.py --install build/blender --output build/verification/blender
+      - name: Build and exercise the Blender UI and native downloads
+        env:
+          PLAYWRIGHT_BROWSERS_PATH: ${{ github.workspace }}/build/playwright
+          STEVE_BLENDER: ${{ github.workspace }}/build/blender/blender-4.5.9-linux-x64/blender
+        run: |
+          npm ci --prefix cad-web --no-audit --no-fund
+          npm run --prefix cad-web build
+          python -m pip install playwright==1.58.0
+          python -m playwright install --with-deps chromium
+          python tools/linux_session.py -- python checks/check_blender_ui.py --output build/verification/blender/ui
+          python tools/linux_session.py -- python checks/check_blender_desktop_downloads.py --output build/verification/blender/native-downloads
+          python tools/linux_session.py -- python checks/check_studio_navigation.py --output build/verification/blender/studio-navigation
+      - uses: actions/upload-artifact@v7
+        if: always()
+        with:
+          name: Blender-linux-verification
+          path: build/verification/blender
+          if-no-files-found: warn
+          retention-days: 2

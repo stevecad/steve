@@ -1,0 +1,14 @@
+Steve 0.3.4
+
+- Fix false diagonal cut lines in flat-pattern previews after rebuilding forms.
+- Correct reported volume, center and inertia for supported polynomial spline extrusions.
+- Preserve parent linked-document caches, aliases and folders across nested builds.
+- Hide unavailable hosted document branch commands in the local app.
+
+Checked native CAD command workflows, independent measurement calculations,
+component parallel-build geometry/reference/export parity, failure and cancellation.
+
+Linked documents and dynamic Python remain serial; supported declarative components
+use adaptive fanout. General rational NURBS moments retain kernel estimates.
+Windows installer is not Authenticode signed. Update manifest is Ed25519 signed.
+Private GitHub access is required for this release channel.

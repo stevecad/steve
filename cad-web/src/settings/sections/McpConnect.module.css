@@ -1,0 +1,38 @@
+.body { display: flex; flex-direction: column; gap: 16px; padding-bottom: 4px; }
+.body h4 { margin: 0 0 6px; font-size: var(--fs-2xs); color: var(--text-3); }
+
+.url, .code {
+  display: flex; align-items: center; gap: 8px; padding: 6px 6px 6px 10px; border-radius: 8px;
+  border: 1px solid var(--line-2); background: var(--bg-2);
+}
+.url code, .code code { flex: 1; min-width: 0; overflow-x: auto; white-space: nowrap; font-family: var(--font-mono); font-size: var(--fs-sm); color: var(--text-1); }
+.url { border-color: color-mix(in srgb, var(--ws) 35%, var(--line-2)); }
+.code { margin-top: 6px; }
+
+.copy {
+  display: inline-flex; align-items: center; gap: 5px; flex-shrink: 0; padding: 4px 8px; border-radius: 6px;
+  border: 1px solid var(--line-2); background: var(--bg-3); color: var(--text-2); font-size: var(--fs-xs); cursor: pointer;
+}
+.copy:hover { color: var(--text-1); border-color: var(--line-3); }
+.copy[data-copied] { color: var(--ws); border-color: color-mix(in srgb, var(--ws) 40%, transparent); }
+
+
+.steps { margin: 12px 0 0; padding-left: 20px; display: flex; flex-direction: column; gap: 10px; color: var(--text-2); font-size: var(--fs-sm); line-height: 1.5; }
+.steps b { color: var(--text-1); font-weight: 600; }
+.steps kbd, .inline { font-family: var(--font-mono); font-size: var(--fs-xs); padding: 1px 5px; border-radius: 4px; background: var(--bg-3); border: 1px solid var(--line-2); color: var(--text-1); }
+
+.notes { display: flex; flex-direction: column; gap: 6px; padding-top: 12px; border-top: 1px solid var(--line-1); }
+.notes p { margin: 0; color: var(--text-3); font-size: var(--fs-xs); line-height: 1.5; }
+.notes b { color: var(--text-2); font-weight: 600; }
+
+/* Tablets and desktops (the Settings dialog fills the window there): larger type and a little more room. */
+:global(html:not([data-ui='phone'])) .body h4 { font-size: var(--fs-xs); }
+:global(html:not([data-ui='phone'])) .url code, :global(html:not([data-ui='phone'])) .code code { font-size: var(--fs-md); }
+:global(html:not([data-ui='phone'])) .url, :global(html:not([data-ui='phone'])) .code { padding: 8px 8px 8px 12px; }
+:global(html:not([data-ui='phone'])) .copy { padding: 5px 10px; font-size: var(--fs-sm); }
+:global(html:not([data-ui='phone'])) .steps { font-size: var(--fs-md); line-height: 1.55; }
+:global(html:not([data-ui='phone'])) .notes { gap: 8px; padding-top: 16px; }
+:global(html:not([data-ui='phone'])) .notes p { font-size: var(--fs-sm); line-height: 1.55; }
+@media (min-width: 900px) {
+  :global(html:not([data-ui='phone'])) .body { gap: 20px; }
+}

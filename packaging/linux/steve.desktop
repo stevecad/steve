@@ -1,0 +1,9 @@
+[Desktop Entry]
+Type=Application
+Name=Steve
+Comment=Local desktop CAD
+Exec=Steve
+Icon=steve
+Terminal=false
+Categories=Graphics;Engineering;
+StartupWMClass=Steve

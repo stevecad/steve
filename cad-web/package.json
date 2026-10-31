@@ -1,0 +1,59 @@
+{
+  "name": "steve-cad",
+  "version": "0.2.0",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "dev": "vite --host 0.0.0.0",
+    "build": "tsc -b && vite build",
+    "typecheck": "tsc -b --pretty"
+  },
+  "dependencies": {
+    "@babel/parser": "^7.29.9",
+    "@codemirror/autocomplete": "6.20.3",
+    "@codemirror/commands": "6.11.1",
+    "@codemirror/lang-javascript": "^6.2.5",
+    "@codemirror/lang-python": "6.2.1",
+    "@codemirror/language": "6.12.4",
+    "@codemirror/lint": "6.9.7",
+    "@codemirror/merge": "6.12.2",
+    "@codemirror/search": "6.7.2",
+    "@codemirror/state": "6.7.6",
+    "@codemirror/view": "6.43.13",
+    "@fontsource-variable/inter": "5.3.0",
+    "@fontsource-variable/jetbrains-mono": "5.3.0",
+    "@lezer/highlight": "1.2.5",
+    "@react-three/drei": "10.7.9",
+    "@react-three/fiber": "9.8.1",
+    "@tscircuit/pcb-viewer": "^1.11.416",
+    "@tscircuit/props": "^0.0.685",
+    "camera-controls": "3.1.2",
+    "circuit-json": "^0.0.514",
+    "circuit-to-svg": "^0.0.441",
+    "clsx": "2.1.1",
+    "cmdk": "1.1.1",
+    "dompurify": "^3.4.16",
+    "lucide-react": "1.49.0",
+    "mediabunny": "1.61.0",
+    "motion": "13.4.6",
+    "oidc-client-ts": "3.5.0",
+    "radix-ui": "1.6.7",
+    "react": "19.3.0",
+    "react-dom": "19.3.0",
+    "schematic-symbols": "^0.0.248",
+    "three": "0.186.1",
+    "zod-to-json-schema": "^3.25.2",
+    "zustand": "5.0.15"
+  },
+  "devDependencies": {
+    "@types/react": "19.3.0",
+    "@types/react-dom": "19.3.0",
+    "@types/three": "0.186.0",
+    "@vitejs/plugin-react": "6.1.1",
+    "typescript": "7.0.2",
+    "vite": "8.3.1"
+  },
+  "overrides": {
+    "typescript": "$typescript"
+  }
+}

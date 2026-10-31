@@ -1,0 +1,37 @@
+.icon { display: grid; place-items: center; color: var(--ws); }
+.body { display: flex; flex-direction: column; gap: 14px; padding-bottom: 4px; }
+.field { display: flex; flex-direction: column; gap: 6px; font-size: var(--fs-xs); color: var(--text-2); font-weight: 500; }
+.field em { font-style: normal; color: var(--text-4); font-weight: 400; }
+.text { min-height: 0; height: auto; padding: 8px 10px; resize: vertical; font: inherit; font-size: var(--fs-sm); line-height: 1.5; color: var(--text-1); }
+
+.shot { display: flex; flex-wrap: wrap; gap: 8px; }
+.preview { position: relative; border-radius: 8px; overflow: hidden; border: 1px solid var(--line-2); max-width: 100%; }
+.preview img { display: block; max-width: 100%; max-height: 180px; }
+.actions { position: absolute; top: 6px; right: 6px; display: flex; gap: 4px; }
+.action {
+  display: grid; place-items: center; width: 22px; height: 22px; border-radius: 6px;
+  background: color-mix(in srgb, var(--bg-1) 80%, transparent); color: var(--text-1); border: 1px solid var(--line-2); cursor: pointer;
+}
+
+.disclosure { border: 1px solid var(--line-1); border-radius: 8px; padding: 8px 10px; background: var(--bg-2); font-size: var(--fs-xs); color: var(--text-2); }
+.disclosure summary { cursor: pointer; color: var(--text-1); font-weight: 500; }
+.facts { display: grid; gap: 4px; margin: 10px 0 6px; }
+.facts div { display: grid; grid-template-columns: 140px 1fr; gap: 8px; }
+.facts dt { color: var(--text-3); }
+.facts dd { margin: 0; color: var(--text-1); word-break: break-word; }
+.recent { margin: 4px 0 8px; max-height: 120px; overflow: auto; padding: 6px 8px; border-radius: 6px; background: var(--bg-1);
+  font-family: var(--font-mono); font-size: var(--fs-2xs); white-space: pre-wrap; word-break: break-word; }
+.muted { margin: 4px 0; color: var(--text-3); }
+
+.error { display: flex; align-items: flex-start; gap: 8px; padding: 8px 10px; border-radius: 8px; font-size: var(--fs-sm);
+  color: var(--danger); background: color-mix(in srgb, var(--danger) 10%, transparent); border: 1px solid color-mix(in srgb, var(--danger) 35%, transparent); }
+.error span { flex: 1; user-select: text; }
+
+.filed { display: flex; gap: 12px; align-items: flex-start; padding: 8px 2px; color: var(--ws); }
+.filed div { display: flex; flex-direction: column; gap: 6px; color: var(--text-1); }
+.link { display: inline-flex; align-items: center; gap: 4px; color: var(--ws); font-size: var(--fs-sm); }
+
+.check { display: flex; align-items: center; gap: 8px; margin: 6px 0; color: var(--text-1); cursor: pointer; }
+.log { margin: 4px 0 6px; }
+.log summary { cursor: pointer; color: var(--text-2); font-weight: 400; }
+.log .recent { max-height: 220px; }

@@ -1,0 +1,22 @@
+.resizer {
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  width: 7px;
+  z-index: 5;
+  cursor: col-resize;
+  touch-action: none;
+}
+.resizer[data-side='left'] { right: -3px; }
+.resizer[data-side='right'] { left: -3px; }
+.resizer::after {
+  content: '';
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  left: 3px;
+  width: 1px;
+  background: transparent;
+  transition: background var(--t-base), box-shadow var(--t-base);
+}
+.resizer:hover::after, .resizer:active::after { background: var(--ws); box-shadow: 0 0 8px var(--ws-glow); }

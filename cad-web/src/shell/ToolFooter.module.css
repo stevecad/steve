@@ -1,0 +1,9 @@
+/* The shared OK/Cancel footer of right-pane tools (ToolFooter.tsx). */
+.footer {
+  position: sticky; bottom: 0; z-index: 2; display: flex; align-items: center; gap: 6px; padding: 10px 12px;
+  border-top: 1px solid var(--line-2); background: var(--bg-1); box-shadow: 0 -8px 16px -12px rgb(0 0 0 / 0.5);
+}
+.footer[data-inline] { position: static; padding: 0; border-top: 0; background: none; box-shadow: none; }
+.extra { display: flex; align-items: center; gap: 4px; min-width: 0; }
+.spacer { flex: 1; }
+.disabled { display: inline-flex; }

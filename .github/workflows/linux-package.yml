@@ -1,0 +1,91 @@
+name: Linux desktop package
+
+on:
+  workflow_call:
+    inputs:
+      source-ref:
+        type: string
+        required: false
+        default: ''
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  linux-x64:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 30
+    steps:
+      - uses: actions/checkout@v7
+        with:
+          ref: ${{ inputs.source-ref || github.sha }}
+          persist-credentials: false
+      - name: Reserve disk for two frozen CAD runtimes
+        # The update test keeps both complete Qt/OCP versions plus their AppImages.
+        # Remove unrelated SDKs only on this disposable GitHub-hosted Ubuntu runner.
+        run: |
+          df -h /
+          sudo rm -rf /usr/local/lib/android /usr/share/dotnet /opt/ghc
+          df -h /
+      - uses: actions/setup-python@v7
+        with:
+          python-version: '3.13.14'
+      - uses: actions/setup-node@v7
+        with:
+          node-version: '24'
+          cache: npm
+          cache-dependency-path: cad-web/package-lock.json
+      - name: Install desktop build dependencies
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y xvfb xauth dbus-x11 gnome-keyring desktop-file-utils libegl1 libgl1 libopengl0 libnss3 libasound2t64 libxkbcommon-x11-0 libxcb-cursor0 libxcb-icccm4 libxcb-keysyms1 libxcb-shape0 libxcb-xinerama0 libxcomposite1 libxdamage1 libxrandr2 libxtst6 libxss1
+      - name: Install pinned Python dependencies
+        run: |
+          python -m pip install --no-cache-dir -r packaging/requirements-linux.lock
+          python -m pip install --no-cache-dir --no-deps -e .
+      - name: Install frontend dependencies
+        run: npm ci --no-audit --no-fund
+        working-directory: cad-web
+      - name: Verify Linux services and CAD workers
+        run: python tools/linux_session.py -- python -m unittest tests.test_launch_services tests.test_local_mcp tests.test_hot_worker tests.test_cad_process tests.test_linux_packaging tests.test_linux_updates tests.test_update_channel_keys tests.test_windows_update_helper tests.test_chat_images tests.test_runtime tests.test_features tests.test_studio_sync
+      - name: Build and verify frozen desktop
+        run: python tools/build.py --headless
+      - name: Verify frozen Blender execution
+        run: |
+          python tools/linux_session.py -- python checks/check_local_blender.py --install build/blender --output build/verification/blender
+          STEVE_BLENDER="$PWD/build/blender/blender-4.5.9-linux-x64/blender" python tools/linux_session.py -- dist/Steve/Steve --blender-smoke build/verification/blender-frozen
+      - name: Build and verify AppImage and tarball
+        run: python tools/build_appimage.py --headless
+      - name: Build older package for automatic update verification
+        run: python tools/build_update_fixture.py --version 0.0.0 --appimage
+      - name: Verify signed automatic upgrades and rollback
+        run: |
+          steve_old_images=(build/update-fixture/dist/linux/*.AppImage)
+          steve_new_bundles=(dist/linux/*.tar.gz)
+          python tools/linux_session.py -- python checks/check_linux_updates.py --old-package build/update-fixture/dist/Steve --old-appimage "${steve_old_images[0]}" --new-bundle "${steve_new_bundles[0]}"
+      - name: Verify AppImage on a clean Ubuntu runtime
+        run: |
+          docker build -f packaging/linux/Dockerfile.runtime-check -t steve-linux-runtime-check:local packaging/linux
+          steve_images=(dist/linux/*.AppImage)
+          docker run --rm --init --mount type=bind,src="${PWD}/${steve_images[0]}",dst=/opt/Steve.AppImage,readonly --mount type=bind,src="${PWD}/tools/linux_session.py",dst=/opt/linux_session.py,readonly steve-linux-runtime-check:local > build/verification/clean-ubuntu-appimage.log 2>&1
+      - name: Index unsigned artifacts for local signing
+        run: python tools/package_release.py --platform linux-x64 --output dist/linux
+      - uses: actions/upload-artifact@v7
+        with:
+          name: Steve-linux-x86_64
+          path: dist/linux/*
+          if-no-files-found: error
+          compression-level: 0
+          retention-days: 2
+          overwrite: true
+      - uses: actions/upload-artifact@v7
+        if: always()
+        with:
+          name: Steve-linux-verification
+          path: |
+            build/verification/*
+            build/update-fixture/build/verification/*
+          if-no-files-found: warn
+          retention-days: 2
+          overwrite: true

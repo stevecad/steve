@@ -1,0 +1,18 @@
+# STEVE sketch solver -- multi-stage snippet for runtime/Dockerfile (build context: repo root).
+#
+# 1) Paste this stage above the runtime stage. It builds the CPython 3.12 x86_64 wheel of the
+#    `steve_sketch` module from solver/ (same C++ core and flags as the WebAssembly build) and
+#    smoke-tests it.
+FROM python:3.12-slim AS sketch-solver
+RUN apt-get update \
+ && apt-get install -y --no-install-recommends g++ libeigen3-dev libboost-dev \
+ && rm -rf /var/lib/apt/lists/*
+COPY solver/ /build/solver/
+RUN pip wheel --no-cache-dir --no-deps -w /wheels /build/solver/python \
+ && pip install --no-cache-dir /wheels/steve_sketch-*.whl \
+ && python -c "import json, steve_sketch; r = json.loads(steve_sketch.solve('{\"entities\": []}')); assert r['status'] == 'ok', r; print(steve_sketch.build_info)"
+
+# 2) In the runtime stage (FROM python:3.12-slim ...), before the USER line, add these two lines:
+#
+# COPY --from=sketch-solver /wheels/ /tmp/sketch-wheels/
+# RUN pip install --no-cache-dir /tmp/sketch-wheels/steve_sketch-*.whl && rm -rf /tmp/sketch-wheels

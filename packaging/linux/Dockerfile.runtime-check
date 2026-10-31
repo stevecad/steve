@@ -1,0 +1,7 @@
+# Runtime verification only: this image has no development environment or CAD packages.
+FROM ubuntu:24.04
+RUN apt-get update && DEBIAN_FRONTEND=noninteractive apt-get install -y --no-install-recommends python3 xvfb xauth dbus-x11 gnome-keyring libegl1 libgl1 libopengl0 libnss3 libasound2t64 libxkbcommon-x11-0 libxcb-cursor0 libxcb-icccm4 libxcb-keysyms1 libxcb-shape0 libxcb-xinerama0 libxcomposite1 libxdamage1 libxrandr2 libxtst6 libxss1 && rm -rf /var/lib/apt/lists/*
+RUN useradd --create-home --uid 10001 stevecheck
+USER stevecheck
+ENV APPIMAGE_EXTRACT_AND_RUN=1
+CMD ["python3", "/opt/linux_session.py", "--", "/opt/Steve.AppImage", "--smoke-test"]

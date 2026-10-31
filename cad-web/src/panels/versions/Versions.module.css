@@ -1,0 +1,105 @@
+.panel { position: relative; display: flex; flex-direction: column; height: 100%; min-height: 0; }
+.empty { display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 8px; height: 100%; padding: 28px; text-align: center; color: var(--text-3); font-size: var(--fs-sm); line-height: 1.5; }
+.empty h3 { font-size: var(--fs-md); color: var(--text-2); }
+.scroll { flex: 1; min-height: 0; overflow: auto; padding-bottom: 20px; }
+.loading { display: grid; place-items: center; padding: 18px; }
+.hint { padding: 8px 14px; font-size: var(--fs-xs); color: var(--text-3); line-height: 1.5; }
+
+.current {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin: 10px;
+  padding: 10px 10px 10px 12px;
+  border-radius: var(--r-lg);
+  background: linear-gradient(135deg, color-mix(in srgb, var(--branch) 14%, transparent), transparent 70%), var(--bg-2);
+  border: 1px solid color-mix(in srgb, var(--branch) 32%, var(--line-2));
+  box-shadow: var(--inset-hi);
+}
+.currentIcon { display: grid; place-items: center; width: 30px; height: 30px; border-radius: 9px; color: var(--branch); background: color-mix(in srgb, var(--branch) 16%, var(--bg-3)); }
+.currentText { flex: 1; min-width: 0; }
+.currentName { font-family: var(--font-mono); font-size: 13px; font-weight: 600; color: var(--text-1); overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.currentMeta { font-size: var(--fs-xs); color: var(--text-3); font-variant-numeric: tabular-nums; }
+.dirty { color: var(--warning); }
+.currentActions { display: flex; gap: 2px; }
+
+.section { padding: 4px 0 6px; }
+.sectionHead { display: flex; align-items: center; gap: 8px; padding: 8px 14px 6px; }
+.count { font-size: var(--fs-2xs); color: var(--text-4); }
+
+.branchRow { position: relative; display: flex; align-items: center; margin: 0 6px; border-radius: 7px; transition: background var(--t-fast); }
+.branchRow:hover { background: var(--bg-3); }
+.branchRow[data-active] { background: color-mix(in srgb, var(--branch) 12%, transparent); }
+.branchMain { flex: 1; min-width: 0; display: flex; align-items: center; gap: 10px; min-height: 38px; padding: 4px 8px; text-align: left; }
+.branchText { display: flex; flex-direction: column; min-width: 0; flex: 1; }
+.branchMeta { display: flex; align-items: center; gap: 7px; font-size: 10.5px; color: var(--text-4); font-variant-numeric: tabular-nums; }
+.branchMeta b { font-weight: 600; color: var(--success); }
+.branchMeta i { font-style: normal; color: var(--warning); }
+.branchMain:disabled { cursor: default; }
+.branchDot { width: 9px; height: 9px; border-radius: 50%; flex-shrink: 0; background: var(--branch); box-shadow: 0 0 0 3px color-mix(in srgb, var(--branch) 18%, transparent); }
+.branchName { font-family: var(--font-mono); font-size: 12px; color: var(--text-1); overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.branchRow[data-active] .branchName { font-weight: 600; }
+.aheadBehind { display: inline-flex; gap: 5px; font-size: 10.5px; font-variant-numeric: tabular-nums; }
+.aheadBehind b { font-weight: 600; color: var(--success); }
+.aheadBehind i { font-style: normal; color: var(--warning); }
+.merged { font-size: var(--fs-2xs); letter-spacing: 0.05em; text-transform: uppercase; color: var(--text-3); border: 1px solid var(--line-2); border-radius: 4px; padding: 0 4px; }
+.branchTime { margin-left: auto; font-size: var(--fs-2xs); color: var(--text-4); white-space: nowrap; }
+.branchActions { display: flex; gap: 1px; padding-right: 4px; opacity: 0; transition: opacity var(--t-fast); }
+.branchRow:hover .branchActions { opacity: 1; }
+.rowAction { width: 22px; height: 22px; display: grid; place-items: center; border-radius: 5px; color: var(--text-3); }
+.rowAction:hover { background: var(--bg-5); color: var(--text-1); }
+
+.graph { position: relative; margin: 2px 6px 0; }
+.graphSvg { position: absolute; left: 0; top: 0; overflow: visible; pointer-events: none; z-index: 1; }
+.pulse { animation: pulse-dot 1.6s var(--ease-in-out) infinite; transform-box: fill-box; transform-origin: center; }
+.node {
+  position: absolute;
+  left: 0;
+  right: 0;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  gap: 2px;
+  padding-right: 8px;
+  border-radius: 8px;
+  text-align: left;
+  transition: background var(--t-fast);
+}
+.node:hover { background: var(--bg-3); }
+.node[data-selected] { background: var(--ws-soft); }
+.node[data-current] .nodeMessage { color: var(--text-1); font-weight: 600; }
+.nodeTitle { display: flex; align-items: center; gap: 5px; min-width: 0; color: var(--text-2); }
+.nodeTitle svg { flex-shrink: 0; color: var(--text-3); }
+.nodeMessage { font-size: var(--fs-sm); overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.nodeMeta { display: flex; align-items: center; gap: 7px; min-width: 0; font-size: 10.5px; color: var(--text-4); font-variant-numeric: tabular-nums; white-space: nowrap; overflow: hidden; }
+.nodeMeta > span { flex-shrink: 0; }
+.nodeMeta > .nodeBranch { flex-shrink: 1; min-width: 0; overflow: hidden; text-overflow: ellipsis; }
+.nodeBranch { font-family: var(--font-mono); font-weight: 600; }
+.headTag { font-size: 9px; letter-spacing: 0.06em; text-transform: uppercase; border: 1px solid; border-radius: 4px; padding: 0 4px; }
+
+.detail {
+  position: relative;
+  margin: 0 8px 8px;
+  padding: 10px 12px;
+  border-radius: var(--r-lg);
+  background: var(--bg-overlay);
+  backdrop-filter: blur(14px);
+  border: 1px solid var(--line-3);
+  box-shadow: var(--shadow-3);
+}
+.detailHead { display: flex; align-items: center; gap: 8px; font-size: var(--fs-sm); }
+.detailHead b { font-family: var(--font-mono); font-weight: 600; }
+.detailMessage { margin: 6px 0 8px; font-size: var(--fs-sm); color: var(--text-2); }
+.detailActions { display: flex; flex-wrap: wrap; gap: 4px; margin-left: -6px; }
+
+.preview { display: flex; flex-direction: column; min-height: 0; border-top: 1px solid var(--line-2); background: var(--code-bg); overflow: hidden; }
+.previewHead { display: flex; align-items: center; gap: 4px; padding: 4px 6px 4px 12px; border-bottom: 1px solid var(--line-1); font-size: 11px; color: var(--text-3); }
+.previewHead .mono { flex: 1; }
+.preview pre { flex: 1; margin: 0; padding: 10px 12px; overflow: auto; font-family: var(--font-mono); font-size: 11px; line-height: 1.6; color: var(--text-2); user-select: text; }
+
+.node[data-viewing] { background: color-mix(in srgb, var(--iris) 10%, transparent); }
+.viewingIcon { flex-shrink: 0; color: var(--iris); }
+/* Who saved a revision or started a branch, and how (teams: "Alice via Claude (MCP)"). */
+.nodeMeta > .nodeBy { flex-shrink: 1; min-width: 0; overflow: hidden; text-overflow: ellipsis; color: var(--text-3); }
+.branchBy { min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; color: var(--text-3); }
+.detailBy { margin: -4px 0 8px; font-size: var(--fs-xs); color: var(--text-3); line-height: 1.45; }

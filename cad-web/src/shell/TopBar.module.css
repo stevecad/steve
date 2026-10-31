@@ -1,0 +1,334 @@
+.topbar {
+  position: relative;
+  z-index: 20;
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  padding: 0 10px 0 12px;
+  background: var(--bg-1);
+  border-bottom: 1px solid var(--line-1);
+}
+
+.brand { display: flex; align-items: center; gap: 9px; padding-right: 4px; }
+.brand img { width: 22px; height: 22px; border-radius: 5px; box-shadow: 0 0 0 1px var(--line-2); }
+.wordmark { font-size: 12.5px; font-weight: 700; letter-spacing: 0.2em; color: var(--text-1); white-space: nowrap; display: inline-grid; }
+/* The invisible full word sets the width; the visible letters (which may lose their T) sit over it, left-aligned. */
+.wordmark > .wordmarkSizer, .wordmark > .wordmarkText { grid-area: 1 / 1; justify-self: start; }
+.wordmarkSizer { visibility: hidden; }
+/* The T that drops out in Electronics (STEVE → SEVE): its box shrinks to nothing while the letter falls away. */
+.wordmarkT { display: inline-block; vertical-align: top; white-space: nowrap; }
+
+.fileMenu {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  height: 30px;
+  padding: 0 7px 0 10px;
+  margin-right: -8px;
+  border-radius: var(--r-xs);
+  font-size: var(--fs-sm);
+  font-weight: 600;
+  color: var(--text-1);
+  transition: background var(--t-fast);
+}
+.fileMenu:hover, .fileMenu[data-state='open'] { background: var(--bg-3); }
+.fileList { min-width: 230px; }
+.saveButton { position: relative; display: grid; place-items: center; width: 30px; height: 30px; border-radius: var(--r-xs); color: var(--text-2); transition: background var(--t-fast), color var(--t-fast); }
+.saveButton:hover:not([aria-disabled='true']) { background: var(--bg-3); color: var(--text-1); }
+.saveButton[aria-disabled='true'] { color: var(--text-4); cursor: default; }
+.saveButton[data-dirty]:not([aria-disabled='true']) { color: var(--text-1); }
+.saveButtonDot { position: absolute; top: 5px; right: 5px; width: 7px; height: 7px; border-radius: 50%; background: var(--warning); box-shadow: 0 0 0 2px var(--bg-1); }
+
+.workspaceMenu {
+  display: flex;
+  align-items: center;
+  gap: 7px;
+  height: 30px;
+  padding: 0 8px 0 10px;
+  border-radius: var(--r-xs);
+  font-size: var(--fs-sm);
+  font-weight: 600;
+  color: var(--text-1);
+  transition: background var(--t-fast);
+}
+.workspaceMenu > svg:first-child { color: var(--ws); }
+.workspaceMenu:hover, .workspaceMenu[data-state='open'] { background: var(--bg-3); }
+.chevron { color: var(--text-3); transition: transform var(--t-fast); }
+.workspaceMenu[data-state='open'] .chevron { transform: rotate(180deg); }
+.workspaceList { min-width: 280px; display: flex; flex-direction: column; gap: 2px; }
+/* Two lines per workspace (name and what it's for): the row grows to them instead of the menu's one-line height. */
+.workspaceList > [role^='menuitem'] { height: auto; min-height: 46px; padding-block: 7px; align-items: center; }
+.workspaceItem { display: flex; flex-direction: column; gap: 3px; min-width: 0; line-height: 1.25; }
+.workspaceItem b { font-weight: 600; color: var(--text-1); }
+.workspaceItem small { font-size: var(--fs-2xs); color: var(--text-3); white-space: nowrap; }
+
+/* The Design tools (Solid, Sheet metal, ...): a menu beside the workspace's, quieter than it. */
+.toolMenu {
+  display: flex;
+  align-items: center;
+  gap: 5px;
+  height: 28px;
+  padding: 0 6px 0 9px;
+  margin-left: -10px;
+  border-radius: var(--r-xs);
+  font-size: var(--fs-sm);
+  font-weight: 500;
+  white-space: nowrap;
+  color: var(--text-2);
+  transition: background var(--t-fast), color var(--t-fast);
+}
+button.toolMenu:hover, .toolMenu[data-state='open'] { background: var(--bg-3); color: var(--text-1); }
+.toolMenu[data-state='open'] .chevron { transform: rotate(180deg); }
+.toolMenu[data-context='sketch'] { padding: 0 10px; color: #63b4ff; box-shadow: inset 0 -2px 0 #63b4ff; border-radius: 0; height: 100%; margin-left: -6px; }
+:root[data-theme='light'] .toolMenu[data-context='sketch'] { color: #1d6fd6; box-shadow: inset 0 -2px 0 #1d6fd6; }
+
+.divider { width: 1px; height: 20px; background: var(--line-2); }
+
+.title { display: flex; align-items: center; gap: 8px; min-width: 0; }
+.kindIcon { color: var(--text-3); }
+.noDoc { color: var(--text-3); font-size: var(--fs-md); }
+.name {
+  max-width: 260px;
+  min-width: 0;
+  flex-shrink: 1;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  padding: 3px 6px;
+  margin: 0 -6px;
+  border-radius: var(--r-sm);
+  font-size: var(--fs-lg);
+  font-weight: 600;
+  letter-spacing: -0.01em;
+  color: var(--text-1);
+  transition: background var(--t-fast);
+}
+.name:hover { background: var(--bg-3); }
+.nameInput {
+  width: 260px;
+  height: 26px;
+  padding: 0 6px;
+  margin: 0 -6px;
+  border-radius: var(--r-sm);
+  border: 1px solid color-mix(in srgb, var(--ws) 60%, transparent);
+  background: var(--bg-0);
+  box-shadow: 0 0 0 3px var(--ws-soft);
+  font-size: var(--fs-lg);
+  font-weight: 600;
+}
+.kind {
+  font-size: var(--fs-2xs);
+  font-weight: 650;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--text-3);
+  padding: 2px 6px;
+  border-radius: 5px;
+  border: 1px solid var(--line-2);
+}
+
+/* The chip keeps its words; only a narrow tab strip drops them (the @container tabs rules below), so the name keeps its characters. */
+.saveState { flex-shrink: 0; min-width: 20px; display: inline-flex; align-items: center; gap: 6px; height: 22px; padding: 0 6px; margin-left: -3px; border-radius: var(--r-xs); font-size: var(--fs-xs); color: var(--text-3); white-space: nowrap; overflow: hidden; cursor: default; transition: background var(--t-fast); }
+.saveState[data-tone='dirty'] { cursor: pointer; }
+.saveLabel { display: inline-flex; min-width: 0; overflow: hidden; }
+.saveState[data-tone='dirty']:hover { background: var(--warning-soft); }
+.saveDot { width: 6px; height: 6px; border-radius: 50%; background: var(--success); transition: background var(--t-base); }
+.saveState[data-tone='dirty'] { color: var(--warning); }
+.saveState[data-tone='dirty'] .saveDot { background: var(--warning); }
+.saveState[data-tone='busy'] .saveDot { background: var(--ws); animation: pulse-dot 1s var(--ease-in-out) infinite; }
+
+.right { margin-left: auto; display: flex; align-items: center; gap: 6px; }
+.account {
+  position: relative; display: grid; place-items: center; width: 26px; height: 26px; margin-left: 2px; border-radius: 50%;
+  background: var(--bg-4); border: 1px solid transparent; color: var(--text-1);
+  font-size: var(--fs-2xs); font-weight: 700; letter-spacing: 0.02em;
+}
+.account:hover, .account[data-state='open'] { border-color: var(--ws); }
+/* Updates on the person's reports wait in the account menu. */
+.account[data-unseen]::after { content: ''; position: absolute; top: -1px; right: -1px; width: 8px; height: 8px; border-radius: 50%; background: var(--ws); box-shadow: 0 0 0 2px var(--bg-1); }
+.accountMenu { width: 272px; }
+.teamChip { display: inline-flex; align-items: center; gap: 5px; max-width: 180px; height: 26px; padding: 0 8px; border-radius: var(--r-xs); border: 0; background: transparent; color: var(--text-2); font-size: var(--fs-xs); font-weight: 600; cursor: pointer; }
+.teamChip span { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.teamChip small { color: var(--text-4); font-size: var(--fs-2xs); font-weight: 500; }
+.teamChip:hover { background: var(--bg-3); color: var(--text-1); }
+.accountCard { display: flex; align-items: center; gap: 10px; padding: 8px 8px 8px; }
+.accountCard > div { display: flex; flex-direction: column; gap: 1px; min-width: 0; }
+.accountCard strong { color: var(--text-1); font-size: var(--fs-sm); font-weight: 600; }
+.accountCard span { color: var(--text-3); font-size: var(--fs-xs); overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.accountCard small { color: var(--text-4); font-size: var(--fs-2xs); }
+.accountCard code { font-family: var(--font-mono); }
+.accountAvatar {
+  display: grid; place-items: center; flex: none; width: 36px; height: 36px; border-radius: 50%;
+  background: var(--ws-softer); color: var(--ws); border: 1px solid color-mix(in srgb, var(--ws) 30%, transparent);
+  font-size: var(--fs-xs); font-weight: 700; letter-spacing: 0.02em;
+}
+.accountCard span.accountAvatar { color: var(--ws); font-size: var(--fs-xs); overflow: visible; }
+.themes { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 4px; padding: 2px 4px 6px; }
+.theme {
+  display: flex; flex-direction: column; align-items: center; gap: 4px; padding: 8px 4px 6px; border-radius: var(--r-sm);
+  border: 1px solid var(--line-2); color: var(--text-2); font-size: var(--fs-xs); cursor: pointer; outline: none;
+  transition: border-color var(--t-fast), background var(--t-fast), color var(--t-fast);
+}
+.theme[data-highlighted] { background: var(--bg-3); color: var(--text-1); }
+.theme[data-state='checked'] { border-color: var(--ws); background: var(--ws-softer); color: var(--text-1); }
+.theme[data-state='checked'] svg { color: var(--ws); }
+.unseen { padding: 1px 7px; border-radius: var(--r-pill); background: var(--ws-softer); color: var(--ws); font-size: var(--fs-2xs); font-weight: 600; }
+.mcp {
+  display: flex; align-items: center; gap: 6px; height: 28px; padding: 0 8px; border-radius: var(--r-xs);
+  border: 0; background: transparent; color: var(--text-2); font-size: var(--fs-sm); font-weight: 500; cursor: pointer;
+}
+.mcp:hover { color: var(--text-1); background: var(--bg-3); }
+.mcp svg { color: var(--text-3); }
+.mcp:hover svg { color: var(--ws); }
+/* Something there waits for the person (an RMFG purchase an agent asked for). */
+.mcp[data-attention] { background: var(--warning-soft); color: var(--text-1); }
+.mcp[data-attention] svg { color: var(--warning); }
+.export[data-disabled] { opacity: 0.45; cursor: default; }
+/* Export split button: the main part repeats the last format; ▾ opens every export. */
+.split { display: inline-flex; align-items: stretch; }
+.split > .export { padding: 0 9px 0 8px; gap: 6px; border-top-right-radius: 0; border-bottom-right-radius: 0; }
+.split > .splitToggle { border-top-left-radius: 0; border-bottom-left-radius: 0; padding: 0 6px; margin-left: 1px; }
+.split > .splitToggle svg { width: 14px; height: 14px; transition: transform var(--t-fast) var(--ease-standard); }
+.split > .splitToggle[data-state='open'] svg { transform: rotate(180deg); }
+
+/* Narrower desktops: the document tabs need the room. MCP and Feedback keep their words longest (they're meant to be
+   seen); Export drops its format first (its tooltip says it). */
+@media (max-width: 1600px) {
+  .topbar { gap: 10px; }
+}
+@media (max-width: 1280px) {
+  .split > .export { gap: 0; padding: 0 8px; }
+  .export > span { display: none; }
+}
+@media (max-width: 1100px) {
+  .wordmark { display: none; }
+  .mcp { gap: 0; padding: 0 8px; }
+  .mcp > span { display: none; }
+}
+@media (max-width: 820px) {
+  .workspaceMenu span { display: none; }
+  .kind, .saveState span:not(.saveDot) { display: none; }
+  .export { gap: 0; padding: 0 8px; }
+  .export > span { display: none; }
+  .mcp { gap: 0; padding: 0 8px; }
+  .mcp > span { display: none; }
+}
+
+@media (max-width: 600px) {
+  .topbar { gap: 8px; padding: 0 6px 0 8px; }
+  /* Settings stays a tap away in the account menu. */
+  .divider, .toolMenu, .mcp, .settingsButton { display: none; }
+  .title { flex: 1; min-width: 72px; }
+  .name { font-size: var(--fs-md); max-width: none; }
+  .workspaceMenu { padding: 0 6px; }
+}
+
+.branchPill {
+  flex-shrink: 0;
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  height: 22px;
+  padding: 0 5px;
+  border-radius: var(--r-xs);
+  font-size: var(--fs-xs);
+  font-weight: 500;
+  color: var(--text-2);
+  background: transparent;
+  border: 0;
+  transition: background var(--t-fast), border-color var(--t-fast);
+}
+.branchPill > svg:first-child { color: var(--branch); }
+.branchPill:hover, .branchPill[data-state='open'] { background: var(--bg-4); color: var(--text-1); }
+.branchPill span { max-width: 140px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.branchPill i { font-style: normal; font-weight: 500; color: var(--warning); }
+.branchPill svg:last-child { opacity: 0.7; }
+/* A document synced with a git repository: a quiet icon, amber when its sync needs the person. */
+.gitBadge { flex-shrink: 0; display: inline-grid; place-items: center; width: 22px; height: 22px; border-radius: var(--r-xs); color: var(--text-3); background: transparent; border: 1px solid transparent; transition: background var(--t-fast), color var(--t-fast); }
+.gitBadge:hover { background: var(--bg-4); color: var(--text-1); }
+.gitBadge[data-trouble] { color: var(--warning); }
+.carbonBadge { flex-shrink: 0; display: inline-grid; place-items: center; width: 22px; height: 22px; border-radius: var(--r-xs); color: var(--text-3); background: transparent; border: 1px solid transparent; transition: background var(--t-fast), color var(--t-fast); }
+.carbonBadge:hover { background: var(--bg-4); color: var(--text-1); }
+.carbonBadge[data-changed] { color: var(--warning); }
+.carbonBadge[data-issues] { color: var(--danger); }
+.branchMenu { min-width: 280px; }
+.branchMenuLabel { padding: 7px 9px 5px; }
+.branchMenuDot { width: 9px; height: 9px; border-radius: 50%; background: var(--branch); }
+@media (max-width: 820px) { .branchPill span, .branchPill i { display: none; } }
+
+/* Document tabs */
+.tabs {
+  flex: 1;
+  min-width: 0;
+  display: flex;
+  align-items: center;
+  align-self: stretch;
+  gap: 0;
+  overflow: hidden;
+  container: tabs / inline-size;
+}
+/* A narrow strip (Design's tool tabs beside it, a smaller window): the branch pill keeps its icon (and its colour); its
+   name is in the tooltip and the menu. */
+@container tabs (max-width: 340px) {
+  .tab[data-active] .branchPill > span, .tab[data-active] .branchPill > i { display: none; }
+}
+/* Narrower still: the save chip keeps its dot and drops its words, so the document's name isn't squeezed to a letter.
+   The chip's tooltip still says Saved, Edited or Not saved. */
+@container tabs (max-width: 280px) {
+  .tab[data-active] .saveLabel { display: none; }
+  .tab[data-active] .saveState { padding: 0 5px; }
+}
+/* Wherever the strip has room for it, the active name keeps a readable few characters. */
+@container tabs (min-width: 200px) {
+  .tab[data-active] .name { min-width: 4em; }
+}
+.tab {
+  position: relative;
+  z-index: 0;
+  flex-shrink: 0;
+  display: flex;
+  align-items: center;
+  gap: 7px;
+  height: 100%;
+  max-width: 220px;
+  padding: 0 4px 0 12px;
+  border-right: 1px solid var(--line-1);
+  color: var(--text-3);
+  cursor: pointer;
+  transition: background var(--t-fast), color var(--t-fast);
+}
+.tab:not([data-active]):hover { background: var(--bg-2); color: var(--text-1); }
+/* The other tabs share what's left evenly, between their narrowest and widest; the rest wait in "N more". */
+.tab:not([data-active]) { flex: 0 1 180px; min-width: 104px; overflow: hidden; }
+/* Never wider than the strip: the name truncates and nothing spills over the neighbours. */
+.tab[data-active] { flex: 0 0.25 auto; max-width: 100%; min-width: 0; color: var(--text-1); cursor: default; padding-right: 4px; }
+.tabThumb {
+  position: absolute;
+  inset: 0 0 -1px;
+  z-index: -1;
+  background: var(--bg-2);
+  box-shadow: inset 0 2px 0 var(--ws);
+}
+.tabName { font-size: var(--fs-sm); font-weight: 520; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; min-width: 0; }
+.tabBranch { font-family: var(--font-mono); font-size: 10px; color: var(--iris); overflow: hidden; text-overflow: ellipsis; white-space: nowrap; max-width: 70px; }
+.tabEnd { position: relative; display: grid; place-items: center; width: 20px; height: 20px; flex-shrink: 0; }
+.tabDirty { width: 7px; height: 7px; border-radius: 50%; background: var(--warning); transition: opacity var(--t-fast); }
+.tabClose { position: absolute; inset: 0; display: grid; place-items: center; border-radius: var(--r-xs); color: var(--text-3); opacity: 0; transition: opacity var(--t-fast), background var(--t-fast), color var(--t-fast); }
+.tab:hover .tabClose, .tab[data-active] .tabClose { opacity: 1; }
+.tab[data-dirty]:hover .tabDirty, .tab[data-dirty][data-active] .tabDirty { opacity: 0; }
+.tab[data-dirty]:not(:hover):not([data-active]) .tabClose { opacity: 0; }
+/* The active tab's save chip already says "● Not saved": its own dot would repeat it, so it keeps its close button. */
+.tabClose:hover { background: var(--bg-5); color: var(--text-1); }
+.moreTabs { flex-shrink: 0; display: inline-flex; align-items: center; gap: 3px; height: 100%; padding: 0 8px 0 12px; border-radius: 0; color: var(--text-2); font-size: var(--fs-sm); white-space: nowrap; transition: background var(--t-fast), color var(--t-fast); }
+.moreTabs:hover, .moreTabs[data-state='open'] { background: var(--bg-2); color: var(--text-1); }
+.moreTabs[data-dirty]::before { content: ''; width: 6px; height: 6px; margin-right: 3px; border-radius: 50%; background: var(--warning); }
+.moreList { min-width: 220px; max-width: 360px; }
+.tabDirty, .tabBranch { flex-shrink: 0; }
+
+/* Phones: only the active document fits; the others stay a tap away in Open and Alt+[ / ]. */
+@media (max-width: 600px) {
+  .tab:not([data-active]) { display: none; }
+  .tab[data-active] { padding-left: 6px; gap: 5px; }
+}
+
+.accountPhoto { width: 100%; height: 100%; object-fit: cover; border-radius: inherit; }

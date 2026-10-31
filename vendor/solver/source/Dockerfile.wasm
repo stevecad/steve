@@ -1,0 +1,17 @@
+# Build environment for the WebAssembly solver. Used by solver/build-wasm.sh; not a runtime image.
+# Pinned: Emscripten 6.0.10 (Ubuntu 24.04 base -> Eigen 3.4.0, Boost 1.83 headers).
+FROM emscripten/emsdk:6.0.10@sha256:e077d54e2b8970575ebc4f185ac1de0b95c05f2b266134d4ba27449af7aebf65
+
+RUN apt-get update \
+ && apt-get install -y --no-install-recommends libeigen3-dev libboost-dev \
+ && rm -rf /var/lib/apt/lists/* \
+ # Expose only the Boost headers to em++ (adding /usr/include would pull in glibc headers).
+ && mkdir -p /opt/boost-include \
+ && ln -s /usr/include/boost /opt/boost-include/boost
+
+# Warm Emscripten's system-library cache for the link settings used by build-wasm.sh, so builds
+# do not rebuild libc++ (wasm exceptions) on every run, and let any uid use the cache.
+RUN printf '#include <stdexcept>\n#include <string>\nint main(){try{throw std::runtime_error("x");}catch(...){}}\n' > /tmp/warm.cpp \
+ && em++ -O3 -fwasm-exceptions -sALLOW_MEMORY_GROWTH=1 -sFILESYSTEM=0 /tmp/warm.cpp -o /tmp/warm.mjs \
+ && rm -f /tmp/warm.* \
+ && chmod -R a+rwX /emsdk/upstream/emscripten/cache

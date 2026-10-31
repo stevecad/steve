@@ -1,0 +1,104 @@
+.browser { display: flex; flex-direction: column; height: 100%; min-height: 0; }
+
+.header {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  height: 36px;
+  flex-shrink: 0;
+  padding: 0 8px 0 14px;
+  border-bottom: 1px solid var(--line-1);
+}
+.headerMeta { margin-left: auto; font-size: var(--fs-xs); color: var(--text-3); }
+
+.scroll { flex: 1; min-height: 0; overflow: auto; padding: 6px 6px 24px; }
+.empty { padding: 14px 10px; color: var(--text-3); font-size: var(--fs-sm); }
+.emptyHint { padding: 4px 12px 10px 42px; color: var(--text-3); font-size: var(--fs-xs); line-height: 1.5; }
+
+.group { margin-top: 2px; }
+.groupLabel { font-weight: 560; color: var(--text-2); }
+
+.row {
+  position: relative;
+  display: flex;
+  align-items: center;
+  height: 27px;
+  padding-right: 4px;
+  border-radius: 6px;
+  color: var(--text-1);
+  transition: background var(--t-fast);
+}
+.row:hover { background: var(--bg-3); }
+.row[data-selected] { background: var(--sel-soft); }
+.row[data-selected]::before {
+  content: '';
+  position: absolute;
+  left: 0;
+  top: 5px;
+  bottom: 5px;
+  width: 2px;
+  border-radius: 2px;
+  background: var(--sel);
+}
+.row[data-partial]:not([data-selected]) { background: color-mix(in srgb, var(--sel) 7%, transparent); }
+.row[data-dimmed] .rowMain { opacity: 0.42; }
+.row[data-state='open'], .row[data-editing] { background: var(--bg-3); }
+.row[data-editing] .rowMain { padding-right: 2px; }
+.mono { font-family: var(--font-mono); font-size: var(--fs-xs); }
+
+.chevron, .chevronSpacer { width: 18px; height: 20px; flex-shrink: 0; display: grid; place-items: center; color: var(--text-3); border-radius: 4px; }
+.chevron:hover { color: var(--text-1); background: var(--bg-4); }
+
+.rowMain { display: flex; align-items: center; gap: 7px; flex: 1; min-width: 0; height: 100%; text-align: left; font-size: var(--fs-sm); padding-left: 2px; }
+.rowIcon { display: grid; place-items: center; width: 18px; color: var(--text-3); flex-shrink: 0; }
+.row[data-selected] .rowIcon { color: var(--sel); }
+.rowLabel { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.rowMeta { margin-left: auto; padding-left: 6px; color: var(--text-3); font-size: var(--fs-xs); display: flex; align-items: center; }
+.linkRevision { white-space: nowrap; flex-shrink: 0; }
+.metaText { font-size: var(--fs-xs); color: var(--text-4); }
+.rowActions { display: flex; align-items: center; gap: 1px; margin-left: 2px; }
+
+.nodeIcon { display: grid; place-items: center; }
+
+.eye {
+  width: 22px;
+  height: 22px;
+  display: grid;
+  place-items: center;
+  border-radius: 5px;
+  color: var(--text-3);
+  opacity: 0;
+  transition: opacity var(--t-fast), background var(--t-fast), color var(--t-fast);
+}
+.row:hover .eye, .eye[data-hidden], .eye[data-see-through], .row[data-selected] .eye { opacity: 1; }
+.eye:hover { background: var(--bg-5); color: var(--text-1); }
+.eye[data-hidden] { color: var(--text-4); }
+
+.planeSwatch { width: 11px; height: 11px; border: 1.5px solid; border-radius: 2px; transform: skewX(-12deg); }
+
+.badge { margin-left: 6px; }
+.status { display: inline-flex; align-items: center; gap: 5px; font-size: var(--fs-2xs); letter-spacing: 0.04em; color: var(--text-3); }
+.statusDot { width: 6px; height: 6px; border-radius: 50%; background: var(--text-4); }
+.statusDot[data-tone='ok'] { background: var(--success); }
+.statusDot[data-tone='warn'] { background: var(--warning); }
+.statusDot[data-tone='soon'] { background: var(--iris); }
+.quantity { font-variant-numeric: tabular-nums; font-weight: 600; color: var(--text-2); }
+.statusDot[data-tone='error'] { background: var(--danger); }
+.row[data-error] .rowIcon, .row[data-error] .rowMain { color: var(--danger); }
+.updateBadge { padding: 1px 6px; border-radius: 99px; font-size: 10.5px; font-weight: 600; color: var(--ws-ink); background: var(--ws-strong); white-space: nowrap; }
+.updateBadge:hover { box-shadow: 0 0 0 3px var(--ws-soft); }
+
+/* "New component" row in a design's tree. */
+.addLabel { color: var(--text-3); }
+.newComponent { display: flex; flex-direction: column; gap: 2px; flex: 1; min-width: 0; }
+.newComponent input {
+  height: 22px; padding: 0 6px; border-radius: var(--r-sm);
+  border: 1px solid var(--ws); background: var(--bg-1, var(--bg-2)); color: var(--text-1);
+  font-family: var(--font-mono); font-size: var(--fs-xs); outline: none;
+}
+.newComponent[data-invalid] input { border-color: var(--warning); }
+.newComponent small { color: var(--warning); font-size: var(--fs-2xs); }
+
+/* A circuit's problems are sentences: their rows grow to fit up to three lines (the rest is in the tooltip). */
+.row[data-item^='problem:'] { height: auto; min-height: 27px; align-items: flex-start; padding-top: 5px; padding-bottom: 5px; }
+.row[data-item^='problem:'] > * { align-self: flex-start; }

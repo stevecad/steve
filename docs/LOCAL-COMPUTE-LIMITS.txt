@@ -1,0 +1,32 @@
+Local CAD compute policy (0.3.5)
+
+Removed fixed local ceilings
+- No 128-worker maximum: concurrency follows logical CPUs, the selected CPU
+  percentage and the existing RAM admission estimate.
+- No 16-native-thread maximum: meshing receives its allocated share of host CPUs.
+- No 16-prewarmed-worker maximum: the pool warms its CPU/RAM capacity, unless a
+  caller explicitly requests fewer spares.
+- No face-count limit for area caching: actual Python cache storage is budgeted
+  against available RAM across the configured pool, with pressure-driven eviction.
+- No default wall-clock timeout for local CAD builds. Explicit cancellation remains.
+
+Remaining constraints and why
+- The user's CPU percentage is intentional (80% default, configurable up to 100%).
+- Worker admission reserves half of physical RAM and estimates 1 GiB per worker.
+  This scheduling guard is not a per-model memory ceiling; larger individual jobs
+  can use more memory. It remains an estimate, not measured peak-memory scheduling.
+- Area integration has convergence/work budgets and an explicit kernel-estimate
+  fallback; this protects reporting from nonconvergent numerical integrals, and
+  does not terminate builds or alter model geometry.
+- Windows topology/fit-check paths remain serial where upstream requires POSIX
+  fork and inherited native OCP objects. POSIX hosts use their allocated CPUs.
+  A portable implementation is needed for these paths on Windows; simply raising
+  a count would invoke an unsupported process method. Native meshing and independent
+  component/document jobs already use multiple CPUs.
+- Parallel booleans remain disabled as upstream requires for reproducible geometry.
+- Protocol archive sizes, bounded network input and output-log limits serve
+  different purposes and are not CAD CPU/worker ceilings.
+
+The old 2,048-face area cache was a local addition. Upstream Studio has no matching
+cache cap; it uses kernel area properties. The local reporting accuracy tests remain
+in place, including transformations, imported geometry, fallback and memory pressure.

@@ -1,0 +1,88 @@
+/* A machine model's collision bodies: the 3D preview, pose, and the bodies by the axis they ride on. */
+.bodies { display: flex; flex-direction: column; gap: 10px; }
+.muted { color: var(--text-3); font-size: var(--fs-xs); line-height: 1.5; }
+.help { color: var(--text-3); font-size: var(--fs-xs); line-height: 1.45; }
+.label { color: var(--text-2); font-size: var(--fs-sm); }
+.input, .select { width: 100%; min-width: 0; height: 28px; padding: 0 6px; border-radius: 6px; border: 1px solid var(--line-2); background: var(--bg-1); color: var(--text-1); font-size: var(--fs-sm); font-variant-numeric: tabular-nums; }
+.input:focus, .select:focus { outline: none; border-color: var(--ws); box-shadow: 0 0 0 3px var(--ws-softer); }
+.input:disabled { opacity: 0.7; }
+.note { margin: 0; padding: 6px 8px; border-radius: 7px; background: var(--bg-3); color: var(--text-2); font-size: var(--fs-xs); line-height: 1.5; }
+.note[data-tone='danger'] { background: color-mix(in srgb, var(--danger) 14%, transparent); color: var(--text-1); }
+
+.head { display: flex; flex-direction: column; gap: 3px; }
+.coverage { display: grid; grid-template-columns: auto minmax(0, 220px); align-items: center; gap: 10px; color: var(--text-2); font-size: var(--fs-sm); }
+
+.view { position: relative; height: 320px; border: 1px solid var(--line-1); border-radius: 10px; overflow: hidden; background: radial-gradient(120% 90% at 50% 0%, color-mix(in srgb, var(--bg-3) 70%, transparent), var(--bg-1)); }
+.loading { position: absolute; inset: auto 8px 8px auto; display: flex; }
+.loading span { display: inline-flex; align-items: center; gap: 6px; padding: 4px 9px; border-radius: 99px; background: var(--bg-3); color: var(--text-2); font-size: var(--fs-xs); }
+
+.pose { display: flex; flex-direction: column; gap: 4px; padding: 8px 10px; border: 1px solid var(--line-1); border-radius: 9px; background: var(--bg-2); }
+.poseHead { display: flex; flex-wrap: wrap; align-items: center; gap: 6px; }
+.poseHead .help { margin-left: auto; }
+.chip { display: inline-flex; align-items: center; gap: 4px; height: 22px; padding: 0 8px; border-radius: 99px; border: 1px solid var(--line-2); color: var(--text-2); font-size: var(--fs-xs); }
+.chip:hover { border-color: var(--ws); color: var(--text-1); }
+.joint { display: grid; grid-template-columns: 70px 1fr 90px; align-items: center; gap: 10px; font-size: var(--fs-sm); }
+.joint span { display: inline-flex; align-items: center; gap: 6px; color: var(--text-2); }
+.joint i, .nodeHead i { width: 8px; height: 8px; border-radius: 50%; }
+.joint input { accent-color: var(--ws); }
+.joint b { color: var(--text-1); font-weight: 600; font-variant-numeric: tabular-nums; text-align: right; }
+
+.list { display: flex; flex-direction: column; gap: 8px; }
+.empty { display: flex; gap: 10px; align-items: flex-start; padding: 12px; border: 1px dashed var(--line-2); border-radius: 10px; color: var(--text-2); font-size: var(--fs-sm); line-height: 1.5; }
+.empty > svg { flex-shrink: 0; color: var(--text-3); }
+.nodeGroup { display: flex; flex-direction: column; gap: 4px; }
+.nodeHead { display: flex; align-items: center; gap: 6px; color: var(--text-1); font-size: var(--fs-xs); font-weight: 650; letter-spacing: 0.03em; }
+.nodeHead small { color: var(--text-3); font-weight: 400; }
+.body { border: 1px solid var(--line-1); border-radius: 9px; background: var(--bg-2); transition: border-color var(--t-fast); }
+.body[data-on] { border-color: color-mix(in srgb, var(--ws) 55%, transparent); }
+.body[data-error] { border-color: color-mix(in srgb, var(--danger) 60%, transparent); }
+.bodyHead { display: grid; grid-template-columns: auto auto auto 1fr; align-items: center; gap: 8px; width: 100%; padding: 7px 10px; text-align: left; color: var(--text-3); }
+.bodyHead b { color: var(--text-1); font-size: var(--fs-sm); font-weight: 600; }
+.badge { padding: 1px 7px; border-radius: 99px; background: var(--bg-3); color: var(--text-2); font-size: var(--fs-2xs); font-weight: 650; letter-spacing: 0.03em; text-transform: uppercase; white-space: nowrap; }
+.status { display: inline-flex; align-items: center; gap: 4px; min-width: 0; overflow: hidden; color: var(--text-3); font-size: var(--fs-xs); text-overflow: ellipsis; white-space: nowrap; }
+.editor { display: flex; flex-direction: column; gap: 6px; padding: 4px 10px 10px; border-top: 1px solid var(--line-1); animation: open var(--t-base) ease-out; }
+@keyframes open { from { opacity: 0; transform: translateY(-3px); } to { opacity: 1; transform: none; } }
+@media (prefers-reduced-motion: reduce) { .editor { animation: none; } }
+.editor > button { align-self: flex-start; }
+.row { display: grid; grid-template-columns: minmax(120px, 38%) 1fr; align-items: center; gap: 8px; }
+.vector { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 4px; }
+.more summary { display: flex; align-items: center; gap: 4px; padding: 4px 0; color: var(--text-2); font-size: var(--fs-sm); cursor: pointer; list-style: none; }
+.more summary::-webkit-details-marker { display: none; }
+.more summary svg { color: var(--text-3); transition: transform var(--t-fast); }
+.more[open] summary svg { transform: rotate(90deg); }
+.more summary small { margin-left: 6px; color: var(--text-4); font-size: var(--fs-xs); }
+.more[open] { display: flex; flex-direction: column; gap: 6px; }
+.problems { margin: 0; padding: 6px 8px 6px 22px; border-radius: 7px; background: color-mix(in srgb, var(--danger) 14%, transparent); color: var(--text-1); font-size: var(--fs-xs); }
+.add { display: flex; flex-wrap: wrap; align-items: center; gap: 6px; }
+.add .help { flex-basis: 100%; }
+
+/* The CAD body picker. */
+.picker { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1.1fr); gap: 12px; min-height: 340px; }
+.pickerDocs, .pickerBodies { display: flex; flex-direction: column; gap: 8px; min-height: 0; }
+.searchBox { display: flex; align-items: center; gap: 6px; height: 30px; padding: 0 8px; border-radius: 7px; border: 1px solid var(--line-2); background: var(--bg-1); color: var(--text-3); }
+.searchBox input { flex: 1; min-width: 0; border: none; background: none; color: var(--text-1); font-size: var(--fs-sm); outline: none; }
+.docList, .bodyChoices { display: flex; flex-direction: column; margin: 0; padding: 0; max-height: 300px; overflow: auto; list-style: none; border: 1px solid var(--line-1); border-radius: 9px; }
+.docList li, .bodyChoices li { border-bottom: 1px solid var(--line-1); }
+.docList li:last-child, .bodyChoices li:last-child { border-bottom: none; }
+.docList li.muted { padding: 8px 10px; }
+.docList button, .bodyChoices button { display: flex; flex-direction: column; gap: 1px; width: 100%; padding: 7px 10px; text-align: left; }
+.docList button span, .bodyChoices button span { color: var(--text-1); font-size: var(--fs-sm); }
+.docList button small, .bodyChoices button small { color: var(--text-3); font-size: var(--fs-xs); }
+.docList button:hover, .bodyChoices button:hover { background: var(--bg-3); }
+.docList button[data-on] { background: var(--ws-softer); }
+.inline { display: grid; grid-template-columns: auto 1fr; align-items: center; gap: 8px; color: var(--text-2); font-size: var(--fs-sm); }
+.pickerFoot { display: flex; justify-content: flex-end; margin-top: 10px; }
+
+/* The Machine form's Model and Controller (MachineFields.tsx): a catalogue to pick from, one per field. */
+.choices { display: grid; gap: 4px; }
+.choice { display: grid; gap: 2px; text-align: left; padding: 7px 10px; border-radius: 8px; border: 1px solid var(--line-2); background: var(--bg-1); color: var(--text-1); cursor: pointer; transition: border-color var(--t-fast), background var(--t-fast); }
+.choice:hover { border-color: var(--ws); }
+.choice:focus-visible { outline: none; border-color: var(--ws); box-shadow: 0 0 0 3px var(--ws-softer); }
+.choice[data-chosen] { border-color: var(--ws); background: var(--ws-softer); }
+.choiceName { font-size: var(--fs-sm); font-weight: 550; }
+.choiceName small { color: var(--text-3); font-weight: 400; }
+.choiceMeta { font-size: var(--fs-xs); color: var(--text-2); }
+.choiceEmpty { margin: 0; font-size: var(--fs-xs); color: var(--text-3); }
+.choiceDefine { display: inline-flex; align-items: center; gap: 6px; justify-self: start; padding: 4px 2px; border: 0; background: none; color: var(--ws); font-size: var(--fs-xs); cursor: pointer; }
+.choiceLink { border: 0; padding: 0; background: none; color: var(--ws); cursor: pointer; text-decoration: underline; font: inherit; }
+.choicePreview { height: 200px; margin-top: 6px; border-radius: 8px; overflow: hidden; border: 1px solid var(--line-2); }

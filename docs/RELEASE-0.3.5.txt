@@ -1,0 +1,61 @@
+Steve 0.3.5 — Studio projects on your machine
+
+Connect your Steve Studio account from Settings → Steve Studio. Steve discovers
+the official desktop client automatically and opens the normal browser sign-in
+and consent flow. No app registration, client ID or copied token is needed.
+
+Choose a workspace and download CAD projects with their pinned linked parts,
+materials and imported assets. Downloads are verified before import and can
+resume after an interrupted connection. Open the downloaded project to build,
+inspect, edit and export it locally, including while offline.
+
+Refresh checks for new Studio snapshots without rebuilding unchanged geometry.
+Changed snapshots arrive as new local copies; existing copies and edits remain
+intact. Optional automatic refresh runs every five minutes while Steve is open.
+Stop syncing retains local documents. Disconnect removes local credentials and
+requests revocation of the Studio grant.
+
+This connection requests read access only. It does not upload local edits or run
+hosted CAD jobs. Team access follows Studio's existing team settings.
+
+MCP connection information is now selectable and copyable.
+
+Face-area results use a memory-based cache in each disposable CAD worker. Its
+byte allowance follows available system RAM and the configured worker pool,
+with least-recently-used eviction as memory pressure rises. There is no face-count
+cap. The area calculation and model geometry are unchanged. Python cache storage
+is accounted for; native geometry is shared with the live model, with OS memory
+pressure providing an additional safeguard.
+
+Fixed 16-thread, 16-spare and 128-worker ceilings are removed. Local allocation
+follows the host and CPU/RAM policy. Windows paths requiring upstream POSIX fork
+remain serial; native meshing and independent CAD jobs can use multiple CPUs.
+
+Known limitations
+- A successfully transferred project is not guaranteed to build on this machine.
+  Projects whose saved source is incomplete (for example a missing imported
+  module) are reported as such; Steve does not invent or silently replace
+  missing source. Some solids that build in Studio can still be rejected by the
+  local kernel; such cases are reported rather than hidden.
+- Very large assemblies can take many minutes to build and inspect locally; this
+  release makes no interactive-speed claim for them.
+
+Verification
+- Focused integration tests and the existing archive regression tests passed.
+- Reporting/cache/worker tests cover analytic accuracy, bounded fallback,
+  large-assembly reuse, byte budgets, memory pressure, worker sharing, process
+  isolation, cancellation and crash recovery.
+- Native Settings download, refresh, open and stop-sync workflows passed using
+  contract fixtures. The frontend production build passed.
+- Sign-in, token renewal, project listing and download, unchanged refresh and
+  disconnect/credential removal were checked end to end.
+- Frozen source/frontend/skills/runtime parity, startup and local stdio MCP
+  build/export/stop/cancel checks passed. Release publication verifies the uploaded
+  ZIP digest before signing the update manifest.
+- Published latest-release feed, Ed25519 manifest signature, uploaded package
+  digest and installer digest verified after publication.
+
+Distribution limits
+- No clean-VM, macOS or Linux certification is claimed for this release.
+- Update manifests are Ed25519 signed. The installer is not Authenticode signed.
+- This private release requires authorized GitHub access.

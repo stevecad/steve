@@ -1,0 +1,309 @@
+{
+  "model": {
+    "version": 1,
+    "kind": "machine_model",
+    "name": "Reference Cartesian mill",
+    "description": "",
+    "machine_type": "vertical_mill",
+    "processes": [
+      "milling"
+    ],
+    "nodes": [
+      {
+        "id": "base",
+        "parent": null,
+        "kind": "fixed",
+        "frame": {
+          "origin_mm": [
+            0.0,
+            0.0,
+            0.0
+          ],
+          "x": [
+            1.0,
+            0.0,
+            0.0
+          ],
+          "y": [
+            0.0,
+            1.0,
+            0.0
+          ],
+          "z": [
+            0.0,
+            0.0,
+            1.0
+          ]
+        },
+        "axis": null,
+        "limits": null,
+        "periodic": false
+      },
+      {
+        "id": "X",
+        "parent": "base",
+        "kind": "linear",
+        "frame": {
+          "origin_mm": [
+            0.0,
+            0.0,
+            0.0
+          ],
+          "x": [
+            1.0,
+            0.0,
+            0.0
+          ],
+          "y": [
+            0.0,
+            1.0,
+            0.0
+          ],
+          "z": [
+            0.0,
+            0.0,
+            1.0
+          ]
+        },
+        "axis": [
+          1.0,
+          0.0,
+          0.0
+        ],
+        "limits": {
+          "unit": "mm",
+          "minimum": 0.0,
+          "maximum": 600.0,
+          "max_velocity_per_minute": 6000.0,
+          "max_acceleration_per_second2": 500.0
+        },
+        "periodic": false
+      },
+      {
+        "id": "Y",
+        "parent": "X",
+        "kind": "linear",
+        "frame": {
+          "origin_mm": [
+            0.0,
+            0.0,
+            0.0
+          ],
+          "x": [
+            1.0,
+            0.0,
+            0.0
+          ],
+          "y": [
+            0.0,
+            1.0,
+            0.0
+          ],
+          "z": [
+            0.0,
+            0.0,
+            1.0
+          ]
+        },
+        "axis": [
+          0.0,
+          1.0,
+          0.0
+        ],
+        "limits": {
+          "unit": "mm",
+          "minimum": 0.0,
+          "maximum": 400.0,
+          "max_velocity_per_minute": 6000.0,
+          "max_acceleration_per_second2": 500.0
+        },
+        "periodic": false
+      },
+      {
+        "id": "Z",
+        "parent": "Y",
+        "kind": "linear",
+        "frame": {
+          "origin_mm": [
+            0.0,
+            0.0,
+            0.0
+          ],
+          "x": [
+            1.0,
+            0.0,
+            0.0
+          ],
+          "y": [
+            0.0,
+            1.0,
+            0.0
+          ],
+          "z": [
+            0.0,
+            0.0,
+            1.0
+          ]
+        },
+        "axis": [
+          0.0,
+          0.0,
+          1.0
+        ],
+        "limits": {
+          "unit": "mm",
+          "minimum": -200.0,
+          "maximum": 0.0,
+          "max_velocity_per_minute": 6000.0,
+          "max_acceleration_per_second2": 500.0
+        },
+        "periodic": false
+      }
+    ],
+    "attachments": [
+      {
+        "id": "table",
+        "node": "base",
+        "role": "workpiece",
+        "frame": {
+          "origin_mm": [
+            0.0,
+            0.0,
+            0.0
+          ],
+          "x": [
+            1.0,
+            0.0,
+            0.0
+          ],
+          "y": [
+            0.0,
+            1.0,
+            0.0
+          ],
+          "z": [
+            0.0,
+            0.0,
+            1.0
+          ]
+        },
+        "interface": null
+      },
+      {
+        "id": "spindle",
+        "node": "Z",
+        "role": "tool",
+        "frame": {
+          "origin_mm": [
+            0.0,
+            0.0,
+            0.0
+          ],
+          "x": [
+            1.0,
+            0.0,
+            0.0
+          ],
+          "y": [
+            0.0,
+            1.0,
+            0.0
+          ],
+          "z": [
+            0.0,
+            0.0,
+            1.0
+          ]
+        },
+        "interface": "bt30"
+      }
+    ],
+    "collision_geometry": [],
+    "collision_coverage": "missing",
+    "poses": [
+      {
+        "id": "home",
+        "positions": [
+          {
+            "joint": "X",
+            "value": 0.0
+          },
+          {
+            "joint": "Y",
+            "value": 0.0
+          },
+          {
+            "joint": "Z",
+            "value": 0.0
+          }
+        ]
+      }
+    ],
+    "home_pose": "home",
+    "spindles": [
+      {
+        "id": "main",
+        "attachment": "spindle",
+        "role": "cutting",
+        "interface": "bt30",
+        "min_rpm": 100.0,
+        "max_rpm": 12000.0,
+        "reversible": true,
+        "max_power_kw": null,
+        "max_torque_nm": null,
+        "max_tool_diameter_mm": 80.0,
+        "max_tool_length_mm": 200.0,
+        "max_tool_mass_kg": null
+      }
+    ],
+    "tool_change": {
+      "mode": "manual",
+      "stations": [],
+      "pose": "home",
+      "retract_pose": "home",
+      "sequence": "explicit_poses"
+    },
+    "cutting_heads": [],
+    "printer": null
+  },
+  "controller": {
+    "version": 1,
+    "kind": "controller",
+    "name": "Reference LinuxCNC controller",
+    "description": "",
+    "dialect": "linuxcnc_cartesian_linear_v1",
+    "firmware_version": null,
+    "processes": [
+      "milling"
+    ],
+    "output_units": "mm",
+    "linear_resolution_mm": 0.001,
+    "angular_resolution_rad": null,
+    "rapid_behavior": "linear",
+    "feed_modes": [
+      "units_per_minute"
+    ],
+    "work_offsets": [
+      1,
+      2,
+      3,
+      4,
+      5,
+      6
+    ],
+    "arc_planes": [],
+    "arc_centers": "unsupported",
+    "radius_arcs": false,
+    "full_circle_arcs": false,
+    "tool_length_compensation": "offset_table",
+    "cutter_compensation": "unsupported",
+    "canned_cycles": [],
+    "lathe_x_convention": "not_applicable",
+    "constant_surface_speed": false,
+    "synchronous_threading": false,
+    "machine_coordinate_retract": true,
+    "tool_change": {
+      "semantics": "linuxcnc_stationary_m6_v1"
+    }
+  }
+}

@@ -1,0 +1,15 @@
+Steve 0.4.0
+
+Updates
+- Updates now come from https://dl.stevecad.studio. Install 0.4.0 once by hand
+  from there; later versions arrive as automatic updates.
+- Update manifests are signed with ECDSA P-384 and carry an expiry; Steve refuses
+  manifests that are expired, unsigned by its release keys, or for another host.
+
+Bug reports and feature requests
+- Report a bug, Request a feature and My reports are available when you are
+  signed in to STEVE. Reports go to STEVE Studio only.
+- Before sending, Steve shows exactly what is included: your text, the app version
+  and OS, and the app's log with home folder paths, account names, emails and
+  tokens removed (you can leave the log out). A screenshot is sent only if you
+  attach one.

@@ -1,0 +1,326 @@
+{
+  "pages": {
+    "/docs/local/start/": {
+      "source": "Steve local guide",
+      "sha256": null
+    },
+    "/docs/local/first-part/": {
+      "source": "Steve local guide",
+      "sha256": null
+    },
+    "/docs/local/history/": {
+      "source": "Steve local guide",
+      "sha256": null
+    },
+    "/docs/local/assistant/": {
+      "source": "Steve local guide",
+      "sha256": null
+    },
+    "/docs/local/settings/": {
+      "source": "Steve local guide",
+      "sha256": null
+    },
+    "/docs/local/shortcuts/": {
+      "source": "Steve local guide",
+      "sha256": null
+    },
+    "/docs/design/": {
+      "source": "docs/site/src/content/docs/design/index.md",
+      "sha256": "c397c957ab68c3a64fc9ca86dacf5923da3941aed50e01323208b24c72cda507"
+    },
+    "/docs/design/sketches/": {
+      "source": "docs/site/src/content/docs/design/sketches.md",
+      "sha256": "19f96d9b55bd4359c5e7440e908b7393d6548f670c8abfe21d5cb6889df2aadf"
+    },
+    "/docs/design/features/": {
+      "source": "docs/site/src/content/docs/design/features.md",
+      "sha256": "ddbcc83f3dfc2d2b9ead0abbc89ba511a29903d9b56990ea386081515027404f"
+    },
+    "/docs/design/selecting/": {
+      "source": "docs/site/src/content/docs/design/selecting.md",
+      "sha256": "7e5aad91e2284189bfd87bbfe95931bbed3746d123d178689e430b1adf20fa3a"
+    },
+    "/docs/design/history/": {
+      "source": "docs/site/src/content/docs/design/history.md",
+      "sha256": "a1aa4fb26dfe50a9297d0007280c66ffda340e3ea8322b2bc2773164ab3df4d7"
+    },
+    "/docs/design/source/": {
+      "source": "docs/site/src/content/docs/design/source.md",
+      "sha256": "8c2a26d377c5c07fb19267874e02ec4895535f1babeba844289e625291f4f05d"
+    },
+    "/docs/design/materials/": {
+      "source": "docs/site/src/content/docs/design/materials.md",
+      "sha256": "3b793413a3957afed35c23655aca72d7bd1f927c0b8cf182b5de3326b6c5f741"
+    },
+    "/docs/design/measure-section/": {
+      "source": "docs/site/src/content/docs/design/measure-section.md",
+      "sha256": "965d4578378df2f9fc79aa70a59bdf9001c1f8a5cb2b5cf721921cfb45e46a79"
+    },
+    "/docs/design/sheet-metal/": {
+      "source": "docs/site/src/content/docs/design/sheet-metal.md",
+      "sha256": "d7c57ef6c328c7bf51a20e199f130dda6c68f9f64dcaeefb6e4d225c770de491"
+    },
+    "/docs/design/import/": {
+      "source": "docs/site/src/content/docs/design/import.md",
+      "sha256": "b9649568f8dfdd589ee35860f69cf2281595807013cea14a40ccb0ad92aa8fbb"
+    },
+    "/docs/design/surface/": {
+      "source": "docs/site/src/content/docs/design/surface.md",
+      "sha256": "841b6a4dc01ef707b8619af2dd7c7efa355a5562d2d9e78d631e7281856f908b"
+    },
+    "/docs/design/export/": {
+      "source": "docs/site/src/content/docs/design/export.md",
+      "sha256": "787213ee87e7c6125641aa2ceb6f94f557ca5446cc37dd0d932e345412f46c06"
+    },
+    "/docs/assemblies/": {
+      "source": "docs/site/src/content/docs/assemblies/index.md",
+      "sha256": "40556eb529989e25a21e4445901a44b84d32ac06f667d753394a44c4ef962341"
+    },
+    "/docs/assemblies/add-components/": {
+      "source": "docs/site/src/content/docs/assemblies/add-components.md",
+      "sha256": "34c28be3f7082ec5585d0b2a0f8a09998f550e697872b41c4648ebf26da097d4"
+    },
+    "/docs/assemblies/animations/": {
+      "source": "docs/site/src/content/docs/assemblies/animations.md",
+      "sha256": "e6d944f329992dfbb13988e2e98e1be4319be4819f3624e7a996909ed15ae0ea"
+    },
+    "/docs/assemblies/bill-of-materials/": {
+      "source": "docs/site/src/content/docs/assemblies/bill-of-materials.md",
+      "sha256": "115f08a828b4cd941959cc1944c42781d58cffa3a5626ef521620594be2ba563"
+    },
+    "/docs/assemblies/collision-checks/": {
+      "source": "docs/site/src/content/docs/assemblies/collision-checks.md",
+      "sha256": "426af8538229aec63a8914190c99a45e2a7082387935edcb106b0bdd397dfa94"
+    },
+    "/docs/assemblies/designs-and-parts/": {
+      "source": "docs/site/src/content/docs/assemblies/designs-and-parts.md",
+      "sha256": "28db6d77e74426d0feca399ea5f9f8d717b882ca422ac114d9600ffb9f742a2c"
+    },
+    "/docs/assemblies/exploded-view/": {
+      "source": "docs/site/src/content/docs/assemblies/exploded-view.md",
+      "sha256": "d664b935aff5d43b3e17a7d481de641ebb6a60c6136a01c3a6c75281fb7c4f0b"
+    },
+    "/docs/assemblies/export-motion/": {
+      "source": "docs/site/src/content/docs/assemblies/export-motion.md",
+      "sha256": "96cd02cb4f07d0d3ad11bb869f7fe058b656b6ddbeb91262c602bc99bd591f94"
+    },
+    "/docs/assemblies/fasteners/": {
+      "source": "docs/site/src/content/docs/assemblies/fasteners.md",
+      "sha256": "7ff360e4376d91f6ebb027993fc5c86f64161ad44bd0e476aeb65dc19166c178"
+    },
+    "/docs/assemblies/gears-and-couplings/": {
+      "source": "docs/site/src/content/docs/assemblies/gears-and-couplings.md",
+      "sha256": "4e2e3ca636416ab6093624aeb87a7ffdbd07ef762d20a6d7c747f7a3650e9227"
+    },
+    "/docs/assemblies/joints/": {
+      "source": "docs/site/src/content/docs/assemblies/joints.md",
+      "sha256": "25532a2fd70dc6f74104fcc135ea7502f306e233e32c2cecaf6681534022fd1f"
+    },
+    "/docs/assemblies/move-a-mechanism/": {
+      "source": "docs/site/src/content/docs/assemblies/move-a-mechanism.md",
+      "sha256": "6e20300a47dcc138e670d5b6c945aa4ad0e5130b11aef221ad2b2a10c9b4cf1a"
+    },
+    "/docs/assemblies/place-components/": {
+      "source": "docs/site/src/content/docs/assemblies/place-components.md",
+      "sha256": "00a42fd342fd55c76e5379637595aa69c199844656bbd8463773197ee36c0f4b"
+    },
+    "/docs/drawing/": {
+      "source": "docs/site/src/content/docs/drawing/index.md",
+      "sha256": "0e82acbcd7eebde45fd269948c561554fe5c96b699235052abf8968bd2824021"
+    },
+    "/docs/drawing/sheets/": {
+      "source": "docs/site/src/content/docs/drawing/sheets.md",
+      "sha256": "0eb31844d2750594b07bc3bdae28b6b2cff4abdda5b3a9474216d39ba9ff5409"
+    },
+    "/docs/drawing/views/": {
+      "source": "docs/site/src/content/docs/drawing/views.md",
+      "sha256": "286b61026905f166f65b03ac4db631ddcdb213fbea12c8132d1a9ee56508ef1a"
+    },
+    "/docs/drawing/dimensions/": {
+      "source": "docs/site/src/content/docs/drawing/dimensions.md",
+      "sha256": "5f1890ea152873f095418a3e0fdc195b1d05736f61a9b251ac228997d98971d8"
+    },
+    "/docs/drawing/gdt/": {
+      "source": "docs/site/src/content/docs/drawing/gdt.md",
+      "sha256": "d63c8cb6b84072148da64483a2e6b5f6dda9263b87919f8fe8ad1203cf6334d3"
+    },
+    "/docs/drawing/welds/": {
+      "source": "docs/site/src/content/docs/drawing/welds.md",
+      "sha256": "f46c10ffc665197b82e1086e76504c186bab0f5027885e0eedd2d7476619c5bf"
+    },
+    "/docs/drawing/notes-and-balloons/": {
+      "source": "docs/site/src/content/docs/drawing/notes-and-balloons.md",
+      "sha256": "f877bdaa3be583cebfae25884ff742006123de794a53af271fddd31793d1fb35"
+    },
+    "/docs/drawing/tables/": {
+      "source": "docs/site/src/content/docs/drawing/tables.md",
+      "sha256": "09e2f5601ba6dadfce061e4c792b418ff886e1b653d03847bc28a22edbdb350d"
+    },
+    "/docs/drawing/select-and-edit/": {
+      "source": "docs/site/src/content/docs/drawing/select-and-edit.md",
+      "sha256": "c790ff60094d51575694c8050dcc34e9f1ddd9b0b0c0ed52285c3d9173c0a6a8"
+    },
+    "/docs/drawing/export/": {
+      "source": "docs/site/src/content/docs/drawing/export.md",
+      "sha256": "4e762173eea63fda3e03044dde2a4fa0f17b012a357d578d3012cb9c1789e951"
+    }
+  },
+  "media": {
+    "c0e592638cd9db410d9f.png": {
+      "source": "assets\\design\\feature-hole.png",
+      "sha256": "c0e592638cd9db410d9fe7db77c19f592a23275f056efbac4e1e8b31000aa83a"
+    },
+    "ca395069e08b16a77f0b.png": {
+      "source": "assets\\design\\timeline.png",
+      "sha256": "ca395069e08b16a77f0b3ff967fd495847a05605a8c11cf031fe7b4521610124"
+    },
+    "d6c3b8b7166868f1708e.png": {
+      "source": "assets\\design\\import-step.png",
+      "sha256": "d6c3b8b7166868f1708ee09ac062c65ecaa461a4b761502b97c6aa648ac4c2ad"
+    },
+    "fcfa9b1b245a2cd94643.png": {
+      "source": "assets\\design\\standard-parts.png",
+      "sha256": "fcfa9b1b245a2cd94643e10a1406e3a27cea45d0703129c3bc334889ab9e5a38"
+    },
+    "7ea12b107946c35b974f.png": {
+      "source": "assets\\design\\mcmaster.png",
+      "sha256": "7ea12b107946c35b974fa4230262b66ff8a47f39d1ef452cf0254b29dfdf9dc4"
+    },
+    "87f878b0b5d0c8168a44.png": {
+      "source": "assets\\design\\materials.png",
+      "sha256": "87f878b0b5d0c8168a448a615b16be9412bef6dce3f61f628e813ec9c281e9fe"
+    },
+    "31a65f7e6e8bd30ebbba.png": {
+      "source": "assets\\design\\measure.png",
+      "sha256": "31a65f7e6e8bd30ebbba757a6f192402465b3f0a257878bd6eac8c4cc18f3caa"
+    },
+    "33e0b469e4ff8482970e.png": {
+      "source": "assets\\design\\section.png",
+      "sha256": "33e0b469e4ff8482970efff372f00da7eb075f0734ca724ccf55238291605b92"
+    },
+    "90c6afbc1a255e3d8bcb.png": {
+      "source": "assets\\design\\selecting-edges.png",
+      "sha256": "90c6afbc1a255e3d8bcbe3db423c9e76eb13e95787ffeea4cd5d22db3c5b0b7c"
+    },
+    "a766ce8e66ccc1468c31.png": {
+      "source": "assets\\design\\sheet-metal.png",
+      "sha256": "a766ce8e66ccc1468c31938175ba926f5583caee030ae9c0b0adf866c681390b"
+    },
+    "9e89a7e01086cb5ac3d5.png": {
+      "source": "assets\\design\\sketch-choose-plane.png",
+      "sha256": "9e89a7e01086cb5ac3d559c931b3fc41cf78a01d86604dfb84d705c1839372f5"
+    },
+    "9fa753816824db27102f.png": {
+      "source": "assets\\design\\sketch-constraints.png",
+      "sha256": "9fa753816824db27102f31dbbce0d2c3c7c8564087cc1216952baf274cf80542"
+    },
+    "5ae01013b8f9bcfba8b1.png": {
+      "source": "assets\\design\\source.png",
+      "sha256": "5ae01013b8f9bcfba8b1316849fe4c4a6896a12119893856bd84fcf22b30d61e"
+    },
+    "b4e8fea6e3c865e34bad.png": {
+      "source": "assets\\assemblies\\link-dialog.png",
+      "sha256": "b4e8fea6e3c865e34bad31a66a03a7f37c4434bf2731739d4ffe907593a752a3"
+    },
+    "53ce3c9d97d9c2c7997f.png": {
+      "source": "assets\\assemblies\\animation-panel.png",
+      "sha256": "53ce3c9d97d9c2c7997f9969280670234e2e6804c62a181e85f6512c963b3cda"
+    },
+    "191ea86e7410b9e93089.png": {
+      "source": "assets\\assemblies\\animation-timeline.png",
+      "sha256": "191ea86e7410b9e93089da3ed429c31a7f9aff10b96d2dcb01c530a86653493d"
+    },
+    "900400313a12ed012b30.png": {
+      "source": "assets\\assemblies\\bill-of-materials.png",
+      "sha256": "900400313a12ed012b30ebed2bd619106e42db20ecd618fa2fa47d113279a3f8"
+    },
+    "609656ced162857a560d.png": {
+      "source": "assets\\assemblies\\design-tree.png",
+      "sha256": "609656ced162857a560d31fafbfdab7e27cbe990b169e7c302bdb7e92504fe14"
+    },
+    "3cc63514cfba30d83a44.png": {
+      "source": "assets\\assemblies\\exploded-view.png",
+      "sha256": "3cc63514cfba30d83a445bd00be9269679caab18fd7a3d98735431fabea05dc0"
+    },
+    "e276cef96718cd6f81f9.png": {
+      "source": "assets\\assemblies\\explode-steps-panel.png",
+      "sha256": "e276cef96718cd6f81f9b4918b39519ee352271bb01d4f00fac0cda3eaa786ce"
+    },
+    "57a44d5526781eef2dfd.png": {
+      "source": "assets\\assemblies\\explode-timeline.png",
+      "sha256": "57a44d5526781eef2dfd45aaee942e6717b47ec259d57023a438c7fdf7dbdae0"
+    },
+    "7cea0bc50b660598fe1f.png": {
+      "source": "assets\\assemblies\\standard-parts.png",
+      "sha256": "7cea0bc50b660598fe1f17be9ef435fb6bb04d9a826e80b6233cebc4496b3ee1"
+    },
+    "c5bcf85a2a757341bcef.png": {
+      "source": "assets\\assemblies\\gear-panel.png",
+      "sha256": "c5bcf85a2a757341bcefa5fb7c7979befd012ab7a373f4e3dc7e5c689ef17d60"
+    },
+    "84ebce825cc29c1a5dd8.png": {
+      "source": "assets\\assemblies\\joint-panel.png",
+      "sha256": "84ebce825cc29c1a5dd833632b4cdb5a56075bc2e67ba95eeec4bc02dde57a67"
+    },
+    "4f41f394f12a6d9f280e.png": {
+      "source": "assets\\assemblies\\joint-inspector.png",
+      "sha256": "4f41f394f12a6d9f280e4e7c3e9c400ad3f903cb9fe102117a8c11c77a98817e"
+    },
+    "200d615f84395e90b28e.png": {
+      "source": "assets\\assemblies\\motion-tab.png",
+      "sha256": "200d615f84395e90b28e914f626ef4279cdf3326e236d7b07a765e6c1782c37c"
+    },
+    "d716f2b4a99fd473f9b9.png": {
+      "source": "assets\\assemblies\\motion-inspector.png",
+      "sha256": "d716f2b4a99fd473f9b98a75c93dc5e9ffcb16abeab9bee6ff8478b0bdc51f56"
+    },
+    "00531bb8f1d3b34800ed.png": {
+      "source": "assets\\assemblies\\motor-panel.png",
+      "sha256": "00531bb8f1d3b34800eda9362c098204cae35d498ad51789ee8d6d74ae1336c0"
+    },
+    "94399d4066c08c4e37e9.png": {
+      "source": "assets\\assemblies\\place-tool.png",
+      "sha256": "94399d4066c08c4e37e93067ee626583fdf5e89e0243a78d17038fa05dd34b56"
+    },
+    "6ce9a774f8618d7db133.png": {
+      "source": "assets\\drawing\\dimension.png",
+      "sha256": "6ce9a774f8618d7db133f78c83afbc19d1e0bbecf93752decda6c887a1766e52"
+    },
+    "56452a8a0c3ba3d70dc6.png": {
+      "source": "assets\\drawing\\dimension-inspector.png",
+      "sha256": "56452a8a0c3ba3d70dc6cc9cec95557adbca40889aa687a7c60c308eeccac4f1"
+    },
+    "cc919b3d502628125c6f.png": {
+      "source": "assets\\drawing\\gdt.png",
+      "sha256": "cc919b3d502628125c6f4288bf1dc4036d4ea604809d6445497717609849ab5f"
+    },
+    "b09eee3ccf06107cce9f.png": {
+      "source": "assets\\drawing\\drawing-tab.png",
+      "sha256": "b09eee3ccf06107cce9fb1357fe6201975a1d7b227053348acb724bf135bae33"
+    },
+    "cb08d59598aee7077726.png": {
+      "source": "assets\\drawing\\menu.png",
+      "sha256": "cb08d59598aee7077726b55e21c4d86169a99eb21d7c1b6c1d8906150f46ab3f"
+    },
+    "0eee73291065261a176f.png": {
+      "source": "assets\\drawing\\title-block.png",
+      "sha256": "0eee73291065261a176fae2651a422aa66f297cae894223a39bce0d597363dd5"
+    },
+    "5b8a16542a41457875b5.png": {
+      "source": "assets\\drawing\\tables.png",
+      "sha256": "5b8a16542a41457875b5a2cd366dd6d91634f666f16d98968124c95196ccd56e"
+    },
+    "cc88e8422f430b305013.png": {
+      "source": "assets\\drawing\\section.png",
+      "sha256": "cc88e8422f430b30501354503059cdda84dade8720e35f228c5bf397b1990e55"
+    }
+  },
+  "plain_text_references": [
+    "/docs/agents/fusion-designs/",
+    "/docs/collaborate/downloads/",
+    "/docs/reference/limits/",
+    "/docs/reference/mcp-tools/designs/",
+    "/docs/simulate/",
+    "/docs/start/workspace/#presentation-view"
+  ]
+}

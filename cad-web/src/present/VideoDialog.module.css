@@ -1,0 +1,22 @@
+/* The video export's dialog (VideoDialog.tsx): labelled rows, then progress with a preview of the frame being encoded. */
+.form { display: flex; flex-direction: column; gap: 8px; }
+.row { display: grid; grid-template-columns: 112px minmax(0, 1fr); align-items: center; gap: 12px; min-height: 30px; }
+.label { font-size: var(--fs-sm); color: var(--text-2); }
+.control { display: flex; align-items: center; gap: 10px; min-width: 0; flex-wrap: wrap; }
+.control > :first-child { min-width: 0; }
+.hint { font-size: var(--fs-xs); color: var(--text-3); }
+.value { font-size: var(--fs-sm); color: var(--text-1); }
+.summary { margin: 4px 0 0; font-size: var(--fs-xs); color: var(--text-3); font-variant-numeric: tabular-nums; }
+.summary[data-problem] { color: var(--warning); }
+.progress { display: flex; flex-direction: column; gap: 10px; }
+.preview { align-self: center; width: 100%; border-radius: var(--r-sm); background: var(--bg-0); border: 1px solid var(--line-2); }
+.meter { height: 4px; border-radius: 2px; background: var(--line-2); overflow: hidden; }
+.meter > span { display: block; height: 100%; background: var(--ws); transition: width 120ms linear; }
+.result { display: flex; flex-direction: column; gap: 6px; font-size: var(--fs-sm); color: var(--text-1); }
+.result p { margin: 0; }
+.note { font-size: var(--fs-xs); color: var(--text-2); line-height: 1.5; }
+.note[data-tone='danger'] { color: var(--danger); }
+
+@media (max-width: 520px) {
+  .row { grid-template-columns: 1fr; gap: 4px; }
+}

@@ -1,0 +1,37 @@
+/* Order from RMFG (dialogs/RmfgDialog.tsx). */
+.row { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+.order { display: flex; flex-direction: column; gap: 10px; }
+.steps { margin: 0; padding-left: 18px; color: var(--text-2); font-size: var(--fs-sm); line-height: 1.6; }
+.price { display: flex; flex-direction: column; gap: 6px; padding: 12px 14px; border-radius: var(--r-md); background: var(--bg-2); }
+.price b { font-size: var(--fs-lg); color: var(--text-1); }
+.price span, .price small { color: var(--text-3); font-size: var(--fs-xs); }
+.options { display: flex; flex-wrap: wrap; gap: 6px; }
+.options button { padding: 3px 8px; border-radius: 6px; border: 1px solid var(--line-2); color: var(--text-2); font-size: var(--fs-xs); }
+.options button[data-active] { border-color: var(--ws); color: var(--text-1); }
+.notes { margin: 0; padding: 0; list-style: none; display: flex; flex-direction: column; gap: 3px; color: var(--text-3); font-size: var(--fs-xs); }
+.notes li { display: flex; gap: 6px; align-items: baseline; }
+.part { display: grid; grid-template-columns: 120px minmax(0, 1fr); gap: 12px; padding: 10px; border: 1px solid var(--line-2); border-radius: var(--r-md); }
+.image { width: 120px; height: 90px; object-fit: contain; border-radius: 6px; background: var(--bg-3); }
+.partBody { display: flex; flex-direction: column; gap: 6px; min-width: 0; }
+.partBody small { color: var(--text-3); font-size: var(--fs-xs); }
+.choices { display: grid; grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); gap: 6px; }
+.finding { display: flex; gap: 6px; align-items: flex-start; font-size: var(--fs-xs); line-height: 1.45; color: var(--text-2); }
+.finding[data-severity='blocking'] { color: var(--danger); }
+.finding[data-severity='warning'] { color: var(--warning); }
+.review { display: inline-flex; align-items: center; gap: 6px; color: var(--ws); font-size: var(--fs-sm); }
+.ask { display: flex; align-items: center; justify-content: space-between; gap: 10px; padding: 10px 12px; border-radius: var(--r-md); background: var(--warning-soft); font-size: var(--fs-sm); }
+.buy { display: flex; flex-direction: column; gap: 8px; padding: 12px 14px; border: 1px solid var(--line-2); border-radius: var(--r-md); }
+.buy small { color: var(--text-3); font-size: var(--fs-xs); }
+.delivery { display: flex; flex-direction: column; gap: 4px; font-size: var(--fs-sm); color: var(--text-2); }
+.delivery label { display: flex; gap: 8px; align-items: center; }
+.total { display: flex; flex-wrap: wrap; align-items: center; gap: 10px; font-size: var(--fs-sm); }
+.done { padding: 10px 12px; border-radius: var(--r-md); background: var(--bg-2); font-size: var(--fs-sm); }
+/* Every open order (the top bar's RMFG button): one row each, opening it. */
+.list { display: flex; flex-direction: column; gap: 8px; }
+.listRow { display: flex; align-items: flex-start; justify-content: space-between; gap: 12px; padding: 10px 12px; border: 1px solid var(--line-2); border-radius: var(--r-md); }
+.listRow[data-waiting] { border-color: color-mix(in srgb, var(--warning) 60%, var(--line-2)); background: var(--warning-soft); }
+.listOpen { display: flex; flex-direction: column; gap: 3px; min-width: 0; flex: 1; padding: 0; border: 0; background: none; text-align: left; cursor: pointer; color: var(--text-2); font-size: var(--fs-sm); }
+.listOpen b { color: var(--text-1); }
+.listOpen small { color: var(--text-3); font-size: var(--fs-xs); line-height: 1.45; }
+.listOpen:hover b { color: var(--ws); }
+@media (max-width: 560px) { .row { grid-template-columns: 1fr; } .part { grid-template-columns: 1fr; } }

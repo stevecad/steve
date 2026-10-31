@@ -1,0 +1,5 @@
+.modelChoice { display: grid; gap: 8px; padding: 10px 12px; border-radius: 9px; border: 1px solid var(--line-2); background: var(--bg-1); font-size: var(--fs-sm); color: var(--text-2); }
+.modelChoice b { color: var(--text-1); }
+.modelOptions { display: flex; flex-wrap: wrap; gap: 6px; }
+.modelOption { padding: 5px 10px; border-radius: 7px; border: 1px solid var(--line-2); background: var(--bg-0); color: var(--text-1); font-size: var(--fs-xs); cursor: pointer; }
+.modelOption:hover, .modelOption:focus-visible { outline: none; border-color: var(--ws); background: var(--ws-softer); }

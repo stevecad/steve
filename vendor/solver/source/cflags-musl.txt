@@ -1,0 +1,9 @@
+# C flags for the vendored musl libm subset (vendor/musl-math), shared by both builds so that
+# sin/cos/atan/atan2/pow are bit-identical on WebAssembly and x86-64 (glibc's differ in the
+# last bit). -fvisibility=hidden keeps the symbols private to the Python extension.
+-std=gnu11
+-O3
+-ffp-contract=off
+-fno-builtin
+-fvisibility=hidden
+-w

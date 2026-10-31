@@ -1,0 +1,18 @@
+/* Shared settings controls. Section styles contain only domain-specific layouts. */
+.form { display: grid; gap: 12px; padding: 4px 0; }
+.field { display: grid; gap: 8px; color: var(--text-1); font-size: var(--fs-sm); font-weight: 500; }
+.input { width: 100%; box-sizing: border-box; min-height: 36px; padding: 8px 12px; border: 1px solid var(--line-2); border-radius: var(--r-md); background: var(--bg-2); color: var(--text-1); font-family: inherit; font-size: var(--fs-sm); line-height: 1.6; resize: vertical; }
+.input:focus-visible { outline: 2px solid var(--ws); outline-offset: 2px; }
+.input::placeholder { color: var(--text-4); }
+.actions { display: flex; align-items: center; flex-wrap: wrap; gap: 8px; padding: 4px 0; margin: 8px 0; }
+.hint { color: var(--text-3); font-size: var(--fs-sm); line-height: 1.6; margin: 8px 0; overflow-wrap: anywhere; }
+.error { padding: 10px 12px; margin: 8px 0; border: 1px solid var(--danger); border-radius: var(--r-md); background: var(--danger-soft); color: var(--text-1); font-size: var(--fs-sm); line-height: 1.5; overflow-wrap: anywhere; }
+.status { color: var(--text-3); font-size: var(--fs-xs); line-height: 1.5; }
+.choices { display: grid; grid-template-columns: repeat(auto-fit, minmax(min(100%, 210px), 1fr)); gap: 12px; padding: 4px 0 8px; }
+.choice { display: flex; flex-direction: column; text-align: left; gap: 8px; padding: 16px; border: 1px solid var(--line-2); border-radius: var(--r-md); background: var(--bg-2); color: var(--text-1); cursor: pointer; }
+.choice:hover { border-color: var(--ws); }
+.choice[aria-pressed='true'] { border-color: var(--ws); background: var(--ws-softer); box-shadow: inset 0 0 0 1px var(--ws); }
+.choice:focus-visible { outline: 2px solid var(--ws); outline-offset: 2px; }
+.choice:disabled { opacity: .5; cursor: wait; }
+.choice strong { font-size: var(--fs-md); font-weight: 600; }
+.choice span { font-size: var(--fs-sm); color: var(--text-3); line-height: 1.5; }

@@ -1,0 +1,6 @@
+Steve 0.4.2
+
+- Settings > Updates shows what's happening: checking, downloading (with megabytes
+  done), preparing, ready.
+- The update feed and its signing keys can no longer be changed from the app: Steve
+  only installs updates from dl.stevecad.studio signed by its built-in keys.

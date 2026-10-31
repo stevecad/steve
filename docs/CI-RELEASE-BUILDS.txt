@@ -1,0 +1,33 @@
+Build in GitHub Actions; sign locally
+
+Primary publication/update host: https://dl.stevecad.studio
+GitHub Releases is an optional mirror, not the intended primary update service.
+The service developer owns that API and its release/update contract. This change
+does not implement upload/download endpoints, guess their paths, change the
+shipped update feed, or define a new updater manifest schema.
+
+Unsigned release builds (.github/workflows/release-build.yml)
+
+- Windows runs on windows-2025 with pinned Python dependencies and Inno Setup 7.
+  It builds Steve.exe, the windowless update helper, installer and portable ZIP.
+- Linux runs the existing Ubuntu 24.04 package, Blender, AppImage, upgrade,
+  rollback and clean-container checks through a reusable workflow.
+- Both jobs check out the same full source commit and emit release-build.json
+  with version, platform, source commit, workflow run ID, file sizes, SHA-256
+  and SHA-384 hashes. Files are marked unsigned. Verification logs are retained.
+- Workflow permissions are contents:read. No signing secrets, private keys or
+  publication credentials are passed to build runners.
+- Run the workflow manually after merge, selecting the reviewed branch/tag.
+  Relevant pull requests also build both platforms; a failed job cannot produce
+  a completed successful release run.
+
+After the build
+
+Signing and publishing happen outside this repository, from a successful run of
+this workflow for an explicit, reviewed commit. Its recorded sizes and hashes are
+checked again before anything is signed. Build runners never receive signing or
+upload credentials.
+
+Update manifests are verified with the ECDSA P-384 keys listed in
+assets/update-channel.json (docs/UPDATE-FEED.txt). Update signing is separate
+from Windows Authenticode signing.

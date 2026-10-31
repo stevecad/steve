@@ -1,0 +1,11 @@
+.status { display:flex; align-items:center; gap:10px; padding:4px 0 12px; }
+.dot { width:8px; height:8px; border-radius:50%; background:var(--text-3); }
+.dot[data-connected] { background:var(--ws); }
+.actions { composes: actions from "../Controls.module.css"; }
+.note { composes: hint from "../Controls.module.css"; }
+.error { composes: error from "../Controls.module.css"; }
+.models { margin:16px 0; font-size:13px; }
+.models summary { cursor:pointer; padding:8px 0; }
+.models ul { margin:4px 0; padding:0; list-style:none; }
+.models li { display:flex; align-items:center; justify-content:space-between; flex-wrap:wrap; gap:8px; padding:9px 0; border-bottom:1px solid var(--line-2); }
+.models code { color:var(--text-3); font-size:11px; }

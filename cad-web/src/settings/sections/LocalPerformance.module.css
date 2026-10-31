@@ -1,0 +1,8 @@
+.metrics { display:grid; grid-template-columns:repeat(4,minmax(0,1fr)); gap:16px; padding:6px 0 24px; }
+.metrics div { display:flex; flex-direction:column; gap:8px; }
+.metrics strong { font-size:30px; font-weight:550; font-variant-numeric:tabular-nums; }
+.metrics span { color:var(--text-3); font-size:12px; }
+.badge { color:var(--ws); font-size:12px; }
+.error { composes: error from "../Controls.module.css"; }
+
+.note { composes: hint from "../Controls.module.css"; }

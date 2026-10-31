@@ -1,0 +1,78 @@
+/*
+ * The desktop's own components inside the phone shell: only touch sizing and what the phone shows elsewhere.
+ * Everything is scoped to html[data-ui='phone'] (phone/detect.ts), so tablets and desktops never see these rules.
+ */
+
+/* The viewport's toolbar and view name: their controls are in the View sheet. The view cube stays. */
+html[data-ui='phone'] #viewport [role='toolbar'][aria-label='View tools'],
+html[data-ui='phone'] #viewport div:has(> #view-orientation) { display: none !important; }
+
+/* Menus (Radix and the viewport's context menu): rows a finger can hit. */
+html[data-ui='phone'] [role='menuitem'],
+html[data-ui='phone'] [role='menuitemradio'],
+html[data-ui='phone'] [role='menuitemcheckbox'] { min-height: 44px; font-size: 14px; }
+
+/* The context menu (long press, or ⋯ on the selection) as an action sheet above the bar. */
+html[data-ui='phone'] #viewport [role='menu'] {
+  left: max(8px, env(safe-area-inset-left)) !important;
+  right: max(8px, env(safe-area-inset-right));
+  top: auto !important;
+  bottom: calc(var(--phone-bar-h, 0px) + 8px);
+  min-width: 0;
+  max-height: 62dvh;
+  overflow: auto;
+  transform-origin: bottom center;
+}
+
+/* The panels' tab rows (Inspector, Source, STEVE…, Model, Versions) and their buttons. */
+html[data-ui='phone'] [data-phone-shell] section[role='dialog'] [role='tablist'] { height: auto; min-height: 48px; overflow-x: auto; scrollbar-width: none; }
+html[data-ui='phone'] [data-phone-shell] section[role='dialog'] [role='tablist'] [role='tab'] { height: 44px; flex-shrink: 0; font-size: 13px; }
+html[data-ui='phone'] [data-phone-shell] section[role='dialog'] [role='tablist'] button:not([role='tab']) { width: 44px; height: 44px; }
+
+
+/* The axis triad repeats what the view cube shows. */
+html[data-ui='phone'] #viewport > svg[aria-hidden='true'] { display: none; }
+
+/* Panel tabs are icons on a phone; the open one also says what it is. */
+html[data-ui='phone'] [data-phone-shell] section[role='dialog'] [role='tablist'] [role='tab'][aria-selected='true'] > span:not([aria-hidden]) { display: inline !important; }
+
+/* A tool's OK / Cancel footer: thumb-sized. */
+html[data-ui='phone'] [data-tool-footer] button { min-height: 44px; min-width: 64px; }
+html[data-ui='phone'] [data-tool-footer] { padding-bottom: 10px; }
+
+/* Results, motion and toolpath players: across the bottom of the model, wrapped to fit, with thumb-sized controls. */
+html[data-ui='phone'] #results-player,
+html[data-ui='phone'] #cam-player {
+  left: 8px; right: 8px; bottom: 10px; translate: none; height: auto; max-width: none;
+  flex-wrap: wrap; justify-content: center; row-gap: 4px; padding: 6px 8px; white-space: normal;
+}
+html[data-ui='phone'] #results-player > button,
+html[data-ui='phone'] #cam-player button { min-width: 44px; min-height: 44px; }
+html[data-ui='phone'] #results-player > span:first-of-type { order: -1; flex-basis: 100%; min-width: 0; padding-top: 2px; }
+html[data-ui='phone'] #results-player > span:empty { display: none; }
+html[data-ui='phone'] #results-player select { height: 44px; }
+html[data-ui='phone'] #results-player > div button { min-height: 40px; }
+html[data-ui='phone'] [data-motion-hud] { bottom: 12px; }
+/* The toolpath player (Manufacture): the deck is the screen's width, its rows wrap, the stock note gets a line of its
+   own, Events / Posted program open over the top of the model (not on the deck), and the selection chip steps aside
+   while the player is open (the selection is kept). */
+html[data-ui='phone'] #cam-player { width: auto; }
+html[data-ui='phone'] #cam-player [data-deck] { flex-wrap: wrap; justify-content: center; row-gap: 4px; }
+html[data-ui='phone'] #cam-player [data-deck='foot'] #cam-stock-note { order: -1; flex-basis: 100%; text-align: center; }
+html[data-ui='phone'] #cam-side { top: 8px; bottom: auto; height: 40%; }
+html[data-ui='phone'] main:has(#cam-player) #phone-selection { display: none; }
+
+html[data-ui='phone'] [data-motion-hud] button { min-width: 44px; min-height: 44px; }
+
+/* The branch pill in the document sheet. */
+html[data-ui='phone'] #phone-document button[aria-label^='Branch'] { min-height: 44px; padding: 0 12px; }
+
+/* The motion timeline (animations and explodes): its controls on one row and the track under them, full width, so it
+   can be scrubbed; the strip grows to fit both rows. */
+html[data-ui='phone'] #animation-strip { height: auto !important; flex-wrap: wrap; row-gap: 6px; padding-top: 6px; padding-bottom: 6px; }
+html[data-ui='phone'] #animation-strip > [class*='stripHead'] > .caps { display: none; }
+html[data-ui='phone'] #animation-strip > [class*='stripActions'] { margin-left: auto; }
+html[data-ui='phone'] #animation-strip > [class*='stripTrack'],
+html[data-ui='phone'] #animation-strip > [class*='stripEmpty'] { order: 3; flex: 1 0 100%; }
+html[data-ui='phone'] #animation-strip button { min-width: 36px; min-height: 36px; }
+html[data-ui='phone'] #animation-strip [data-step] { min-width: 0; min-height: 0; }

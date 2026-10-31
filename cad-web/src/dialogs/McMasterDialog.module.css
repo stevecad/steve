@@ -1,0 +1,69 @@
+/* McMaster-Carr: open the catalog window, drop the downloaded STEP, reuse earlier parts (StandardPartsDialog's language). */
+.body { display: flex; flex-direction: column; gap: 12px; min-height: 0; }
+
+.browse { display: flex; align-items: center; gap: 8px; flex-wrap: wrap; }
+.or { font-size: var(--fs-xs); color: var(--text-3); }
+.lookup input {
+  width: 132px; height: 30px; padding: 0 10px; border-radius: var(--r-sm); border: 1px solid var(--line-3); background: var(--bg-2);
+  color: var(--text-1); font-family: var(--font-mono); font-size: var(--fs-sm); text-transform: uppercase;
+}
+.lookup input:focus, .fieldRow input:focus { outline: none; border-color: var(--ws); box-shadow: 0 0 0 3px var(--ws-soft); }
+
+.steps { display: flex; gap: 18px; margin: 0; padding: 0; list-style: none; counter-reset: step; font-size: var(--fs-xs); color: var(--text-2); }
+.steps li { counter-increment: step; display: flex; align-items: center; gap: 6px; }
+.steps li::before {
+  content: counter(step); display: grid; place-items: center; width: 18px; height: 18px; border-radius: 50%;
+  background: var(--bg-4); color: var(--text-1); font-size: 10.5px; font-weight: 600;
+}
+.steps b { color: var(--text-1); font-weight: 600; }
+
+.drop {
+  display: flex; align-items: center; justify-content: center; gap: 14px; min-height: 120px; padding: 18px; border-radius: var(--r-lg);
+  border: 1.5px dashed var(--line-3); background: var(--bg-2); color: var(--text-3); font-size: var(--fs-sm); line-height: 1.5; cursor: pointer;
+  transition: border-color var(--t-fast), background var(--t-fast), color var(--t-fast);
+}
+.drop b { color: var(--text-1); font-weight: 600; }
+.drop u { text-decoration: none; color: var(--ws); }
+.drop:hover, .drop:focus-visible, .drop[data-dragging] { outline: none; border-color: var(--ws); background: var(--ws-softer); color: var(--text-2); }
+
+.file {
+  display: flex; align-items: flex-start; gap: 12px; padding: 12px; border-radius: var(--r-lg); border: 1px solid var(--line-2);
+  background: var(--bg-3); color: var(--text-2); animation: file-in 0.2s var(--ease-out);
+}
+@keyframes file-in { from { opacity: 0; transform: translateY(4px); } }
+@media (prefers-reduced-motion: reduce) { .file { animation: none; } }
+.fileFields { flex: 1; min-width: 0; display: flex; flex-direction: column; gap: 8px; }
+.fileName { font-size: var(--fs-sm); color: var(--text-1); font-weight: 600; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.fileName small { font-weight: 400; color: var(--text-3); margin-left: 6px; }
+.fieldRow { display: flex; gap: 10px; }
+.fieldRow label { display: flex; flex-direction: column; gap: 4px; font-size: var(--fs-2xs); color: var(--text-3); }
+.fieldRow label[data-wide] { flex: 1; min-width: 0; }
+.fieldRow input {
+  height: 30px; padding: 0 9px; border-radius: var(--r-sm); border: 1px solid var(--line-3); background: var(--bg-2); color: var(--text-1); font-size: var(--fs-sm);
+}
+.fieldRow label:first-child input { width: 130px; font-family: var(--font-mono); text-transform: uppercase; }
+.fieldRow input[data-invalid] { border-color: var(--danger, #f07575); }
+.hint { font-size: var(--fs-2xs); color: var(--warning); }
+.clear { display: grid; place-items: center; width: 24px; height: 24px; border-radius: 6px; color: var(--text-3); }
+.clear:hover { background: var(--bg-4); color: var(--text-1); }
+
+.error { padding: 8px 10px; border-radius: var(--r-sm); background: var(--danger-soft, rgb(220 60 60 / 0.12)); color: var(--danger, #f07575); font-size: var(--fs-xs); line-height: 1.45; display: flex; gap: 6px; align-items: flex-start; }
+.error span { flex: 1; }
+
+.cache { display: flex; flex-direction: column; gap: 8px; min-height: 0; }
+.cacheHead { display: flex; align-items: center; gap: 10px; }
+.cacheHead b { flex: 1; font-size: var(--fs-2xs); font-weight: 700; letter-spacing: 0.06em; text-transform: uppercase; color: var(--text-3); }
+.filter { position: relative; display: flex; align-items: center; }
+.filter svg { position: absolute; left: 8px; color: var(--text-3); pointer-events: none; }
+.filter input { width: 180px; height: 26px; padding: 0 8px 0 26px; border-radius: var(--r-sm); border: 1px solid var(--line-2); background: var(--bg-2); color: var(--text-1); font-size: var(--fs-xs); }
+.list { max-height: min(28vh, 260px); overflow: auto; display: flex; flex-direction: column; border: 1px solid var(--line-1); border-radius: var(--r-md); }
+.row { display: flex; align-items: center; gap: 10px; padding: 6px 8px 6px 10px; border-bottom: 1px solid var(--line-1); font-size: var(--fs-sm); }
+.row:last-child { border-bottom: 0; }
+.row:hover { background: var(--bg-3); }
+.row code { font-family: var(--font-mono); font-size: var(--fs-xs); color: var(--text-1); min-width: 88px; }
+.rowTitle { flex: 1; min-width: 0; color: var(--text-2); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.date { font-size: var(--fs-2xs); color: var(--text-3); white-space: nowrap; font-variant-numeric: tabular-nums; }
+.row a { display: grid; place-items: center; width: 22px; height: 22px; border-radius: 5px; color: var(--text-3); }
+.row a:hover { background: var(--bg-4); color: var(--ws); }
+.muted { padding: 14px; font-size: var(--fs-xs); color: var(--text-3); text-align: center; }
+.note { font-size: var(--fs-2xs); color: var(--text-4); }

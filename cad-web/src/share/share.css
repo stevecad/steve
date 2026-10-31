@@ -1,0 +1,30 @@
+/* The share page's glue around the app's own shell modules (ShareShell.tsx), in the app's tokens. */
+.share { display: grid; grid-template-rows: var(--topbar-h) minmax(0, 1fr); grid-template-columns: minmax(0, 1fr); height: 100vh; height: 100dvh; background: var(--bg-0); overflow: hidden; }
+.muted { color: var(--text-3); font-size: var(--fs-sm); }
+.message { display: grid; place-items: center; height: 100%; text-align: center; padding: 24px; }
+#viewport .message { position: absolute; inset: 0; z-index: 3; pointer-events: none; }
+.loading { display: flex; align-items: center; gap: 10px; padding: 9px 16px 9px 13px; border-radius: 99px; background: var(--bg-overlay); border: 1px solid var(--line-2); color: var(--text-2); font-variant-numeric: tabular-nums; }
+
+/* The top bar: the design's name is a title here, not a field to rename. */
+.share-name { max-width: 420px; }
+.share-name:hover { background: transparent; }
+.share-meta { min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; font-size: var(--fs-xs); color: var(--text-3); }
+.share-credit { font-size: var(--fs-xs); color: var(--text-3); white-space: nowrap; text-decoration: none; }
+.share-credit:hover { color: var(--text-1); }
+@media (max-width: 820px) { .share-meta, .share-credit { display: none; } }
+
+/* Motors and animations: rows that light up while they play. */
+.share-play { width: 100%; text-align: left; color: var(--text-1); cursor: pointer; }
+.share-play:hover { border-color: var(--line-3); }
+.share-play[aria-pressed='true'] { border-color: var(--sel-line); background: var(--sel-soft); }
+.share-play[aria-pressed='true'] svg { color: var(--sel); }
+
+/* Phones: as many bar buttons as the link has uses for (the phone shell has five), and thumb-sized controls. */
+[data-share-phone] > nav[data-share-bar] { grid-template-columns: repeat(var(--share-buttons), minmax(0, 1fr)); }
+@media (orientation: landscape) {
+  [data-share-phone] > nav[data-share-bar] { grid-template-columns: 66px; grid-template-rows: repeat(var(--share-buttons), minmax(0, 1fr)); }
+}
+.share-mark { width: 26px; height: 26px; border-radius: 8px; box-shadow: 0 0 0 1px var(--line-2); }
+.share-touch button { min-height: 44px; }
+.share-touch [aria-label='Clear selection'] { min-width: 44px; }
+.share-touch [role='slider'] { width: 24px; height: 24px; }

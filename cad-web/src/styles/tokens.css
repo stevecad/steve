@@ -1,0 +1,234 @@
+/* Registered so the workspace accent animates when switching workspaces. */
+@property --ws { syntax: '<color>'; inherits: true; initial-value: #8fdcc0; }
+@property --ws-soft { syntax: '<color>'; inherits: true; initial-value: transparent; }
+@property --ws-softer { syntax: '<color>'; inherits: true; initial-value: transparent; }
+@property --ws-glow { syntax: '<color>'; inherits: true; initial-value: transparent; }
+
+/*
+ * STEVE Studio design tokens.
+ * Graphite surfaces, a mint brand accent, and a per-workspace accent that
+ * shifts between Design (mint), Simulate (iris), Manufacture (amber) and Electronics (azure).
+ */
+:root {
+  color-scheme: dark;
+
+  /* Surfaces, deepest to most raised. */
+  --bg-0: #0c0e10;
+  --bg-1: #121518;
+  --bg-2: #171b1f;
+  --bg-3: #1d2226;
+  --bg-4: #242a2f;
+  --bg-5: #2c3339;
+  --bg-overlay: rgb(20 24 27 / 0.86);
+  --scrim: rgb(5 7 8 / 0.62);
+
+  --line-1: rgb(255 255 255 / 0.055);
+  --line-2: rgb(255 255 255 / 0.085);
+  --line-3: rgb(255 255 255 / 0.13);
+  --line-4: rgb(255 255 255 / 0.2);
+
+  --text-1: #eef1f2;
+  --text-2: #b4bcc0;
+  --text-3: #7d878d;
+  --text-4: #555e64;
+
+  /* Brand. */
+  --mint: #8fdcc0;
+  --mint-strong: #5fcfa5;
+  --amber: #e8bd84;
+  --iris: #a99bff;
+  --azure: #5cb8ff;
+  --coral: #ff8a78;
+  --lime: #b7e27a;
+
+  /* Workspace accent, swapped by [data-workspace]. */
+  --ws: var(--mint);
+  --ws-strong: var(--mint-strong);
+  --ws-ink: #07251b;
+  --ws-soft: rgb(143 220 192 / 0.12);
+  --ws-softer: rgb(143 220 192 / 0.07);
+  --ws-glow: rgb(143 220 192 / 0.35);
+
+  /* Semantic. */
+  --sel: #53b6ff;
+  --sel-soft: rgb(83 182 255 / 0.16);
+  --sel-line: rgb(83 182 255 / 0.55);
+  --success: #7bd89d;
+  --warning: #eec077;
+  --danger: #ff8474;
+  --danger-soft: rgb(255 132 116 / 0.12);
+  --warning-soft: rgb(238 192 119 / 0.12);
+  --info: var(--azure);
+
+  --axis-x: #ff6b6b;
+  --axis-y: #7ed47c;
+  --axis-z: #5aa9ff;
+
+  /* Viewport backdrop. */
+  --vp-top: #2a3136;
+  --vp-bottom: #0f1214;
+
+  /* Code. */
+  --code-bg: #0d1012;
+  --code-gutter: #111517;
+  --code-line: rgb(255 255 255 / 0.035);
+  --tok-kw: #c7a0ff;
+  --tok-str: #b8dd9a;
+  --tok-num: #f7ab7c;
+  --tok-fn: #86b8ff;
+  --tok-cm: #6b777d;
+  --tok-bi: #7fd6e8;
+  --tok-dec: #f3cf7d;
+  --tok-prop: #d7dde0;
+  --tok-op: #9aa6ad;
+
+  /* Type. */
+  --font-sans: 'Inter Variable', 'Inter', ui-sans-serif, system-ui, -apple-system, 'Segoe UI', sans-serif;
+  --font-mono: 'JetBrains Mono Variable', 'JetBrains Mono', ui-monospace, 'SF Mono', Menlo, Consolas, monospace;
+  --fs-2xs: 9.5px;
+  --fs-xs: 10.5px;
+  --fs-sm: 11.5px;
+  --fs-md: 12.5px;
+  --fs-lg: 14px;
+  --fs-xl: 17px;
+  --fs-2xl: 22px;
+  --fs-3xl: 30px;
+
+  /* Shape. */
+  --r-xs: 4px;
+  --r-sm: 4px;
+  --r-md: 6px;
+  --r-lg: 8px;
+  --r-xl: 10px;
+  --r-pill: 999px;
+
+  /* Elevation. */
+  --shadow-1: 0 1px 2px rgb(0 0 0 / 0.35);
+  --shadow-2: 0 4px 14px rgb(0 0 0 / 0.35), 0 1px 3px rgb(0 0 0 / 0.3);
+  --shadow-3: 0 12px 40px rgb(0 0 0 / 0.45), 0 2px 8px rgb(0 0 0 / 0.3);
+  --shadow-4: 0 28px 90px rgb(0 0 0 / 0.55), 0 6px 20px rgb(0 0 0 / 0.35);
+  --inset-hi: inset 0 1px 0 rgb(255 255 255 / 0.045);
+
+  /* Motion. */
+  --ease-out: cubic-bezier(0.16, 1, 0.3, 1);
+  --ease-in-out: cubic-bezier(0.65, 0, 0.35, 1);
+  --ease-standard: cubic-bezier(0.2, 0, 0, 1);
+  --ease-spring: cubic-bezier(0.34, 1.4, 0.64, 1);
+  --t-fast: 90ms;
+  --t-base: 160ms;
+  --t-slow: 260ms;
+  --t-slower: 420ms;
+
+  /* Layout. */
+  --topbar-h: 40px;
+  --ribbon-h: 76px;
+  --status-h: 26px;
+}
+
+:root[data-theme='light'] {
+  color-scheme: light;
+  --bg-0: #e9ecee;
+  --bg-1: #f4f6f7;
+  --bg-2: #fbfcfc;
+  --bg-3: #eef1f3;
+  --bg-4: #e4e8eb;
+  --bg-5: #d9dee2;
+  --bg-overlay: rgb(250 251 252 / 0.9);
+  --scrim: rgb(30 36 40 / 0.32);
+  --line-1: rgb(12 22 28 / 0.07);
+  --line-2: rgb(12 22 28 / 0.1);
+  --line-3: rgb(12 22 28 / 0.15);
+  --line-4: rgb(12 22 28 / 0.24);
+  --text-1: #141a1e;
+  --text-2: #465157;
+  --text-3: #6f7b82;
+  --text-4: #a2acb2;
+  --mint: #1f9a73;
+  --mint-strong: #14805e;
+  --amber: #b87318;
+  --iris: #6a55e8;
+  --ws-ink: #ffffff;
+  --ws-soft: rgb(31 154 115 / 0.12);
+  --ws-softer: rgb(31 154 115 / 0.06);
+  --ws-glow: rgb(31 154 115 / 0.3);
+  --sel: #1682e0;
+  --sel-soft: rgb(22 130 224 / 0.12);
+  --sel-line: rgb(22 130 224 / 0.55);
+  --success: #1f9d58;
+  --warning: #b87318;
+  --danger: #d8443a;
+  --danger-soft: rgb(216 68 58 / 0.1);
+  --warning-soft: rgb(184 115 24 / 0.1);
+  --vp-top: #f6f8f9;
+  --vp-bottom: #c9d1d6;
+  --code-bg: #fbfcfc;
+  --code-gutter: #f3f5f6;
+  --code-line: rgb(12 22 28 / 0.035);
+  --tok-kw: #7a3fd0;
+  --tok-str: #3d7d1d;
+  --tok-num: #b85418;
+  --tok-fn: #1f5fbf;
+  --tok-cm: #8a969c;
+  --tok-bi: #0b7c8f;
+  --tok-dec: #9a6b00;
+  --tok-prop: #26313a;
+  --tok-op: #5b666c;
+  --shadow-1: 0 1px 2px rgb(15 25 30 / 0.08);
+  --shadow-2: 0 4px 14px rgb(15 25 30 / 0.1), 0 1px 3px rgb(15 25 30 / 0.08);
+  --shadow-3: 0 12px 40px rgb(15 25 30 / 0.14), 0 2px 8px rgb(15 25 30 / 0.08);
+  --shadow-4: 0 28px 90px rgb(15 25 30 / 0.2), 0 6px 20px rgb(15 25 30 / 0.1);
+  --inset-hi: inset 0 1px 0 rgb(255 255 255 / 0.7);
+}
+
+[data-workspace] {
+  transition: --ws var(--t-slower) var(--ease-out), --ws-soft var(--t-slower) var(--ease-out), --ws-softer var(--t-slower) var(--ease-out), --ws-glow var(--t-slower) var(--ease-out);
+}
+
+[data-workspace='simulate'] {
+  --ws: var(--iris);
+  --ws-strong: #8a78ff;
+  --ws-ink: #140c3a;
+  --ws-soft: rgb(169 155 255 / 0.13);
+  --ws-softer: rgb(169 155 255 / 0.07);
+  --ws-glow: rgb(169 155 255 / 0.35);
+}
+
+[data-workspace='electronics'] {
+  --ws: #6cc8ff;
+  --ws-strong: #3fb4ff;
+  --ws-ink: #04182a;
+  --ws-soft: rgb(108 200 255 / 0.13);
+  --ws-softer: rgb(108 200 255 / 0.07);
+  --ws-glow: rgb(108 200 255 / 0.35);
+}
+
+[data-workspace='manufacture'] {
+  --ws: var(--amber);
+  --ws-strong: #e0a25a;
+  --ws-ink: #2b1804;
+  --ws-soft: rgb(232 189 132 / 0.13);
+  --ws-softer: rgb(232 189 132 / 0.07);
+  --ws-glow: rgb(232 189 132 / 0.35);
+}
+
+:root[data-theme='light'] [data-workspace] {
+  transition: --ws var(--t-slower) var(--ease-out), --ws-soft var(--t-slower) var(--ease-out), --ws-softer var(--t-slower) var(--ease-out), --ws-glow var(--t-slower) var(--ease-out);
+}
+
+[data-workspace='simulate'] { --ws-ink: #ffffff; --ws-soft: rgb(106 85 232 / 0.1); --ws-glow: rgb(106 85 232 / 0.3); }
+:root[data-theme='light'] [data-workspace='manufacture'] { --ws-ink: #ffffff; --ws-soft: rgb(184 115 24 / 0.1); --ws-glow: rgb(184 115 24 / 0.3); }
+:root[data-theme='light'] [data-workspace='electronics'] { --ws: #0a7fc4; --ws-strong: #076aa6; --ws-ink: #ffffff; --ws-soft: rgb(10 127 196 / 0.1); --ws-softer: rgb(10 127 196 / 0.05); --ws-glow: rgb(10 127 196 / 0.3); }
+
+@media (prefers-reduced-motion: reduce) {
+  :root {
+    --t-fast: 0ms;
+    --t-base: 0ms;
+    --t-slow: 0ms;
+    --t-slower: 0ms;
+  }
+}
+
+/* The viewport's backdrop when Settings → Display › Background picks one (viewport/Viewport.tsx sets data-viewport):
+   light grey for light-coloured parts and screenshots, or the dark one whatever the app's theme. */
+:root[data-viewport='light'] { --vp-top: #e8e8e8; --vp-bottom: #c8c8c8; }
+:root[data-viewport='dark'] { --vp-top: #2a3136; --vp-bottom: #0f1214; }

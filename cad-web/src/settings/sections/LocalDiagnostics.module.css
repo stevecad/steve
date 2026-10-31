@@ -1,0 +1,11 @@
+.actions { composes: actions from "../Controls.module.css"; }
+.actions span, .empty, .path { color:var(--text-3); font-size:12px; line-height:1.6; }
+.entries { max-height:440px; overflow:auto; }
+.entries details { border-top:1px solid var(--line-2); padding:12px 0; }
+.entries summary { cursor:pointer; font-size:12px; line-height:1.7; }
+.entries summary strong { margin-right:12px; }
+.entries summary span { color:var(--text-3); margin-right:12px; }
+.entries summary code { color:var(--ws); }
+.detail { padding:16px; margin-top:12px; border-radius:8px; background:var(--bg-2); font-size:12px; }
+.detail pre { white-space:pre-wrap; overflow-wrap:anywhere; line-height:1.6; user-select:text; }
+.path { overflow-wrap:anywhere; margin-top:16px; user-select:text; }

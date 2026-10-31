@@ -1,0 +1,66 @@
+/* Cutting presets: the picker an operation uses, and the feeds & speeds a preset or cutter shows. */
+.muted { color: var(--text-3); font-size: var(--fs-xs); line-height: 1.5; }
+.readValue { color: var(--text-1); font-size: var(--fs-sm); }
+.link { margin-left: 6px; padding: 0 4px; border-radius: 4px; color: var(--ws); font-size: var(--fs-xs); font-weight: 500; }
+.link:hover { background: var(--ws-softer); }
+.select { flex: 1; min-width: 0; height: 28px; padding: 0 4px 0 8px; border-radius: 6px; border: 1px solid var(--line-2); background: var(--bg-1); color: var(--text-1); font-size: var(--fs-sm); }
+.select:focus { outline: none; border-color: var(--ws); box-shadow: 0 0 0 3px var(--ws-softer); }
+.input { width: 100%; min-width: 0; height: 26px; padding: 0 6px; border-radius: 6px; border: 1px solid var(--line-2); background: var(--bg-1); color: var(--text-1); font-size: var(--fs-sm); font-variant-numeric: tabular-nums; }
+.input:focus { outline: none; border-color: var(--ws); box-shadow: 0 0 0 3px var(--ws-softer); }
+
+.picker { display: flex; flex-direction: column; gap: 8px; padding: 10px; border: 1px solid var(--line-1); border-radius: 9px; background: var(--bg-2); }
+.pickerHead { display: flex; align-items: center; gap: 8px; color: var(--text-2); }
+.pickerTitle { font-size: var(--fs-sm); font-weight: 600; white-space: nowrap; }
+.note { margin: 0; padding: 6px 8px; border-radius: 7px; background: var(--bg-3); color: var(--text-2); font-size: var(--fs-xs); line-height: 1.5; }
+.note[data-tone='warning'] { background: var(--warning-soft); color: var(--warning); }
+.empty { display: flex; align-items: center; gap: 10px; justify-content: space-between; padding: 8px 10px; border-radius: 7px; background: var(--bg-3); color: var(--text-2); font-size: var(--fs-xs); line-height: 1.5; }
+.empty > span { min-width: 0; }
+
+.limits { display: flex; flex-direction: column; gap: 8px; animation: rise var(--t-base) ease-out; }
+@keyframes rise { from { opacity: 0; transform: translateY(3px); } to { opacity: 1; transform: none; } }
+@media (prefers-reduced-motion: reduce) { .limits { animation: none; } }
+.limitChips { display: flex; flex-wrap: wrap; gap: 4px; margin: 0; padding: 0; list-style: none; }
+.limitChips li { display: inline-flex; align-items: baseline; gap: 3px; height: 24px; padding: 3px 9px 0; border-radius: 99px; background: var(--bg-3); color: var(--text-1); font-size: var(--fs-xs); font-weight: 500; font-variant-numeric: tabular-nums; white-space: nowrap; }
+.limitChips small { color: var(--text-3); font-weight: 400; }
+.checks { display: grid; grid-template-columns: 14px auto auto 1fr; align-items: center; gap: 3px 8px; margin: 0; padding: 0; list-style: none; font-size: var(--fs-xs); }
+.checks li { display: contents; }
+.checks li > span { color: var(--text-2); }
+.checks li > b { color: var(--text-1); font-weight: 600; font-variant-numeric: tabular-nums; text-align: right; }
+.checks li > small { color: var(--text-3); }
+.checks li > svg { grid-column: 1; }
+.checks li > span:first-child { grid-column: 2; }
+.checks li[data-verdict='within'] > svg { color: var(--mint); }
+.checks li[data-verdict='over'] > svg, .checks li[data-verdict='over'] > b { color: var(--danger); }
+.applyRow { display: flex; align-items: center; gap: 10px; justify-content: space-between; padding: 6px 6px 6px 10px; border-radius: 8px; background: var(--ws-softer); }
+.suggest { color: var(--text-2); font-size: var(--fs-sm); font-variant-numeric: tabular-nums; }
+.suggest b { color: var(--text-1); font-size: var(--fs-md); font-weight: 650; }
+
+/* Feeds & speeds: a preset's limits worked out for a cutter. */
+.feeds { display: flex; flex-direction: column; gap: 10px; margin-top: 10px; padding: 12px; border: 1px solid var(--line-1); border-radius: 10px; background: var(--bg-2); }
+.feedsHead { display: flex; align-items: center; gap: 8px; color: var(--text-2); }
+.feedsHead h4 { margin: 0; font-size: var(--fs-sm); font-weight: 650; color: var(--text-1); }
+.feedsInputs { display: grid; grid-template-columns: repeat(2, minmax(0, 140px)); gap: 8px; }
+.feedsInputs label { display: flex; flex-direction: column; gap: 3px; color: var(--text-3); font-size: var(--fs-2xs); font-weight: 600; letter-spacing: 0.04em; text-transform: uppercase; }
+.result { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 8px; }
+.resultCell { display: flex; flex-direction: column; gap: 2px; padding: 8px 10px; border-radius: 8px; background: var(--bg-3); }
+.resultCell dt { color: var(--text-3); font-size: var(--fs-2xs); font-weight: 600; letter-spacing: 0.04em; text-transform: uppercase; }
+.resultCell dd { margin: 0; color: var(--text-1); font-size: 18px; font-weight: 650; font-variant-numeric: tabular-nums; }
+.resultCell dd small { margin-left: 4px; color: var(--text-3); font-size: var(--fs-xs); font-weight: 400; }
+.bounds { margin: 0; padding: 0; list-style: none; display: flex; flex-direction: column; gap: 2px; font-size: var(--fs-xs); }
+.bounds li { display: flex; justify-content: space-between; gap: 10px; padding: 3px 0; border-bottom: 1px dashed var(--line-1); color: var(--text-2); font-variant-numeric: tabular-nums; }
+.bounds li[data-governs] { color: var(--text-1); font-weight: 600; }
+.bounds li[data-governs]::before { content: '▸'; margin-right: -6px; color: var(--ws); }
+.bounds li > span:first-child { flex: 1; }
+
+/* A cutter's presets: what it may run at, per material and operation. */
+.cutterPresets { display: flex; flex-direction: column; gap: 8px; margin-top: 10px; }
+.cutterPresetsHead { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 8px; }
+.cutterPresetsHead label { display: flex; flex-direction: column; gap: 3px; color: var(--text-3); font-size: var(--fs-2xs); font-weight: 600; letter-spacing: 0.04em; text-transform: uppercase; }
+.applied { display: flex; align-items: center; gap: 8px; padding: 6px 10px; border-radius: 8px; background: color-mix(in srgb, var(--mint) 14%, transparent); color: var(--text-1); font-size: var(--fs-sm); font-variant-numeric: tabular-nums; }
+
+/* Operation chips in a preset's form: what its cutter's type can do. */
+.opChips { display: flex; flex-wrap: wrap; gap: 4px; }
+.opChip { height: 24px; padding: 0 9px; border-radius: 99px; border: 1px solid var(--line-2); background: transparent; color: var(--text-3); font-size: var(--fs-xs); cursor: pointer; }
+.opChip[data-on] { border-color: color-mix(in srgb, var(--ws) 55%, transparent); background: var(--ws-softer); color: var(--text-1); }
+.opChip[data-off] { opacity: 0.55; }
+.opChip:disabled { cursor: default; }

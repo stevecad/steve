@@ -1,0 +1,49 @@
+.bar {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 0 10px 0 12px;
+  background: var(--bg-1);
+  border-top: 1px solid var(--line-2);
+  font-size: var(--fs-xs);
+  color: var(--text-2);
+  white-space: nowrap;
+  overflow: hidden;
+  z-index: 10;
+}
+.job { display: inline-flex; align-items: center; gap: 7px; min-width: 0; }
+.jobLabel { display: inline-grid; overflow: hidden; min-width: 0; }
+.jobLabel > * { grid-area: 1 / 1; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.dot { width: 7px; height: 7px; border-radius: 50%; background: var(--success); box-shadow: 0 0 0 3px color-mix(in srgb, var(--success) 16%, transparent); }
+.job[data-tone='busy'] .dot { background: var(--ws); box-shadow: 0 0 0 3px var(--ws-soft); animation: pulse-dot 1.1s var(--ease-in-out) infinite; }
+.job[data-tone='danger'] { color: var(--danger); }
+.job[data-tone='danger'] .dot { background: var(--danger); box-shadow: 0 0 0 3px var(--danger-soft); }
+.muted { color: var(--text-3); }
+.credit { color: var(--text-3); text-decoration: none; padding: 1px 5px; margin: 0 -5px; border-radius: 4px; transition: color 0.12s, background 0.12s; }
+.credit:hover { color: var(--text-1); background: var(--bg-4); }
+.credit:focus-visible { outline: 2px solid var(--ws); outline-offset: 1px; }
+.strong { color: var(--text-1); font-weight: 540; }
+.sep { width: 1px; height: 12px; background: var(--line-2); }
+.right { margin-left: auto; display: flex; align-items: center; gap: 10px; }
+.coords { display: inline-flex; gap: 10px; font-family: var(--font-mono); font-size: 10.5px; color: var(--text-2); }
+.coords > span { display: inline-flex; gap: 4px; min-width: 64px; }
+.coords b { font-weight: 700; font-family: var(--font-sans); font-size: 9.5px; }
+.coords b[data-axis='X'] { color: var(--axis-x); }
+.coords b[data-axis='Y'] { color: var(--axis-y); }
+.coords b[data-axis='Z'] { color: var(--axis-z); }
+.units { font-weight: 600; font-size: var(--fs-2xs); letter-spacing: 0.06em; padding: 1px 5px; border-radius: 4px; border: 1px solid var(--line-2); color: var(--text-2); }
+/* The chip as a button: one click flips mm and inches. */
+button.units { background: transparent; font-family: inherit; line-height: inherit; cursor: pointer; transition: color 0.12s, background 0.12s; }
+button.units:hover { background: var(--bg-4); color: var(--text-1); }
+button.units:focus-visible { outline: 2px solid var(--ws); outline-offset: 1px; }
+.filter { display: inline-flex; align-items: center; gap: 5px; height: 18px; padding: 0 6px; border-radius: 4px; color: var(--text-2); }
+.filter:hover { background: var(--bg-4); color: var(--text-1); }
+.local { display: inline-flex; align-items: center; gap: 4px; color: var(--warning); }
+
+@media (max-width: 900px) { .coords, .sep:nth-of-type(3) { display: none; } }
+
+/* Stop build: a small square after the elapsed time while a build runs. */
+.stop { display: inline-flex; align-items: center; justify-content: center; width: 16px; height: 16px; margin-left: 2px; padding: 0;
+  border: 0; border-radius: 3px; background: transparent; color: var(--text-3); cursor: pointer; }
+.stop:hover { color: var(--danger); background: var(--bg-4); }
+.stop svg { fill: currentColor; }

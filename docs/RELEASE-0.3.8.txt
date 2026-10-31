@@ -1,0 +1,29 @@
+Steve 0.3.8 — Linux
+
+First signed Linux AppImage and tarball release, based on the local Blender and
+Studio account functionality introduced in 0.3.7. Ubuntu 24.04 x86_64 is the
+supported baseline. Blender remains an optional separate runtime.
+
+- Complete Ed25519-signed Linux bundles download automatically, activate after
+  normal exit and retain the previous working version for startup rollback.
+- If GitHub's latest release is for Windows only, Linux finds its most recent
+  published platform feed through the release list. Drafts and prereleases are
+  excluded, pagination is supported, and signature/platform/hash checks remain
+  mandatory. Custom direct feeds retain their existing behavior.
+- CAD and Blender process trees terminate if their controller crashes. Source
+  and frozen checks cover descendant cleanup and cancellation.
+- Linux uses a persistent platform signing key. Projects, credentials, update
+  opt-out and custom managed-feed settings survive installation and updates.
+- Older development builds using the legacy trust key require one installation
+  of this release or a public-key change. Subsequent Linux updates are automatic.
+- Windows 0.3.8 ZIP, installer and signed update manifest are now available in
+  the same release. Windows trust remains unchanged; Linux assets are unchanged.
+- The bundled Python updater passed isolated Windows 0.3.7-to-0.3.8 normal
+  shutdown and interrupted-startup recovery, preserving data and installer
+  records without launching a shell.
+
+Verification covers source tests, real Blender execution, browser navigation,
+native Qt downloads, frozen CAD/MCP, constrained sketch solving, clean Ubuntu
+AppImage execution, signed HTTPS upgrades and deliberate-corruption rollback.
+Other distributions, native Wayland and physical GPU drivers need desktop
+validation before being advertised as supported.

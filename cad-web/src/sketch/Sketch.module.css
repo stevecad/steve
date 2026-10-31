@@ -1,0 +1,163 @@
+/* Constraint glyphs and dimensions live on the sketch plane (drei Html). */
+.glyph {
+  pointer-events: auto;
+  display: grid;
+  place-items: center;
+  min-width: 17px;
+  height: 17px;
+  padding: 0 4px;
+  translate: 8px -22px;
+  border-radius: 5px;
+  font-family: var(--font-mono);
+  font-size: 10px;
+  font-weight: 700;
+  color: var(--text-2);
+  background: var(--bg-overlay);
+  border: 1px solid var(--line-3);
+  box-shadow: var(--shadow-2);
+  backdrop-filter: blur(8px);
+  cursor: pointer;
+  user-select: none;
+}
+.glyph:hover { color: var(--text-1); border-color: color-mix(in srgb, var(--ws) 60%, var(--line-3)); }
+.glyph[data-selected] { color: var(--bg-0); background: var(--sel); border-color: var(--sel); }
+.glyph[data-conflict] { color: #fff; background: var(--danger); border-color: var(--danger); }
+
+.dimension {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  padding: 2px 7px;
+  border-radius: 6px;
+  font-family: var(--font-mono);
+  font-size: 11px;
+  font-weight: 600;
+  white-space: nowrap;
+  color: var(--text-1);
+  background: var(--bg-overlay);
+  border: 1px solid var(--line-3);
+  box-shadow: var(--shadow-2);
+  backdrop-filter: blur(8px);
+  cursor: grab;
+  user-select: none;
+  touch-action: none;
+}
+.dimension[data-placing] { color: var(--ws); border-color: var(--ws-strong); box-shadow: 0 0 0 3px var(--ws-soft), var(--shadow-2); }
+.dimension:hover { border-color: color-mix(in srgb, var(--ws) 70%, var(--line-3)); }
+.dimension[data-selected] { border-color: var(--sel); box-shadow: 0 0 0 2px color-mix(in srgb, var(--sel) 35%, transparent); }
+.dimension[data-conflict] { color: #fff; background: var(--danger); border-color: var(--danger); }
+/* A value that would cover another at this zoom: faded until zoomed in, or pointed at. */
+.dimension[data-crowded]:not(:hover):not([data-selected]):not([data-conflict]) { opacity: 0.35; }
+.dimensionExpr { color: var(--ws); font-weight: 500; }
+.dimensionExpr::after { content: ' ='; color: var(--text-3); }
+.dimensionEdit { display: inline-flex; flex-direction: column; align-items: center; gap: 3px; }
+.dimensionEdit input {
+  width: 110px;
+  height: 24px;
+  padding: 0 7px;
+  border-radius: 6px;
+  font-family: var(--font-mono);
+  font-size: 12px;
+  text-align: center;
+  color: var(--text-1);
+  background: var(--bg-2);
+  border: 1.5px solid var(--ws);
+  box-shadow: 0 0 0 3px var(--ws-soft), var(--shadow-3);
+  outline: none;
+}
+.dimensionEdit[data-error] input { border-color: var(--danger); box-shadow: 0 0 0 3px var(--danger-soft); }
+.dimensionEditRow { display: inline-flex; align-items: center; gap: 4px; }
+.dimensionEditRow em {
+  padding: 3px 6px;
+  border-radius: 5px;
+  font-size: 11px;
+  font-style: normal;
+  color: var(--text-2);
+  background: var(--bg-2);
+  box-shadow: var(--shadow-3);
+  user-select: none;
+}
+.dimensionEditRow em:hover { color: var(--text-1); }
+.dimensionEdit small { max-width: 220px; padding: 3px 7px; border-radius: 5px; font-size: 11px; color: #fff; background: var(--danger); white-space: normal; text-align: center; }
+
+
+
+/* Origin plane labels while choosing where to sketch. */
+.planeTag {
+  display: inline-block;
+  padding: 2px 7px;
+  border-radius: 6px;
+  font-family: var(--font-mono);
+  font-size: 11px;
+  font-weight: 700;
+  color: var(--plane);
+  background: var(--bg-overlay);
+  border: 1px solid color-mix(in srgb, var(--plane) 55%, transparent);
+  backdrop-filter: blur(8px);
+  transition: all var(--t-fast);
+}
+.planeTag[data-hot] { color: var(--ws-ink); background: var(--plane); border-color: var(--plane); box-shadow: 0 0 12px var(--ws-glow); }
+
+/* Heads-up sizes while drawing (type to lock, Tab to switch, Enter to place). */
+.heads {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  height: 24px;
+  padding: 0 4px 0 7px;
+  border-radius: 7px;
+  font-family: var(--font-mono);
+  font-size: 11px;
+  color: var(--text-3);
+  background: var(--bg-overlay);
+  border: 1px solid var(--line-3);
+  box-shadow: var(--shadow-2);
+  backdrop-filter: blur(8px);
+  white-space: nowrap;
+  transition: border-color var(--t-fast), box-shadow var(--t-fast);
+}
+.heads span { font-weight: 700; color: var(--ws); }
+.heads em { font-style: normal; color: var(--text-3); }
+.heads input {
+  width: 58px;
+  height: 20px;
+  padding: 0 4px;
+  border-radius: 5px;
+  font: inherit;
+  font-size: 12px;
+  color: var(--text-1);
+  background: transparent;
+  border: none;
+  outline: none;
+  field-sizing: content;
+  min-width: 34px;
+  max-width: 120px;
+}
+.heads[data-focused] { border-color: var(--ws-strong); box-shadow: 0 0 0 3px var(--ws-soft), var(--shadow-2); }
+.heads[data-locked] { border-color: var(--ws-strong); background: color-mix(in srgb, var(--ws-strong) 16%, var(--bg-overlay)); }
+.heads[data-locked] input { color: var(--ws); font-weight: 600; }
+.heads[data-invalid] { border-color: var(--danger); }
+
+/* Inference while drawing: what the click will add, beside the cursor. Outlined in the preview tint (committed constraint
+   glyphs are filled chips on the geometry), so the two never read as the same thing. */
+.inference {
+  display: inline-flex;
+  gap: 3px;
+  translate: 12px 10px;
+  pointer-events: none;
+}
+.inference b {
+  display: grid;
+  place-items: center;
+  min-width: 17px;
+  height: 17px;
+  padding: 0 4px;
+  border-radius: 5px;
+  font-family: var(--font-mono);
+  font-size: 10px;
+  font-weight: 700;
+  color: var(--ws);
+  background: color-mix(in srgb, var(--bg-0) 72%, transparent);
+  border: 1px dashed color-mix(in srgb, var(--ws) 75%, transparent);
+  white-space: nowrap;
+}

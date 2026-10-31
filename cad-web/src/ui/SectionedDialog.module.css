@@ -1,0 +1,51 @@
+/* A dialog of sections (ui/SectionedDialog.tsx): the nav and the panes are direct children of the grid; the caller
+   sets the grid's columns. */
+.shell { position: relative; display: grid; flex: 1; min-height: 420px; margin: -4px -4px 0; border-top: 1px solid var(--line-1); }
+/* Default columns at zero specificity: the caller's className (the library's three panes) always wins. */
+:where(.shell) { grid-template-columns: 208px minmax(0, 1fr); }
+
+/* ── Nav ── */
+.nav { display: flex; flex-direction: column; gap: 1px; padding: 10px 8px; border-right: 1px solid var(--line-1); overflow: auto; }
+.navSection { display: block; }
+.navGroup { margin: 10px 8px 4px; font-size: var(--fs-2xs); font-weight: 700; letter-spacing: 0.06em; text-transform: uppercase; color: var(--text-4); }
+.navSection:first-of-type .navGroup { margin-top: 12px; }
+.navItem { display: flex; align-items: center; gap: 8px; width: 100%; height: 30px; padding: 0 8px; border-radius: 7px; color: var(--text-2); font-size: var(--fs-sm); text-align: left; white-space: nowrap; transition: background 0.12s, color 0.12s; }
+.navItem > svg { flex: none; color: var(--text-3); transition: color 0.12s; }
+.navItem:hover { background: var(--bg-3); color: var(--text-1); }
+.navItem[data-on] { background: var(--ws-softer); color: var(--text-1); }
+.navItem[data-on] > svg { color: var(--ws); }
+.navItem:focus-visible { outline: 2px solid var(--ws); outline-offset: -2px; }
+.navLabel { overflow: hidden; text-overflow: ellipsis; }
+.navItem small { margin-left: auto; color: var(--text-4); font-variant-numeric: tabular-nums; }
+.navFoot { margin-top: auto; padding: 10px 4px 0; display: flex; flex-direction: column; gap: 6px; }
+
+/* ── Panes ── */
+.pane { display: flex; flex-direction: column; min-width: 0; min-height: 0; }
+.paneHead { display: flex; align-items: center; gap: 10px; padding: 10px 14px; border-bottom: 1px solid var(--line-1); }
+.paneIcon { display: grid; place-items: center; flex: none; width: 30px; height: 30px; border-radius: 8px; color: var(--ws); background: var(--ws-softer); }
+.paneBack { display: none; place-items: center; flex: none; width: 28px; height: 28px; margin-left: -6px; border-radius: 7px; color: var(--text-2); }
+.paneBack:hover { background: var(--bg-3); color: var(--text-1); }
+.paneTitle { flex: 1; min-width: 0; }
+.paneTitle h3 { font-size: var(--fs-md); font-weight: 600; letter-spacing: 0; word-spacing: 0.06em; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.paneTitle p { color: var(--text-3); font-size: var(--fs-xs); font-variant-numeric: tabular-nums; }
+.paneTabs { display: flex; gap: 2px; padding: 6px 14px 0; border-bottom: 1px solid var(--line-1); }
+.tab { height: 30px; padding: 0 10px; border-bottom: 2px solid transparent; color: var(--text-3); font-size: var(--fs-sm); }
+.tab[data-on] { color: var(--text-1); border-bottom-color: var(--ws); }
+.paneBody { flex: 1; min-height: 0; overflow: auto; padding: 10px 14px 16px; }
+.paneFoot { display: flex; align-items: center; gap: 8px; padding: 10px 14px; border-top: 1px solid var(--line-1); }
+.spacer { flex: 1; }
+.paneEmpty { display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 8px; height: 100%; padding: 24px; color: var(--text-3); font-size: var(--fs-sm); text-align: center; }
+.paneEmpty > svg { color: var(--text-4); }
+.paneEmpty small { color: var(--text-4); font-size: var(--fs-xs); }
+
+/* Phone-sized: the nav becomes a strip, an overlay pane slides over the rest. */
+@media (max-width: 759px) {
+  :where(.shell) { grid-template-columns: minmax(0, 1fr); grid-template-rows: auto minmax(0, 1fr); }
+  .nav { flex-direction: row; gap: 4px; padding: 6px 8px; overflow-x: auto; border-right: 0; border-bottom: 1px solid var(--line-1); }
+  .navSection { display: contents; }
+  .navGroup, .navFoot { display: none; }
+  .navItem { flex: none; width: auto; }
+  .shell > .pane[data-overlay] { position: absolute; inset: 0; z-index: 2; display: none; background: var(--bg-2); }
+  .shell[data-detail] > .pane[data-overlay] { display: flex; }
+  .paneBack { display: grid; }
+}

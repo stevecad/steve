@@ -1,0 +1,45 @@
+.stack {
+  position: fixed;
+  /* Above the viewport toolbar and the results/animation players, so a lingering error never covers controls. */
+  bottom: calc(var(--status-h) + 132px);
+  z-index: 700;
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  gap: 8px;
+  width: min(340px, calc(100vw - 32px));
+  pointer-events: none;
+  transition: right var(--t-slow) var(--ease-out);
+}
+.toast {
+  pointer-events: auto;
+  position: relative;
+  display: flex;
+  gap: 10px;
+  width: 100%;
+  padding: 11px 34px 11px 12px;
+  border-radius: var(--r-lg);
+  background: var(--bg-overlay);
+  backdrop-filter: blur(16px) saturate(1.4);
+  border: 1px solid var(--line-3);
+  box-shadow: var(--shadow-3), var(--inset-hi);
+  overflow: hidden;
+}
+.toast::before { content: ''; position: absolute; left: 0; top: 0; bottom: 0; width: 3px; background: var(--info); }
+.toast[data-tone='success']::before { background: var(--success); }
+.toast[data-tone='warning']::before { background: var(--warning); }
+.toast[data-tone='danger']::before { background: var(--danger); }
+.icon { margin-top: 1px; color: var(--info); flex-shrink: 0; }
+.toast[data-tone='success'] .icon { color: var(--success); }
+.toast[data-tone='warning'] .icon { color: var(--warning); }
+.toast[data-tone='danger'] .icon { color: var(--danger); }
+.text { min-width: 0; }
+.title { font-size: var(--fs-md); font-weight: 600; color: var(--text-1); }
+.detail { margin-top: 2px; font-size: var(--fs-sm); color: var(--text-2); line-height: 1.45; overflow-wrap: anywhere; }
+/* Each action on its own line, so "Reload" and "What's new" never run together. */
+.action { display: block; margin-top: 7px; font-size: var(--fs-sm); font-weight: 600; color: var(--ws); }
+.action:hover { text-decoration: underline; }
+.close { position: absolute; top: 8px; right: 8px; width: 20px; height: 20px; display: grid; place-items: center; border-radius: 5px; color: var(--text-3); }
+.close:hover { background: var(--bg-4); color: var(--text-1); }
+.copy { right: 30px; }
+.toast:has(.copy) { padding-right: 56px; }

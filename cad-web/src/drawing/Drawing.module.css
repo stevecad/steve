@@ -1,0 +1,180 @@
+/* The Drawing tab: the sheet, over the 3D view (which stays loaded beneath). Its tools' options and the selection's
+   properties are in the right-hand Dock (ToolPanel.tsx, Inspector.tsx); its tree in the Browser (DrawingTree.tsx). */
+.tab {
+  position: absolute;
+  inset: 0;
+  z-index: 5;
+  display: flex;
+  background: var(--bg-0);
+}
+
+.stage { position: relative; flex: 1; min-width: 0; min-height: 0; display: flex; flex-direction: column; }
+.bar {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  min-height: 36px;
+  padding: 4px 10px;
+  border-bottom: 1px solid var(--line-1);
+  font-size: var(--fs-xs);
+  color: var(--text-2);
+}
+.bar[data-tone='warning'] { color: var(--warning, #c98a00); }
+.bar[data-tone='danger'] { color: var(--danger, #d0453b); }
+.barStatus { display: flex; align-items: center; gap: 6px; flex: 1; min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.pages { display: flex; gap: 4px; flex-wrap: wrap; }
+.page {
+  padding: 2px 9px;
+  border-radius: 999px;
+  border: 1px solid var(--line-2);
+  background: var(--bg-2);
+  color: var(--text-2);
+  font-size: var(--fs-xs);
+  max-width: 180px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.page[data-active] { border-color: var(--ws); color: var(--text-1); background: var(--ws-soft); }
+/* A sheet tab dragged to another place: where it lands. */
+.page[data-dragging] { opacity: 0.5; }
+.page[data-drop="before"] { box-shadow: -3px 0 0 var(--ws); }
+.page[data-drop="after"] { box-shadow: 3px 0 0 var(--ws); }
+
+/* The paper: drafting-table grey around a white sheet, panned and zoomed with the pointer. */
+.canvas {
+  position: relative;
+  flex: 1;
+  min-height: 0;
+  overflow: hidden;
+  cursor: grab;
+  background: color-mix(in srgb, var(--bg-2) 85%, var(--text-4));
+  touch-action: none;
+}
+.canvas:active { cursor: grabbing; }
+.paper { position: absolute; left: 0; top: 0; transform-origin: 0 0; box-shadow: 0 2px 14px rgb(0 0 0 / 0.28); background: #fff; }
+.paper svg { display: block; width: 100%; height: 100%; }
+.paper[data-stale] { opacity: 0.55; transition: opacity var(--t-base); }
+/* While what was dropped is drawn again, only it fades: the rest of the sheet stays as it is to work on. */
+.paper[data-stale][data-moves] { opacity: 1; }
+.paper [data-redrawing] { opacity: 0.45; }
+.canvas:focus-visible { outline: 2px solid var(--ws); outline-offset: -2px; }
+/* What's on the sheet is picked with a click, and dragged into place; what's selected takes the workspace colour. */
+.paper :is([data-dimension], [data-balloon], [data-datum], [data-frame], [data-weld], [data-hole-table], [data-note]) { cursor: pointer; }
+.canvas[data-editable] .paper :is([data-dimension], [data-note]) { cursor: move; }
+.canvas[data-balloons-editable] .paper [data-balloon] { cursor: move; }
+.canvas[data-welds-editable] .paper [data-weld] { cursor: move; }
+/* The model's geometry is picked on the sheet: what's under the pointer and what's selected, over the paper. */
+.canvas[data-hover-geometry] { cursor: pointer; }
+.picks { position: absolute; left: 0; top: 0; transform-origin: 0 0; overflow: visible; pointer-events: none; }
+.picks path { fill: none; stroke: var(--ws); stroke-linecap: round; stroke-linejoin: round; }
+.picks circle { fill: var(--ws); }
+.picks [data-picked='hover'] { opacity: 0.45; }
+.paper :is([data-dimension], [data-balloon], [data-datum], [data-frame], [data-weld], [data-hole-table], [data-note])[data-selected] path[stroke-width]:not([data-hit]) { stroke: var(--ws); }
+.paper :is([data-dimension], [data-balloon], [data-datum], [data-frame], [data-weld], [data-hole-table], [data-note])[data-selected] :is(path[fill='#000000'], text) { fill: var(--ws); }
+.canvas:not([data-tool]) .paper :is([data-dimension], [data-balloon], [data-datum], [data-frame], [data-weld], [data-note]):hover:not([data-selected]) :is(path[fill='#000000'], text) { fill: color-mix(in srgb, var(--ws) 70%, #000); }
+/* While a tool is open, the pointer picks: what it takes highlights, and its preview is drawn over the sheet. */
+.canvas[data-tool] { cursor: crosshair; }
+.canvas[data-tool] .paper [data-dimension] { cursor: crosshair; }
+.overlay { position: absolute; inset: 0; width: 100%; height: 100%; pointer-events: none; overflow: visible; }
+.hoverBox { fill: none; stroke: var(--ws); opacity: 0.7; }
+.selectedBox { fill: color-mix(in srgb, var(--ws) 8%, transparent); stroke: var(--ws); }
+.pickHover { fill: none; stroke: var(--ws); stroke-linecap: round; stroke-linejoin: round; opacity: 0.85; }
+.pickChosen { fill: none; stroke: #e2552d; stroke-linecap: round; stroke-linejoin: round; }
+.ghost { fill: none; stroke: var(--ws); }
+.ghostText { fill: color-mix(in srgb, var(--ws) 75%, #000); font-family: var(--font-sans, Helvetica, Arial, sans-serif); paint-order: stroke; stroke: #fff; stroke-width: 0.6; }
+.cutLine { stroke: #e2552d; fill: none; }
+.provisional { fill: none; stroke: var(--ws); pointer-events: none; }
+.provisional polygon { fill: var(--ws); stroke: none; }
+.measure { margin: 0; font-size: var(--fs-sm); color: var(--text-1); font-variant-numeric: tabular-nums; }
+.measure strong { font-weight: 600; }
+.noteInput {
+  position: absolute;
+  min-width: 160px;
+  padding: 2px 4px;
+  border: 1px solid var(--ws);
+  border-radius: 3px;
+  background: #fff;
+  color: #000;
+  font-family: Helvetica, Arial, sans-serif;
+  line-height: 1.1;
+  outline: none;
+  box-shadow: 0 2px 8px rgb(0 0 0 / 0.2);
+}
+.toolBody { display: flex; flex-direction: column; gap: 10px; padding: 12px; }
+.prompt { margin: 0; font-size: var(--fs-sm); color: var(--text-1); line-height: 1.45; }
+.renameInput {
+  flex: 1;
+  min-width: 0;
+  height: 22px;
+  padding: 0 6px;
+  border: 1px solid var(--ws);
+  border-radius: var(--r-sm, 4px);
+  background: var(--bg-1);
+  color: var(--text-1);
+  font: inherit;
+  font-size: var(--fs-sm);
+}
+
+.empty {
+  position: absolute;
+  inset: 0;
+  display: grid;
+  place-items: center;
+  padding: 24px;
+  text-align: center;
+  color: var(--text-3);
+  font-size: var(--fs-sm);
+  line-height: 1.5;
+}
+.emptyCard { max-width: 420px; display: flex; flex-direction: column; align-items: center; gap: 12px; }
+.emptyTitle { font-size: var(--fs-lg); font-weight: 600; color: var(--text-1); }
+.emptyActions { display: flex; gap: 8px; flex-wrap: wrap; justify-content: center; }
+
+/* The setup: the Drawing tool's panel in the right-hand Dock, which scrolls it. */
+.panel { flex: 1 0 auto; display: flex; flex-direction: column; }
+.panel fieldset { border: 0; margin: 0; padding: 0; min-width: 0; }
+.panelHead { display: flex; align-items: center; gap: 8px; padding: 10px 12px; border-bottom: 1px solid var(--line-1); }
+.panelHead > :first-child { flex: 1; min-width: 0; }
+.grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+.stack { display: flex; flex-direction: column; gap: 10px; }
+.row { display: flex; align-items: center; justify-content: space-between; gap: 10px; font-size: var(--fs-sm); color: var(--text-2); }
+.views { display: flex; flex-wrap: wrap; gap: 6px; }
+.view {
+  padding: 3px 10px;
+  border-radius: 999px;
+  border: 1px solid var(--line-2);
+  background: var(--bg-3);
+  color: var(--text-2);
+  font-size: var(--fs-xs);
+  text-transform: capitalize;
+}
+.view[aria-pressed='true'] { border-color: var(--ws); color: var(--text-1); background: var(--ws-soft); }
+.view:disabled { opacity: 0.5; }
+.viewRow { display: grid; grid-template-columns: 64px minmax(0, 1fr) minmax(0, 1fr); gap: 6px; align-items: center; font-size: var(--fs-xs); color: var(--text-2); text-transform: capitalize; }
+.revision { display: grid; grid-template-columns: 44px 1fr 24px; gap: 6px; align-items: center; }
+.revisionMeta { grid-column: 2 / 3; display: grid; grid-template-columns: 1fr 64px; gap: 6px; }
+.revision + .revision { margin-top: 8px; padding-top: 8px; border-top: 1px dashed var(--line-1); }
+.dimension { display: grid; grid-template-columns: minmax(0, 1fr) 24px; gap: 6px; align-items: center; }
+.dimension + .dimension { margin-top: 8px; padding-top: 8px; border-top: 1px dashed var(--line-1); }
+.dimensionHead { font-size: var(--fs-xs); color: var(--text-2); overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.dimension[data-issue] .dimensionHead { color: var(--warning, #c98a00); }
+.dimension[data-selected] { margin-left: -6px; padding-left: 4px; border-left: 2px solid var(--ws); }
+.dimensionWide { grid-column: 1 / -1; justify-self: start; }
+.dimensionMeta { grid-column: 1 / -1; display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1fr) 72px; gap: 6px; }
+.frameMeta { grid-column: 1 / -1; display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 6px; }
+.issue { grid-column: 1 / -1; margin: 0; font-size: var(--fs-xs); line-height: 1.5; color: var(--warning, #c98a00); }
+.note { display: grid; grid-template-columns: 22px 1fr 24px; gap: 6px; align-items: center; font-size: var(--fs-xs); color: var(--text-3); }
+.template { display: grid; grid-template-columns: minmax(0, 1fr) repeat(3, 24px); gap: 4px; align-items: center; }
+.template + .template { margin-top: 6px; padding-top: 6px; border-top: 1px dashed var(--line-1); }
+.templateName { display: flex; flex-direction: column; min-width: 0; font-size: var(--fs-sm); color: var(--text-1); }
+.templateName span, .templateName small { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.templateName small { font-size: var(--fs-xs); color: var(--text-3); }
+.hint { margin: 0; font-size: var(--fs-xs); color: var(--text-3); line-height: 1.5; }
+.hint code { font-family: var(--font-mono); color: var(--text-2); }
+.link { padding: 0; color: var(--ws); font: inherit; text-decoration: underline; text-underline-offset: 2px; }
+.label { font-size: var(--fs-xs); color: var(--text-2); font-weight: 500; }
+.footer { display: flex; flex-wrap: wrap; gap: 6px; padding: 12px; }
+/* The model's geometry selected on the sheet (the 3D view's selection), in every view that shows it. */
+.geometryMark path { fill: none; stroke: var(--ws); stroke-linecap: round; stroke-linejoin: round; }
+.geometryMark circle { fill: var(--ws); }

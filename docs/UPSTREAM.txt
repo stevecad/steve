@@ -1,0 +1,67 @@
+Steve — local CAD provenance
+
+Studio source: synchronized from STEVE Studio
+CadQuery fork: https://github.com/10-X-eng/cadquery
+Pinned revision: 6a8cf4fb3edfc2da1575a3885a896da8b7924c75
+Geometry binding: cadquery-ocp 8.0.1.1.0
+
+The CAD frontend, modeling runtime, parser and shipped sketch-solver WASM
+are synchronized from STEVE Studio. Their original files, credits and notices
+are retained. The solver's complete source and build instructions are in
+vendor/solver/source. Its LGPL and other dependency licenses are there;
+vendor/solver/NOTICE identifies each dependency. The Windows build bundles
+the official Node.js 24.13.0 win-x64 node.exe, which is not committed:
+tools/fetch_node.py downloads it from nodejs.org and checks its pinned SHA-256.
+Node's license is vendor/solver/NODE-LICENSE.
+
+Steve additions: Python loopback API and document store; desktop host;
+Steve assistant bridge; local process lifecycle; WASM solver transport.
+Custom-material field validation in cad_materials.py is taken from
+STEVE Studio's user-materials module. It uses the shipped CAD material IDs/categories
+and the same physical-property ranges, with local storage only.
+Standard Parts and McMaster use Studio's catalog/identity contracts with local
+content-addressed storage. Catalog metadata and original STEP files are fetched
+directly from their public sources; local builds have no SaaS execution deadline.
+Frontend changes: local document synchronization and desktop agent/settings
+integration; hide unavailable service panels; two Windows case-sensitive
+module-name fixes (RoutingView and ChecksView). CAD modeling, feature dialogs,
+sketch interaction and rendering use upstream code.
+
+Local runtime fix in vendor/steve/model.py: importing the same STEP solid again
+into one Model creates independent topology when the cached shape is already a
+body. This preserves coincident bodies until Move places them and prevents the
+preview/topology exporter from losing the mesh. The imported geometry and
+public Model.import_step signature are unchanged. Regression tests cover
+four solids, distinct face references, independent placement and desktop import.
+
+All CAD execution is local. CAD source is Python with the current user's
+permissions, not a security sandbox. Enabled agent tools execute directly. The local HTTP interface requires a random desktop-session header
+and rejects foreign origins. The embedded browser blocks remote requests.
+
+Source compatibility targets the synchronized Studio runtime, not an unbounded
+claim of compatibility with every future Studio revision. The local adapter does not
+run Studio's hosted application, manufacturing, electronics or simulation
+services. Remote document exchange uses explicitly configured MCP tools.
+
+Local CAD performance additions: native OpenCascade meshing uses up to 16
+threads within each job's available CPU share. Modeling booleans retain the
+Studio ordering policy. Studio-format component/topology records are stored
+locally with source/input/runtime invalidation, checksums and atomic publication.
+Retired Qt CAD renderer and its redundant face/edge display arrays are removed.
+
+Drawing PDF merger: pure CAD object-merging functions from STEVE Studio's
+product-drawing module, in cad_pdf.py; local routes in cad_drawings.py. The
+desktop drawing preview uses Studio's sanitized sheet SVGs and original PDFs.
+PDF fonts: Liberation Sans 2.1.5 (SIL OFL 1.1) from the official release
+https://github.com/liberationfonts/liberation-fonts/releases/tag/2.1.5
+and DejaVu Sans from the installed Matplotlib distribution. Exact file hashes
+are in pdf-fonts/SOURCES.json; licenses are in THIRD-PARTY-LICENSES/pdf-fonts.
+Fonts are private app resources, never installed into the operating system.
+
+Offline CAD manual: design, assemblies and drawing pages/images from STEVE Studio's
+documentation source, excluding Blender and circuit-board workflows.
+Local guides and adaptations cover desktop saving, history, settings and exports.
+cad-web/public/help/SOURCES.json records source and image hashes. Build with:
+  python tools/build_help.py --source <studio-documentation-checkout>
+The build script uses markdown-it-py and PyYAML. Runtime resources are plain JSON
+and images; the desktop needs no documentation server or Markdown dependency.

@@ -1,0 +1,41 @@
+Windows installer/update verification
+
+Run on Windows with the normal build environment, Inno Setup, and the test-only
+websockets package (verified with 17.4). Do not test against a user's installation.
+
+1. Build cad-web with npm run build.
+2. Build two source fixtures using tools/build_windows_update_fixture.py, with
+   --version 0.3.6 and --version 0.3.7 and separate --output directories.
+   These are disposable version labels, not publication instructions.
+3. Compile packaging/Steve.iss against the older fixture using:
+   /DInstallerAppId=Steve.WindowsUpdateVerification
+   /DInstallerAppName=SteveUpdateVerification
+   /DAppVersion=0.3.6 /DPackageDir=<old fixture>/dist/Steve
+   /DReleaseDir=<test installer output>
+   The unique identity keeps the real Steve uninstall records/shortcuts separate.
+4. With PYTHONPATH=src, run python -m checks.check_windows_updates
+   --installer <test installer exe> --candidate <new fixture>/dist/Steve
+   --root <new disposable test directory> --installed-version 0.3.6 --version 0.3.7.
+
+The check installs the older package through Inno Setup, hosts a signed update
+on local HTTPS with disposable TLS/signing keys, launches the installed app with
+its installation as cwd, and uses the normal automatic updater. It exercises
+normal exit and interrupted shutdown/startup recovery. It observes visible
+progress from SteveUpdate.exe (and rejects shell launches), the workspace notice and viewport dimensions, checks the running new
+version, preserves uninstall records and user data, and runs the uninstaller.
+It compares the actual user's installation file hashes before and after.
+The candidate is never copied manually into either installed application.
+
+The root contains result.json and screenshots plus private disposable test keys.
+Only share the result/screenshots, never the entire test root. If interrupted,
+close only the application whose executable is under that root and run its
+uninstall/unins*.exe before starting again with a new root.
+
+Old installed versions with the directory-lock defect require an installer-based
+upgrade to obtain the repaired helper. A release payload cannot repair a helper
+that fails before replacing files. These tests do not perform that upgrade on
+the user's real installation.
+
+checks/check_update_install.py tests the actual standalone helper against valid
+and deliberately failing startup executables. checks/check_package.py verifies
+its compiled Python code and Windows GUI subsystem and rejects a bundled .ps1.

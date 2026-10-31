@@ -1,0 +1,64 @@
+/* The shop and Steve's catalogue in the Manufacturing library (shop/ShopPage.tsx): cards for machines, tables for tool
+   setups, the shop's code. One pane next to the library's nav. */
+/* align-items: start: a card that opens its form grows alone; the others keep their height. */
+.cards { display: grid; grid-template-columns: repeat(auto-fill, minmax(260px, 1fr)); align-items: start; gap: 10px; margin-bottom: 16px; }
+.card { display: flex; flex-direction: column; gap: 8px; min-width: 0; padding: 12px; border: 1px solid var(--line-1); border-radius: 10px; background: var(--bg-1); }
+.cardHead { display: flex; align-items: flex-start; gap: 8px; min-width: 0; }
+.cardTitle { flex: 1; min-width: 0; }
+.cardTitle h4 { margin: 0; font-size: var(--fs-sm); font-weight: 600; color: var(--text-1); overflow-wrap: anywhere; }
+.cardTitle p { margin: 1px 0 0; color: var(--text-3); font-size: var(--fs-xs); overflow-wrap: anywhere; }
+.facts { display: grid; grid-template-columns: auto minmax(0, 1fr); gap: 3px 12px; margin: 0; font-size: var(--fs-xs); }
+.facts dt { color: var(--text-3); }
+.facts dd { margin: 0; color: var(--text-1); font-variant-numeric: tabular-nums; overflow-wrap: anywhere; }
+.status { display: inline-block; margin-left: 6px; padding: 0 6px; border-radius: 99px; font-size: var(--fs-2xs, 10px); font-weight: 600; white-space: nowrap; }
+.status[data-tone='ok'] { color: var(--success); background: color-mix(in srgb, var(--success) 14%, transparent); }
+.status[data-tone='saved'] { color: var(--warning); background: var(--warning-soft); }
+.description { margin: 0; color: var(--text-3); font-size: var(--fs-xs); line-height: 1.45; display: -webkit-box; -webkit-line-clamp: 3; -webkit-box-orient: vertical; overflow: hidden; }
+.cardFoot { display: flex; flex-wrap: wrap; align-items: center; gap: 6px; margin-top: auto; }
+
+.heading { display: flex; align-items: center; gap: 8px; margin: 4px 0 8px; }
+.heading h4 { flex: 1; margin: 0; font-size: var(--fs-xs); font-weight: 700; letter-spacing: 0.06em; text-transform: uppercase; color: var(--text-4); }
+
+/* Inline forms: each field a label over its input. */
+.form { display: flex; flex-direction: column; gap: 8px; padding-top: 8px; border-top: 1px solid var(--line-1); }
+.field { display: flex; flex-direction: column; gap: 3px; font-size: var(--fs-xs); color: var(--text-3); }
+.input { height: 28px; padding: 0 8px; border: 1px solid var(--line-2); border-radius: 6px; background: var(--bg-1); color: var(--text-1); font-size: var(--fs-sm); outline: none; }
+.input:focus { border-color: var(--ws); box-shadow: 0 0 0 3px var(--ws-softer); }
+.formActions { display: flex; justify-content: flex-end; gap: 6px; }
+.fieldRow { display: grid; grid-template-columns: repeat(auto-fit, minmax(130px, 1fr)); gap: 8px; }
+.addTool { margin-bottom: 16px; }
+.unload { display: grid; place-items: center; width: 22px; height: 22px; margin-left: auto; border-radius: 5px; color: var(--text-3); }
+.unload:hover:not(:disabled) { background: var(--bg-3); color: var(--danger); }
+.hidden { position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0); white-space: nowrap; }
+
+/* Tool tables */
+.tableWrap { overflow-x: auto; margin-bottom: 16px; border: 1px solid var(--line-1); border-radius: 10px; }
+.tableTitle { display: flex; align-items: baseline; gap: 8px; padding: 9px 12px 7px; border-bottom: 1px solid var(--line-1); }
+.tableTitle h4 { margin: 0; font-size: var(--fs-sm); font-weight: 600; color: var(--text-1); }
+.tableTitle span { color: var(--text-3); font-size: var(--fs-xs); }
+.table { width: 100%; border-collapse: collapse; font-size: var(--fs-xs); font-variant-numeric: tabular-nums; }
+.table th { padding: 6px 12px; color: var(--text-3); font-weight: 600; text-align: left; white-space: nowrap; }
+.table td { padding: 5px 12px; border-top: 1px solid var(--line-1); color: var(--text-1); }
+.table [data-numeric] { text-align: right; white-space: nowrap; }
+.stickout { width: 76px; height: 24px; padding: 0 6px; border: 1px solid transparent; border-radius: 5px; background: transparent; color: var(--text-1); font: inherit; text-align: right; }
+.stickout:hover { border-color: var(--line-2); }
+.stickout:focus { border-color: var(--ws); background: var(--bg-1); outline: none; }
+
+/* Plain lists: controllers, linked shops */
+.list { display: flex; flex-direction: column; margin-bottom: 16px; border: 1px solid var(--line-1); border-radius: 10px; }
+.listRow { display: flex; flex-wrap: wrap; align-items: center; gap: 4px 10px; min-height: 36px; padding: 6px 12px; font-size: var(--fs-xs); color: var(--text-2); }
+.listRow + .listRow { border-top: 1px solid var(--line-1); }
+.listRow b { color: var(--text-1); font-weight: 600; }
+.listRow code { color: var(--text-3); font-family: var(--font-mono); font-size: 11px; }
+.listRow > :last-child:not(:first-child) { margin-left: auto; }
+
+/* Code */
+.code { display: flex; flex-direction: column; gap: 8px; height: 100%; min-height: 320px; }
+.codeBar { display: flex; flex-wrap: wrap; align-items: center; gap: 8px; }
+.codeBar select { min-width: 0; max-width: 100%; }
+.code > :last-child { flex: 1; min-height: 0; }
+
+.empty { display: flex; flex-direction: column; align-items: center; gap: 10px; padding: 40px 16px; color: var(--text-3); font-size: var(--fs-sm); text-align: center; }
+.empty > svg { color: var(--text-4); }
+.busy { display: inline-flex; align-items: center; gap: 6px; color: var(--text-3); font-size: var(--fs-xs); white-space: nowrap; }
+.error { margin: 0 0 12px; padding: 8px 10px; border-radius: 8px; background: color-mix(in srgb, var(--danger) 14%, transparent); color: var(--text-1); font-size: var(--fs-xs); line-height: 1.5; overflow-wrap: anywhere; user-select: text; }

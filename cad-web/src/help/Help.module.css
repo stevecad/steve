@@ -1,0 +1,54 @@
+.dialog { width: 100vw; height: 100vh; max-width: none; max-height: none; border-radius: 0; }
+.shell { flex: 1; min-height: 0; display: grid; grid-template-columns: 260px minmax(0, 1fr) 210px; border-top: 1px solid var(--line-1); }
+.sidebar { display: flex; flex-direction: column; min-height: 0; border-right: 1px solid var(--line-1); padding: 16px 12px 0 0; }
+.search { display: flex; align-items: center; gap: 8px; padding: 9px 10px; background: var(--bg-0); border: 1px solid var(--line-2); border-radius: 8px; color: var(--text-3); }
+.search:focus-within { border-color: var(--ws); }
+.search input { width: 100%; min-width: 0; background: transparent; color: var(--text-1); border: 0; outline: none; font: inherit; }
+.search input::-webkit-search-cancel-button { display: none; }
+.search button { display: flex; }
+.nav { flex: 1; overflow: auto; min-height: 0; padding: 8px 0 20px; }
+.group { color: var(--text-3); font-size: 10px; font-weight: 700; text-transform: uppercase; letter-spacing: .08em; padding: 20px 9px 8px; }
+.topic { display: block; width: 100%; padding: 8px 10px; border-radius: 6px; text-align: left; color: var(--text-2); line-height: 1.4; font-size: 12px; }
+.topic:hover, .result:hover { background: var(--bg-3); color: var(--text-1); }
+.topic[aria-current] { color: var(--ws); background: var(--ws-softer); font-weight: 600; }
+.result { display: flex; flex-direction: column; gap: 5px; padding: 12px 10px; width: 100%; text-align: left; border-radius: 6px; }
+.result b { color: var(--text-1); font-size: 12px; }
+.result span { font-size: 11px; line-height: 1.5; color: var(--text-3); display: -webkit-box; -webkit-line-clamp: 3; -webkit-box-orient: vertical; overflow: hidden; }
+.local { display: flex; justify-content: space-between; padding: 12px 9px; font-size: 10px; color: var(--text-3); border-top: 1px solid var(--line-1); }
+.main { display: flex; flex-direction: column; min-width: 0; min-height: 0; }
+.toolbar { display: flex; align-items: center; gap: 5px; padding: 10px 20px; border-bottom: 1px solid var(--line-1); flex-shrink: 0; }
+.toolbar > span { margin-left: 10px; font-size: 11px; color: var(--text-3); }
+.toolbar small { margin-left: auto; padding: 3px 7px; border: 1px solid var(--line-1); border-radius: 5px; color: var(--text-3); font-size: 10px; }
+.scroll { flex: 1; min-height: 0; overflow: auto; scroll-padding-top: 24px; }
+.article { max-width: 850px; margin: 0 auto; padding: 42px 42px 60px; }
+.article h1 { font-size: 30px; letter-spacing: -.035em; line-height: 1.2; font-weight: 650; margin: 0 0 14px; }
+.lead { color: var(--text-3); font-size: 15px; line-height: 1.6; margin-bottom: 36px; }
+.prose { color: var(--text-2); font-size: 13px; line-height: 1.85; overflow-wrap: anywhere; }
+.prose h2 { font-size: 20px; font-weight: 600; color: var(--text-1); margin: 38px 0 15px; line-height: 1.4; scroll-margin-top: 24px; letter-spacing: -.02em; }
+.prose h3 { font-size: 16px; font-weight: 600; color: var(--text-1); margin: 30px 0 12px; line-height: 1.4; scroll-margin-top: 24px; }
+.prose h4 { font-size: 14px; color: var(--text-1); margin: 24px 0 10px; }
+.prose p { margin: 0 0 15px; }
+.prose strong { color: var(--text-1); font-weight: 600; }
+.prose ul, .prose ol { padding-left: 23px; margin: 12px 0 20px; }
+.prose ul { list-style: disc; } .prose ol { list-style: decimal; }
+.prose li { padding-left: 4px; margin-bottom: 7px; }
+.prose a { color: var(--ws); text-decoration: underline; text-underline-offset: 3px; }
+.prose code { font-family: var(--font-mono, monospace); font-size: .9em; padding: 2px 4px; border-radius: 4px; background: var(--bg-0); }
+.prose pre { position: relative; white-space: pre; overflow: auto; background: var(--bg-0); border: 1px solid var(--line-1); border-radius: 8px; padding: 40px 18px 18px; margin: 20px 0; line-height: 1.6; }
+.prose pre code { padding: 0; }
+.copy { position: absolute; right: 10px; top: 8px; font-family: inherit; font-size: 10px; color: var(--text-3); border: 1px solid var(--line-1); padding: 2px 7px; border-radius: 4px; }
+.copy:hover { color: var(--text-1); }
+.prose table { display: block; max-width: 100%; overflow: auto; border-collapse: collapse; margin: 20px 0; font-size: 12px; }
+.prose th, .prose td { padding: 10px 12px; border: 1px solid var(--line-1); min-width: 85px; vertical-align: top; text-align: left; }
+.prose th { color: var(--text-1); font-weight: 600; background: var(--bg-2); }
+.prose img { display: block; max-width: 100%; height: auto; margin: 24px auto; border: 1px solid var(--line-1); border-radius: 8px; }
+.prose blockquote { border-left: 3px solid var(--ws); padding-left: 18px; margin: 20px 0; }
+.article footer { border-top: 1px solid var(--line-1); margin-top: 40px; padding-top: 18px; color: var(--text-4); font-size: 10px; }
+.contents { overflow: auto; min-height: 0; padding: 16px 0 20px 16px; border-left: 1px solid var(--line-1); }
+.contents button { display: block; width: 100%; padding: 7px 9px; text-align: left; font-size: 11px; line-height: 1.45; color: var(--text-3); border-radius: 5px; }
+.contents button[data-level="3"] { padding-left: 20px; }
+.contents button:hover { color: var(--text-1); background: var(--bg-3); }
+.empty { color: var(--text-3); line-height: 1.7; padding: 24px; }
+.empty h2 { color: var(--text-1); margin-bottom: 12px; } .empty p { margin-bottom: 15px; }
+@media (max-width: 1280px) { .shell { grid-template-columns: 230px minmax(0, 1fr); } .contents { display: none; } .article { padding: 30px; } }
+@media (max-width: 700px) { .shell { grid-template-columns: 185px minmax(0, 1fr); } .article { padding: 24px 18px; } .article h1 { font-size: 24px; } .topic { font-size: 11px; } .toolbar { padding: 8px; } }

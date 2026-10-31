@@ -1,0 +1,107 @@
+Steve automatic update contract
+
+Updates come from https://dl.stevecad.studio, a static, read-only download host.
+assets/update-channel.json ships each platform's feed and the ECDSA P-384 public
+keys Steve trusts for it:
+
+  windows-x64  https://dl.stevecad.studio/windows/latest.json
+  linux-x64    https://dl.stevecad.studio/linux/latest.json
+
+Packages and installers live next to their manifest (/windows/<file>,
+/linux/<file>) under immutable, versioned names. The download host never signs:
+the signing keys stay offline with the release owner. No credential is sent
+to the feed or the download host, and no account token is embedded in Steve.
+Updates are enabled by default; Settings > Updates keeps the opt-out.
+
+Signed manifest (latest.json)
+  version:   semantic version; only a newer version than the installed one is used
+  platform:  windows-x64 or linux-x64 (must match the client)
+  url:       https://dl.stevecad.studio/<windows|linux>/<package>; no credentials,
+             no other host or port
+  sha256:    lowercase SHA-256 of the complete package bytes
+  expires:   ISO-8601 UTC time (e.g. 2026-12-01T09:00:00Z); a client refuses the
+             manifest from that moment on
+  signature: base64 of an ASN.1 DER-encoded ECDSA signature (P-384 curve,
+             SHA-384 digest) over the UTF-8 JSON of
+             {version, platform, url, sha256, expires} with sorted keys and
+             separators ',' and ':' (no spaces). Raw r||s signatures and
+             any other algorithm are refused.
+
+Steve fetches the manifest, verifies the signature with any of the platform's
+listed keys, the platform, the download host and the expiry before downloading,
+and checks the package digest before extraction. An older or equal version is
+never installed (downgrade refusal). The expiry stops an old, validly signed
+manifest from being replayed indefinitely: publish a fresh manifest at least
+every 30 days. A package that was already downloaded or
+installed under a fresh manifest stays valid after that manifest expires; the
+staged and installed state is re-checked for signature, platform and host only.
+
+Signing keys and rotation
+
+Each platform lists its trusted keys in assets/update-channel.json
+("platforms" -> "<platform>" -> "public_keys"). Each key is the base64 of a DER
+SubjectPublicKeyInfo holding an EC public key on the P-384 (secp384r1) curve;
+any other key type or curve (Ed25519, P-256, RSA, ...) is refused, also for a
+managed feed. A manifest signed by any listed key is accepted. To rotate, ship a release that lists the new key next to the
+old one, sign later releases with the new key, then drop the old key.
+
+Releases are signed and published by the release owner outside this repository;
+private keys never exist here or on the download host.
+
+Managed deployments
+
+Steve offers no setting to change its update feed or keys: anyone who could
+paste a feed and key into the app could install their own code. A managed
+deployment's feed is provisioned in Steve's encrypted local settings by whoever
+administers the machine. Such a feed must still serve manifests signed by one of
+its keys, with packages on the feed's own host.
+
+Package formats
+
+The Windows ZIP contains Steve/Steve.exe and Steve/_internal/... plus notices.
+Absolute paths, escaping paths and symlinks are rejected.
+
+The Linux tar.gz contains Steve/bundle.json (schema 1, release version and
+platform linux-x64), Steve/AppRun and Steve/usr/lib/steve/Steve with the complete
+runtime. tools/build_appimage.py produces this exact bundle. Safe internal
+symlinks are preserved; escaping links, traversal, hard links and device files
+are rejected. A Linux AppImage and extracted installation consume the same tarball.
+
+Installation
+
+Enabled clients check on startup and every six hours, download in the background,
+and apply after normal exit. Open documents are not interrupted. The Windows
+helper (a bundled, self-contained Python executable, with no shell or system
+Python dependency) re-verifies the signed staging record and file inventory, runs
+the candidate's offline smoke test, then swaps the package directories and
+restores the previous directory if the swap fails. The profile is outside the
+install directory. Source-mode runs do not replace themselves.
+
+Linux stages complete versioned bundles inside the user's profile, verifies
+their inventory and version, and runs the actual new frontend's offline smoke
+test after the old process exits. A profile lock prevents activation over an
+open application. Active/previous version pointers are authenticated and changed
+atomically through the vault. The original package remains a stable launcher;
+it verifies the selected bundle and waits for GUI/MCP readiness. A damaged bundle
+or early startup failure restores the previous bundle automatically. Failed
+digests are quarantined; incomplete downloads cannot change the active version.
+See LINUX.md for interrupted-shutdown recovery and storage retention.
+
+Restart and update: once an update is staged, Settings > Updates and the update
+banner offer "Restart and update" (POST /v1/local/updates/restart, packaged
+Steve only). Steve closes through its normal close (an unsaved chat draft is
+kept and a running request finishes first), the update is applied exactly as
+after a normal exit, and Steve opens again: on Windows the helper reopens the
+installed Steve.exe; on Linux the stable launcher (the AppImage file or the
+extracted installation) is started again only after a successful activation.
+A failed or deferred update keeps the working version and does not reopen it.
+
+Earlier builds used a GitHub release feed. Their saved feed, key and release
+token settings are dropped on first start; installations older than this
+contract need one manual install of a current package from dl.stevecad.studio.
+
+Package checks never invent or embed the release owner's signing key. The
+two-version integration checks (checks/check_linux_updates.py,
+checks/check_windows_updates.py) use disposable signing/TLS keys and a local
+HTTPS feed configured as a managed override; they never publish anything or
+weaken production TLS verification.

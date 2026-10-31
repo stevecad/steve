@@ -1,0 +1,19 @@
+# Compile flags shared by the WebAssembly (build-wasm.sh) and Python (python/setup.py) builds.
+# Parity between the two depends on identical flags: no fast-math, no FP contraction (FMA),
+# no Eigen vectorization (Eigen 3.4 has no WebAssembly SIMD path, so both stay scalar), and
+# sin/cos/atan/atan2 always call the vendored musl implementations (vendor/musl-math, see
+# cflags-musl.txt) instead of being constant-folded or fused by the compiler.
+-std=c++20
+-O3
+-ffp-contract=off
+-DNDEBUG
+-DEIGEN_NO_DEBUG
+-DEIGEN_DONT_VECTORIZE
+-DEIGEN_DONT_PARALLELIZE
+-DEIGEN_STACK_ALLOCATION_LIMIT=16384
+-Wno-deprecated-declarations
+-fno-builtin-sin
+-fno-builtin-cos
+-fno-builtin-sincos
+-fno-builtin-atan
+-fno-builtin-atan2

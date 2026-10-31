@@ -1,0 +1,7 @@
+
+.search { composes: input from "../Controls.module.css"; margin: 4px 0 12px; }
+.list { min-width: 0; }
+.binding { min-width: 135px; padding: 8px 12px; background: var(--bg-1); color: var(--text-1); border: 1px solid var(--line-2); border-radius: 6px; cursor: pointer; }
+.binding:focus-visible { outline: 2px solid var(--ws); outline-offset: 2px; }
+.conflict { padding: 12px; margin-bottom: 12px; border: 1px solid var(--warning); border-radius: var(--r-md); }
+

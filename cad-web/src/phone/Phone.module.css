@@ -1,0 +1,332 @@
+/* The phone shell (PhoneShell.tsx). Every control is at least 44 × 44 px; the notch, home indicator and rounded
+   corners are kept clear with the safe-area insets (index.html sets viewport-fit=cover). */
+
+.shell {
+  --phone-bar-h: calc(60px + env(safe-area-inset-bottom));
+  /* Toasts (shell/Toasts.module.css) sit 132 px above the status bar on the desktop: here, just above the bar. */
+  --status-h: calc(var(--phone-bar-h) - 120px);
+  position: fixed;
+  inset: 0;
+  display: grid;
+  grid-template-rows: auto minmax(0, 1fr) auto;
+  grid-template-columns: minmax(0, 1fr);
+  background: var(--bg-0);
+  overflow: hidden;
+  -webkit-tap-highlight-color: transparent;
+}
+
+/* ── Top bar ── */
+.topbar {
+  display: flex;
+  align-items: center;
+  gap: 2px;
+  min-height: calc(52px + env(safe-area-inset-top));
+  padding: env(safe-area-inset-top) max(4px, env(safe-area-inset-right)) 0 max(6px, env(safe-area-inset-left));
+  background: var(--bg-1);
+  border-bottom: 1px solid var(--line-2);
+}
+.title {
+  flex: 1;
+  min-width: 0;
+  min-height: 44px;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: flex-start;
+  gap: 1px;
+  padding: 3px 8px;
+  border: 0;
+  border-radius: var(--r-lg);
+  background: transparent;
+  color: var(--text-1);
+  text-align: left;
+}
+.title:active { background: var(--bg-3); }
+.titleLine { display: flex; align-items: center; gap: 6px; max-width: 100%; font-size: 15px; font-weight: 620; line-height: 1.25; }
+.name { min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.kind, .chevron { flex-shrink: 0; color: var(--text-3); }
+.title small { max-width: 100%; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; font-size: 12px; color: var(--text-3); line-height: 1.3; }
+.title small[data-tone='busy'] { color: var(--ws); }
+.title small[data-tone='dirty'] { color: var(--warning); }
+.title small[data-tone='danger'] { color: var(--danger); }
+.count {
+  flex-shrink: 0; display: inline-grid; place-items: center; min-width: 19px; height: 19px; padding: 0 5px;
+  border-radius: 10px; background: var(--bg-4); color: var(--text-2); font-size: 11px; font-weight: 600;
+}
+
+.iconButton {
+  flex-shrink: 0;
+  width: 44px;
+  height: 44px;
+  display: grid;
+  place-items: center;
+  border: 0;
+  border-radius: var(--r-lg);
+  background: transparent;
+  color: var(--text-2);
+}
+.iconButton:active { background: var(--bg-3); }
+.iconButton[data-dirty] { color: var(--ws); }
+.iconButton[aria-disabled='true'] { opacity: 0.45; }
+.workspaceButton {
+  flex-shrink: 0;
+  width: 44px;
+  height: 44px;
+  display: grid;
+  place-items: center;
+  border: 0;
+  border-radius: var(--r-lg);
+  background: var(--ws-soft);
+  color: var(--ws);
+}
+
+/* ── The model ── */
+.main { position: relative; min-height: 0; min-width: 0; display: flex; flex-direction: column; }
+
+/* ── Bottom bar ── */
+.bar {
+  display: grid;
+  grid-template-columns: repeat(5, minmax(0, 1fr));
+  gap: 2px;
+  padding: 4px max(6px, env(safe-area-inset-right)) calc(4px + env(safe-area-inset-bottom)) max(6px, env(safe-area-inset-left));
+  background: var(--bg-1);
+  border-top: 1px solid var(--line-2);
+}
+.barButton {
+  min-width: 0;
+  min-height: 52px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 3px;
+  padding: 0 2px;
+  border: 0;
+  border-radius: var(--r-lg);
+  background: transparent;
+  color: var(--text-2);
+  font-size: 11px;
+  font-weight: 550;
+}
+.barButton span { max-width: 100%; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.barButton:active { background: var(--bg-3); }
+.barButton[data-active] { color: var(--ws); background: var(--ws-softer); }
+.barButton[aria-disabled='true'] { opacity: 0.45; }
+
+/* ── Selection chip ── */
+.chip {
+  position: absolute;
+  left: 50%;
+  bottom: 12px;
+  z-index: 20;
+  translate: -50% 0;
+  display: flex;
+  align-items: center;
+  max-width: calc(100% - 24px);
+  padding: 0 2px 0 16px;
+  border-radius: var(--r-pill);
+  background: var(--bg-overlay);
+  backdrop-filter: blur(14px) saturate(1.3);
+  border: 1px solid var(--line-3);
+  box-shadow: var(--shadow-3);
+}
+.chipLabel { min-width: 0; margin-right: 4px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; font-size: 14px; font-weight: 560; color: var(--text-1); }
+.chipButton { flex-shrink: 0; width: 44px; height: 44px; display: grid; place-items: center; border: 0; border-radius: 50%; background: transparent; color: var(--text-2); }
+.chipButton:active { background: var(--bg-4); }
+
+/* ── Exploded view (ExplodeStrip.tsx): one row under the model, which shrinks to make room rather than hide under it. ── */
+.explodeStrip {
+  flex-shrink: 0;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  min-height: 56px;
+  padding: 0 max(2px, env(safe-area-inset-right)) 0 max(14px, env(safe-area-inset-left));
+  background: var(--bg-1);
+  border-top: 1px solid var(--line-2);
+}
+.explodeIcon { flex-shrink: 0; color: var(--ws); }
+.explodeSlider { flex: 1; min-width: 0; padding: 10px 6px; }
+.explodeSlider [role='slider'] { width: 24px; height: 24px; }
+.explodeValue { flex-shrink: 0; min-width: 40px; text-align: right; font-size: 13px; color: var(--text-2); }
+.explodeStrip .chipButton[aria-disabled='true'] { opacity: 0.45; }
+/* The selection chip stands just above the strip instead of over it. */
+.main:has(> .explodeStrip) > .chip { bottom: calc(56px + 12px); }
+
+/* ── Sheets ── */
+.scrim { position: fixed; inset: 0; z-index: 600; background: var(--scrim); }
+.sheet {
+  position: fixed;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  z-index: 610;
+  display: flex;
+  flex-direction: column;
+  max-height: calc(100dvh - env(safe-area-inset-top) - 8px);
+  padding: 0 env(safe-area-inset-right) env(safe-area-inset-bottom) env(safe-area-inset-left);
+  border-radius: var(--r-xl) var(--r-xl) 0 0;
+  background: var(--bg-1);
+  border-top: 1px solid var(--line-3);
+  box-shadow: var(--shadow-4);
+  transition: height var(--t-slow) var(--ease-out);
+}
+.sheet[data-size='peek'] { height: 44dvh; }
+.sheet[data-size='half'] { height: 64dvh; }
+.sheet[data-size='full'] { height: calc(100dvh - env(safe-area-inset-top) - 8px); }
+.sheetHead {
+  position: relative;
+  flex-shrink: 0;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  min-height: 54px;
+  padding: 8px 6px 0 16px;
+  touch-action: none;
+}
+.sheetHead[data-bare] { min-height: 20px; padding: 0; }
+.grabber { position: absolute; top: 7px; left: 50%; translate: -50% 0; width: 38px; height: 5px; border-radius: 3px; background: var(--line-4); }
+.sheetTitle { flex: 1; min-width: 0; margin: 4px 0 0; font-size: 17px; font-weight: 650; color: var(--text-1); }
+.sheetTitle small { margin-left: 8px; font-size: 12.5px; font-weight: 500; color: var(--text-3); }
+.sheetActions { display: flex; margin-left: auto; }
+.sheetBody {
+  flex: 1;
+  min-height: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 18px;
+  padding: 6px 12px 20px;
+  overflow: auto;
+  overscroll-behavior: contain;
+}
+.sheetHead[data-bare] + .sheetBody { gap: 0; padding: 0; overflow: hidden; }
+
+.group h3, .list h3 {
+  margin: 0 4px 8px;
+  font-size: 11.5px;
+  font-weight: 620;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: var(--text-3);
+}
+.grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(78px, 1fr)); gap: 6px; }
+.tile {
+  min-width: 0;
+  min-height: 70px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  padding: 8px 4px;
+  border: 1px solid var(--line-1);
+  border-radius: var(--r-lg);
+  background: var(--bg-2);
+  color: var(--text-1);
+  font-size: 11.5px;
+  line-height: 1.2;
+  text-align: center;
+}
+.tile span { max-width: 100%; overflow-wrap: anywhere; }
+.tile svg { flex-shrink: 0; color: var(--text-2); }
+.tile:active { background: var(--bg-3); }
+.tile[data-active] { background: var(--ws-soft); border-color: color-mix(in srgb, var(--ws) 40%, transparent); }
+.tile[data-active] svg { color: var(--ws); }
+.tile[aria-disabled='true'] { opacity: 0.42; }
+
+.list { display: flex; flex-direction: column; gap: 2px; }
+.row {
+  width: 100%;
+  min-width: 0;
+  min-height: 52px;
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  padding: 8px 10px;
+  border: 0;
+  border-radius: var(--r-md);
+  background: transparent;
+  color: var(--text-1);
+  font-size: 15px;
+  text-align: left;
+}
+.row:active { background: var(--bg-3); }
+.row > svg { flex-shrink: 0; color: var(--text-2); }
+.rowText { flex: 1; min-width: 0; display: flex; flex-direction: column; gap: 2px; }
+.rowText > span { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.rowText small {
+  display: -webkit-box; overflow: hidden; -webkit-line-clamp: 2; -webkit-box-orient: vertical;
+  font-size: 12.5px; line-height: 1.35; color: var(--text-3);
+}
+.row[aria-disabled='true'] > svg, .row[aria-disabled='true'] .rowText > span { opacity: 0.45; }
+.row[data-active] > svg, .row[aria-current] > svg { color: var(--ws); }
+.row[aria-current] { background: var(--ws-softer); }
+.row[data-danger] { color: var(--danger); }
+.row[data-danger] > svg { color: var(--danger); }
+.rowEnd { margin-left: auto; color: var(--text-3); }
+.tabRow { display: flex; align-items: center; }
+.tabRow .row { flex: 1; }
+
+.search {
+  position: sticky;
+  top: -6px;
+  z-index: 1;
+  flex-shrink: 0;
+  box-shadow: 0 -6px 0 6px var(--bg-1);
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  min-height: 46px;
+  padding: 0 14px;
+  border: 1px solid var(--line-2);
+  border-radius: var(--r-lg);
+  background: var(--bg-3);
+  color: var(--text-3);
+}
+/* 16 px keeps iOS from zooming the page when the field takes focus. */
+.search input { flex: 1; min-width: 0; min-height: 44px; border: 0; outline: 0; background: transparent; color: var(--text-1); font-size: 16px; }
+.segmented { display: flex; gap: 3px; padding: 3px; border-radius: var(--r-lg); background: var(--bg-2); }
+.segmented button {
+  flex: 1; min-width: 0; min-height: 44px; display: flex; align-items: center; justify-content: center; gap: 6px;
+  border: 0; border-radius: 10px; background: transparent; color: var(--text-2); font-size: 13.5px; font-weight: 560;
+}
+.segmented button[aria-selected='true'], .segmented button[aria-checked='true'] { background: var(--bg-4); color: var(--text-1); box-shadow: var(--shadow-1); }
+.disclosure {
+  display: flex; align-items: center; justify-content: space-between; min-height: 50px; padding: 0 14px;
+  border: 1px solid var(--line-1); border-radius: var(--r-lg); background: var(--bg-2); color: var(--text-1); font-size: 15px;
+}
+.disclosure svg { color: var(--text-3); transition: rotate var(--t-base); }
+.disclosure[aria-expanded='true'] svg { rotate: 180deg; }
+.empty { margin: 0; padding: 16px 4px; color: var(--text-3); font-size: 14px; }
+
+.docHead { display: flex; flex-wrap: wrap; align-items: center; gap: 10px; padding: 0 4px; }
+.docName { min-width: 0; min-height: 44px; padding: 0; border: 0; background: transparent; color: var(--text-1); font-size: 20px; font-weight: 650; text-align: left; }
+.renameInput {
+  flex: 1; min-width: 0; min-height: 46px; padding: 0 12px; border: 1px solid var(--ws); border-radius: var(--r-md);
+  background: var(--bg-3); color: var(--text-1); font-size: 18px; outline: 0;
+}
+.account { display: flex; flex-direction: column; gap: 2px; padding: 0 4px; }
+.account strong { font-size: 16px; color: var(--text-1); }
+.account span { font-size: 13px; color: var(--text-3); }
+
+/* ── Landscape: the bar becomes a rail on the right, sheets come from the right. ── */
+@media (orientation: landscape) {
+  .shell { grid-template-rows: auto minmax(0, 1fr); grid-template-columns: minmax(0, 1fr) auto; --phone-bar-h: 0px; }
+  .topbar { grid-column: 1; min-height: calc(44px + env(safe-area-inset-top)); }
+  .main { grid-column: 1; grid-row: 2; }
+  .bar {
+    grid-column: 2; grid-row: 1 / span 2; grid-template-columns: 66px; grid-template-rows: repeat(5, minmax(0, 1fr));
+    padding: max(4px, env(safe-area-inset-top)) max(4px, env(safe-area-inset-right)) max(4px, env(safe-area-inset-bottom)) 4px;
+    border-top: 0; border-left: 1px solid var(--line-2);
+  }
+  .barButton { min-height: 44px; }
+  .sheet, .sheet[data-size] {
+    top: 0; left: auto; height: auto; max-height: none; width: min(440px, 64vw);
+    padding: env(safe-area-inset-top) env(safe-area-inset-right) env(safe-area-inset-bottom) 0;
+    border-radius: var(--r-xl) 0 0 var(--r-xl); border-top: 0; border-left: 1px solid var(--line-3);
+  }
+  .chip { bottom: max(10px, env(safe-area-inset-bottom)); }
+  /* The strip runs along the bottom of the model, left of the rail, clear of the home indicator. */
+  .explodeStrip { min-height: calc(52px + env(safe-area-inset-bottom)); padding-right: 2px; padding-bottom: env(safe-area-inset-bottom); }
+  .main:has(> .explodeStrip) > .chip { bottom: calc(52px + env(safe-area-inset-bottom) + 10px); }
+}
