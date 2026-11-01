@@ -39,4 +39,30 @@ class LinkedScopeTests(unittest.TestCase):
    self.assertEqual(set(links._SOURCES),{'shared','bad'})
    self.assertEqual(len(links._BUILT),1)
 
+ def test_linked_documents_import_their_own_helper_modules(self):
+  # Helper modules of the same name in separately written documents: each linked document imports its own, never
+  # the host's or another linked document's, and the host's own module is back once the links have built.
+  with tempfile.TemporaryDirectory() as host_folder,tempfile.TemporaryDirectory() as folder:
+   (Path(host_folder)/'helpers.py').write_text('host_width = 1\n')
+   sys.path.insert(0,host_folder)
+   try:
+    import helpers
+    uses='import cadquery as cq\nfrom helpers import {name}\nsize = 2\nresult = cq.Workplane("XY").box({name}, size, size)\n'
+    def doc(identifier,name,files):
+     return dict(document_id=identifier,revision=1,kind='part',name=identifier,code=uses.format(name=name),files=files,links={})
+    links.register({
+     'first':doc('first','width_a',{'helpers.py':'width_a = 7\n'}),
+     'second':doc('second','width_b',{'helpers.py':'from parts.sizes import B as width_b\n','parts/sizes.py':'B = 9\n'}),
+     'third':doc('third','width_c',{'helpers.py':'from parts.sizes import C as width_c\n','parts/sizes.py':'C = 3\n'}),
+    },Path(folder))
+    widths={alias:round(links.Link(alias)().result.val().BoundingBox().xlen,6) for alias in ('first','second','third')}
+    self.assertEqual(widths,{'first':7,'second':9,'third':3})
+    self.assertIs(sys.modules.get('helpers'),helpers)
+    self.assertNotIn('parts',sys.modules)
+    other=links.Link('first')(size=5).result.val().BoundingBox()
+    self.assertEqual((round(other.xlen,6),round(other.ylen,6)),(7,5))
+   finally:
+    sys.path.remove(host_folder)
+    sys.modules.pop('helpers',None)
+
 if __name__=='__main__':unittest.main()

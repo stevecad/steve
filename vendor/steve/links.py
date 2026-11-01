@@ -358,8 +358,18 @@ def component_main(source: dict) -> str:
             f"design = Design({json.dumps(source.get('name') or component)})\ndesign.add({component})\nresult = design.result()\n")
 
 
+def _own_modules(files: dict) -> set:
+    """The top-level module names a linked document's files define (`helpers.py` → helpers, `parts/…` → parts). While it
+    runs, the modules of those names already imported (the host's, another linked document's, or this link's build with
+    other overrides) step aside, so its imports load its own files; they're restored afterwards. `steve` itself never
+    steps aside: the build's registries live in it."""
+    names = {path.split("/")[0].removesuffix(".py") for path in files if path.endswith(".py") or "/" in path}
+    return {name for name in names if name.isidentifier()} - {"steve"}
+
+
 def _build(alias: str, source: dict, overrides: dict, index: int) -> LinkedInstance:
-    """Runs the linked document in its own folder with its own `params`, `components` and `links` modules. A circuit isn't
+    """Runs the linked document in its own folder with its own modules (`params`, `components`, `links` and every helper
+    module or folder beside its main.py), whatever the host or other linked documents call theirs. A circuit isn't
     run: its board is built from the frozen board data and STEP the build service attached (steve/circuit_board.py)."""
     if source.get("kind") == "circuit":
         from . import circuit_board, imports
@@ -392,7 +402,7 @@ def _build(alias: str, source: dict, overrides: dict, index: int) -> LinkedInsta
     (folder / "main.py").write_text(main)
     if source.get("kind") == "shop":
         return _build_shop(alias, source, overrides, folder, files)
-    names = {"params", "components", "links"}
+    names = {"params", "components", "links"} | _own_modules(files)
     saved = {name: module for name, module in sys.modules.items() if name.split(".")[0] in names}
     for name in saved:
         del sys.modules[name]
@@ -435,7 +445,7 @@ def _build_shop(alias: str, source: dict, overrides: dict, folder: Path, files: 
     may be named like the host shop's, so the host's modules of those names step aside while it runs. Its `shop` and
     every name its main.py defines come back as the instance's namespace; nothing is placed."""
     from .shop import Shop
-    names = {"params", "links"} | {path.split("/")[0].removesuffix(".py") for path in files}
+    names = {"params", "links"} | _own_modules(files)
     saved = {name: module for name, module in sys.modules.items() if name.split(".")[0] in names}
     for name in saved:
         del sys.modules[name]
