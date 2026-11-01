@@ -82,17 +82,18 @@ class CadProcessTests(unittest.TestCase):
             self.assertEqual(errors, ['Build cancelled.'])
             self.assertFalse(child.with_suffix('.escaped').exists())
 
-    def test_blender_keeps_the_host_environment_and_cad_stays_minimal(self):
+    def test_blender_gets_its_allowlist_and_cad_stays_minimal(self):
         script = ('import json, os\n'
                   'print(json.dumps({key: os.environ.get(key) for key in '
-                  '("STEVE_ENV_MARKER", "TMPDIR", "OMP_NUM_THREADS")}))\n')
+                  '("STEVE_ENV_MARKER", "TMPDIR", "OMP_NUM_THREADS", "LD_LIBRARY_PATH_ORIG")}))\n')
         with tempfile.TemporaryDirectory() as directory:
             root = Path(directory)
             (root / 'show.py').write_text(script)
             temp = root / 'tmp'
             temp.mkdir()
-            budget = SimpleNamespace(capacity=3)
-            overlay = {'STEVE_ENV_MARKER': 'visible', 'TMPDIR': str(temp), 'OMP_NUM_THREADS': '6'}
+            budget = SimpleNamespace(capacity=3, percent=50)
+            overlay = {'STEVE_ENV_MARKER': 'secret', 'TMPDIR': str(temp), 'OMP_NUM_THREADS': '6',
+                       'LD_LIBRARY_PATH_ORIG': '/host/lib'}
             with patch.dict(os.environ, overlay):
                 def invoke(external):
                     with (root / 'log').open('wb') as log:
@@ -102,9 +103,10 @@ class CadProcessTests(unittest.TestCase):
                 external_code, external = invoke(True)
                 internal_code, internal = invoke(False)
         self.assertEqual(external_code, 0)
-        self.assertEqual(external['STEVE_ENV_MARKER'], 'visible')
+        self.assertIsNone(external['STEVE_ENV_MARKER'])
+        self.assertEqual(external['LD_LIBRARY_PATH_ORIG'], '/host/lib')
         self.assertEqual(external['TMPDIR'], str(temp))
-        self.assertEqual(external['OMP_NUM_THREADS'], '6')
+        self.assertEqual(external['OMP_NUM_THREADS'], str(max(1, (os.cpu_count() or 1) * 50 // 100)))
         self.assertEqual(internal_code, 0)
         self.assertIsNone(internal['STEVE_ENV_MARKER'])
         self.assertEqual(internal['TMPDIR'], str(temp))

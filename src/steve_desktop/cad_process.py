@@ -19,20 +19,28 @@ _spawn_lock = threading.Lock()
 _CAD_ENV = {'PATH', 'PATHEXT', 'SYSTEMROOT', 'WINDIR', 'TEMP', 'TMP', 'TMPDIR', 'HOME', 'USERPROFILE',
             'APPDATA', 'LOCALAPPDATA', 'PROGRAMFILES', 'PROGRAMFILES(X86)', 'PROGRAMDATA', 'COMSPEC',
             'LD_LIBRARY_PATH', 'DYLD_LIBRARY_PATH'}
+# Blender also needs the host library path the frozen app saved, its locale, and the
+# display session (some GPU backends ask for it even in --background). Nothing else:
+# render scripts come from documents, so tokens and keys in the session stay out.
+_BLENDER_ENV = _CAD_ENV | {'LD_LIBRARY_PATH_ORIG', 'LANG', 'LC_ALL', 'LC_CTYPE', 'DISPLAY', 'WAYLAND_DISPLAY',
+                           'XDG_RUNTIME_DIR', 'XAUTHORITY'}
 
 
 def command_environment(external=False, budget=None):
     """Environment for one CAD worker, or for an external host tool such as Blender.
 
     CAD jobs share a machine-wide CPU budget, so each worker's numerical libraries
-    stay on one thread. Blender is one host process. Its ``--threads`` flag and,
-    on Windows, the job-object CPU cap already apply that budget. The CAD allowlist
-    would also hide TMPDIR and ``LD_LIBRARY_PATH_ORIG`` from the Linux process
-    guardian, so it could not rebuild Blender's host environment.
+    stay on one thread. Blender is one host process: its OpenMP libraries get the
+    same share of the machine as its ``--threads`` flag. Its allowlist keeps TMPDIR
+    and ``LD_LIBRARY_PATH_ORIG``, which the Linux process guardian needs to rebuild
+    Blender's host environment.
     """
     if external:
         from steve_desktop.blender_runtime import environment
-        return environment()
+        env = {key: value for key, value in environment().items() if key.upper() in _BLENDER_ENV}
+        if budget is not None:
+            env['OMP_NUM_THREADS'] = str(max(1, (os.cpu_count() or 1) * budget.percent // 100))
+        return env
     env = {key: value for key, value in os.environ.items() if key.upper() in _CAD_ENV}
     env['PYTHONUTF8'] = '1'
     if budget is not None:
