@@ -91,7 +91,7 @@ class CadProcessTests(unittest.TestCase):
             (root / 'show.py').write_text(script)
             temp = root / 'tmp'
             temp.mkdir()
-            budget = SimpleNamespace(capacity=3, percent=50)
+            budget = SimpleNamespace(capacity=3, percent=50, attach=lambda process: None)  # Windows: the job-object CPU cap
             overlay = {'STEVE_ENV_MARKER': 'secret', 'TMPDIR': str(temp), 'OMP_NUM_THREADS': '6',
                        'LD_LIBRARY_PATH_ORIG': '/host/lib'}
             with patch.dict(os.environ, overlay):
