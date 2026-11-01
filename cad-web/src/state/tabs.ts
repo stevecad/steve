@@ -48,21 +48,44 @@ function placeholder(key: string, fields: Partial<DocTab>): DocTab {
 /** Counts tab loads: one left while still opening (abandonQuietBuild) leaves the tab state to the newer one. */
 let loads = 0;
 
-async function load(tab: DocTab) {
+/** Opens a tab's document; false when it no longer exists and nothing took its place (missingTab). */
+async function load(tab: DocTab): Promise<boolean> {
   const run = ++loads;
   switching = true;
+  let missing = false;
   try {
-    if (tab.id) await openDocument(tab.id, tab.branch, { pose: tab.pose, stash: tab.stash });
+    if (tab.id) missing = await openDocument(tab.id, tab.branch, { pose: tab.pose, stash: tab.stash }) === 'missing';
     else if (tab.buildId && !tab.stash) await openBuild(tab.buildId);
     else await reopenUnsaved(tab.stash ?? { code: '', name: tab.name, kind: tab.kind }, tab.previewBuildId, tab.pose);
   } finally {
     // Left before it opened: the tab keeps its unsaved edits for next time.
     if (run === loads) {
       switching = false;
-      if (get().activeTab === tab.key) updateTab(tab.key, { stash: null });
-      syncActiveTab();
+      if (!missing) {
+        if (get().activeTab === tab.key) updateTab(tab.key, { stash: null });
+        syncActiveTab();
+      }
     }
   }
+  return missing && run === loads ? missingTab(tab.key) : true;
+}
+
+/**
+ * The tab's design no longer exists (deleted permanently in another window, or not in this workspace), so it would
+ * fail again every time: the tab closes and the next one takes over. Unsaved edits it held stay open as a new design.
+ * Resolves false when nothing took its place.
+ */
+async function missingTab(key: string): Promise<boolean> {
+  const tab = tabs().find((item) => item.key === key);
+  if (!tab) return false;
+  if (tab.stash) {
+    const fresh = `new:${Date.now().toString(36)}${counter++}`;
+    set((state) => ({ tabs: state.tabs.map((item) => (item.key === key ? { ...item, key: fresh, id: null, buildId: null, branch: 'main', dirty: true } : item)), activeTab: state.activeTab === key ? fresh : state.activeTab }));
+    toast('warning', 'Your unsaved edits are kept', 'They’re open as a new design. Save it to keep them.');
+    const kept = tabs().find((item) => item.key === fresh)!;
+    return get().activeTab === fresh ? load(kept) : false;
+  }
+  return dropTab(key);
 }
 
 /** Lets navigation leave what the app is doing (abandonQuietBuild); a tab left while opening keeps its document's name. */
@@ -134,16 +157,22 @@ export function openHere(target: { id: string; branch?: string }) {
 }
 
 function removeTab(key: string) {
+  void dropTab(key);
+}
+
+/** Closes a tab; when it was the active one, the next tab opens. Resolves false when no tab took its place. */
+async function dropTab(key: string): Promise<boolean> {
   const list = tabs();
   const index = list.findIndex((tab) => tab.key === key);
-  if (index < 0) return;
+  if (index < 0) return false;
   const wasActive = get().activeTab === key;
   const remaining = list.filter((tab) => tab.key !== key);
   set({ tabs: remaining, ...(wasActive ? { activeTab: null } : {}) });
-  if (!wasActive) return;
+  if (!wasActive) return false;
   const next = remaining[Math.min(index, remaining.length - 1)];
-  if (next) { set({ activeTab: next.key }); void load(next); }
-  else clearWorkspace();
+  if (next) { set({ activeTab: next.key }); return load(next); }
+  clearWorkspace();
+  return false;
 }
 
 /**
@@ -229,12 +258,11 @@ export function syncActiveTab() {
   if (current.name !== fields.name || current.kind !== fields.kind || current.dirty !== fields.dirty || current.id !== fields.id || current.branch !== fields.branch || current.buildId !== fields.buildId) updateTab(current.key, fields);
 }
 
-/** Reopens the previously active tab; false when there is nothing to resume. */
+/** Reopens the previously active tab; false when there is nothing to resume (or its design no longer exists). */
 export async function resumeActiveTab(): Promise<boolean> {
   const tab = tabs().find((item) => item.key === get().activeTab);
   if (!tab || (!tab.id && !tab.buildId && !tab.stash)) return false;
-  await load(tab);
-  return true;
+  return load(tab);
 }
 
 export function persistTabs() {

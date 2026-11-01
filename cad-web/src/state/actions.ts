@@ -248,7 +248,10 @@ export function adoptRename(saved: CadDocument) {
 
 export interface OpenOptions { pose?: CameraPose | null; stash?: DocStash | null }
 
-export async function openDocument(id: string, branch = 'main', options: OpenOptions = {}) {
+/** How an open ended: `missing` is a design (or branch) that no longer exists here, not one in the Trash or a passing failure. */
+export type OpenOutcome = 'opened' | 'missing' | 'failed';
+
+export async function openDocument(id: string, branch = 'main', options: OpenOptions = {}): Promise<OpenOutcome> {
   const keepTab = get().leftTab;
   clearWorkspace();
   // A design opens the way Settings → Display says; back in its tab, it looks as it was left.
@@ -256,16 +259,18 @@ export async function openDocument(id: string, branch = 'main', options: OpenOpt
   const gen = generation;
   if (!holdOpening) openingGeneration = gen;
   busy(true, branch === 'main' ? 'Opening design' : `Opening ${branch}`);
+  let found = false;
   try {
     const doc: CadDocument = branch === 'main' ? await Api.document(id) : await Branches.read(id, branch);
-    if (gen !== generation) return;
+    found = true;
+    if (gen !== generation) return 'failed';
     if (doc.kind === 'shop' || doc.kind === 'cam') {
       // Kept as documents, worked in Manufacture: the shop on its page, a CAM program with its part. Never a file here.
       set({ busy: false });
       phase('idle', '');
       setUrl('');
       void import('@/workspaces/manufacture/cam/camDoc').then(({ openStored }) => setTimeout(() => void openStored(doc), 0));
-      return;
+      return 'opened';
     }
     patchDoc({ open: true, branch, saved: doc, name: doc.name, kind: doc.kind, ...opened(doc) });
     loadWorkspaceData(doc.id);
@@ -274,33 +279,39 @@ export async function openDocument(id: string, branch = 'main', options: OpenOpt
     let shown = false;
     if (doc.preview_build_id) {
       const build = await Api.build(doc.preview_build_id);
-      if (gen !== generation) return;
+      if (gen !== generation) return 'failed';
       if (!build.retired_at) {
         await showBuild(build, gen, true, options.pose ?? null);
         shown = true;
       }
     }
-    if (gen !== generation) return;
+    if (gen !== generation) return 'failed';
     patchDoc({ savedSnapshot: snapshot() });
     setUrl(documentQuery(id, branch));
     if (options.stash && await restoreEdits(options.stash, gen) === 'unknown') {
       toast('warning', 'Check your unsaved edits', `They were kept from an earlier session and may be older than revision ${doc.revision}. Save them only if they’re what you want.`, {
         sticky: true, action: { label: 'Use the latest', run: () => leave(() => void openDocument(id, branch)) } });
     }
-    if (gen !== generation) return;
+    if (gen !== generation) return 'failed';
     saveDraft();
     set({ busy: false });
     phase(shown ? 'succeeded' : 'idle', shown ? buildWords(doc.kind).ready : '');
     if (!doc.code.trim()) set({ dockTab: 'source' });
+    return 'opened';
   } catch (error) {
-    if (gen !== generation) return;
+    if (gen !== generation) return 'failed';
     set({ busy: false });
     phase('failed', 'Open failed');
     // Deleted (in another window, or before this tab was restored): it can come back from the Trash.
     const trashed = error instanceof ApiError && error.code === 'document_in_trash';
-    toast('danger', trashed ? 'This design is in the Trash' : 'Couldn’t open this design', (error as Error).message, trashed ? { action: { label: 'Restore it', run: () => {
+    // Gone for good (deleted permanently, or never in this workspace): callers close what still points at it (tabs.ts).
+    // A passing failure (offline, a server error) or another workspace's switch isn't missing.
+    const missing = !found && !trashed && error instanceof ApiError && error.status === 404 && error.code !== 'workspace_not_found';
+    if (missing) toast('danger', 'This design isn’t here any more', branch === 'main' ? 'It was deleted permanently, or it isn’t in this workspace.' : (error as Error).message);
+    else toast('danger', trashed ? 'This design is in the Trash' : 'Couldn’t open this design', (error as Error).message, trashed ? { action: { label: 'Restore it', run: () => {
       void import('./trash').then(({ restoreFromTrash }) => restoreFromTrash([{ id, name: '' }])).then((ids) => { if (ids.length) void openDocument(id, branch, options); });
     } } } : {});
+    return missing ? 'missing' : 'failed';
   } finally {
     if (openingGeneration === gen) openingGeneration = -1;
   }
