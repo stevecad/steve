@@ -2565,11 +2565,45 @@ def _rounded(point) -> list[float]:
 
 
 def _exact_overlap(a: cq.Shape, b: cq.Shape) -> tuple[float, float, tuple] | None:
-    """`_overlap` with its centre unrounded, so a kept answer can be moved to a new placement (`_Exact`)."""
-    from OCP.BRepAlgoAPI import BRepAlgoAPI_Common
+    """`_overlap` with its centre unrounded, so a kept answer can be moved to a new placement (`_Exact`).
+
+    When the boolean misses where two faces cross (a very shallow press of one part into another's wall can), it sees
+    two untouched solids and decides from a single point whether one lies inside the other: a whole solid then comes
+    back as the common volume, centred on that solid's centre. So a result holding a whole solid of a or b is believed
+    only when that solid really lies inside the other part (`_swallowed`); otherwise the boolean is asked again, without
+    the oriented-box pre-filter and then with a fuzzy value far below CLASH_TOLERANCE, and a pair no attempt answers
+    plausibly is unverified (None), never a confident wrong volume."""
     from OCP.BRepGProp import BRepGProp
-    from OCP.collections import List_TopoDS_Shape as TopTools_ListOfShape
     from OCP.GProp import GProp_GProps
+    for attempt, (use_obb, fuzzy) in enumerate(_COMMON_ATTEMPTS):
+        shape = _boolean_common(a, b, use_obb, fuzzy)
+        if shape is None:
+            if attempt == 0:
+                return None
+            continue
+        props = GProp_GProps()
+        BRepGProp.VolumeProperties_s(shape, props)
+        centre, volume = props.CentreOfMass(), max(props.Mass(), 0.0)
+        if volume > CLASH_TOLERANCE and _swallowed(shape, a, b):
+            continue
+        depth = _thickness(props.MatrixOfInertia(), volume) if volume > CLASH_TOLERANCE else 0.0
+        return volume, depth, (centre.X(), centre.Y(), centre.Z())
+    return None
+
+
+# _exact_overlap's attempts, in order: (oriented-box pre-filter, fuzzy value in mm). The first is the usual, fast one;
+# the others run only when its result holds a whole solid that isn't inside the other part.
+_COMMON_ATTEMPTS = ((True, 0.0), (False, 0.0), (False, 1e-5), (False, TOUCH_MM))
+# _swallowed: how closely (relative) a piece of the common volume must match a whole solid's volume to be that solid,
+# and how far (mm) a sampled point of a solid may lie outside the other part and still count as inside it.
+WHOLE_VOLUME_REL = 1e-4
+INSIDE_TOLERANCE_MM = 1e-3
+
+
+def _boolean_common(a: cq.Shape, b: cq.Shape, use_obb: bool, fuzzy: float):
+    """The common shape of a and b (a TopoDS_Shape), or None when the boolean failed."""
+    from OCP.BRepAlgoAPI import BRepAlgoAPI_Common
+    from OCP.collections import List_TopoDS_Shape as TopTools_ListOfShape
     try:
         common = BRepAlgoAPI_Common()
         arguments, tools = TopTools_ListOfShape(), TopTools_ListOfShape()
@@ -2577,18 +2611,97 @@ def _exact_overlap(a: cq.Shape, b: cq.Shape) -> tuple[float, float, tuple] | Non
         tools.Append(b.wrapped)
         common.SetArguments(arguments)
         common.SetTools(tools)
-        common.SetUseOBB(True)  # Only faces whose oriented boxes meet are intersected: the same result, less work.
+        common.SetUseOBB(use_obb)  # Only faces whose oriented boxes meet are intersected: the same result, less work.
+        if fuzzy:
+            common.SetFuzzyValue(fuzzy)
         common.Build()
     except Exception:  # a kernel failure reads as unverified, never as a crashed build
         return None
     # IsDone only: OCP doesn't bind HasErrors on the BRepAlgoAPI classes (it's protected in OCCT)
     if not common.IsDone() or common.Shape().IsNull():
         return None
+    return common.Shape()
+
+
+def _solids_of(shape) -> list:
+    """The solids (TopoDS_Shape) of a TopoDS_Shape."""
+    from OCP.TopAbs import TopAbs_SOLID
+    from OCP.TopExp import TopExp_Explorer
+    found, explorer = [], TopExp_Explorer(shape, TopAbs_SOLID)
+    while explorer.More():
+        found.append(explorer.Current())
+        explorer.Next()
+    return found
+
+
+def _solid_volume(shape) -> float:
+    from OCP.BRepGProp import BRepGProp
+    from OCP.GProp import GProp_GProps
     props = GProp_GProps()
-    BRepGProp.VolumeProperties_s(common.Shape(), props)
-    centre, volume = props.CentreOfMass(), max(props.Mass(), 0.0)
-    depth = _thickness(props.MatrixOfInertia(), volume) if volume > CLASH_TOLERANCE else 0.0
-    return volume, depth, (centre.X(), centre.Y(), centre.Z())
+    BRepGProp.VolumeProperties_s(shape, props)
+    return abs(props.Mass())
+
+
+def _swallowed(common, a: cq.Shape, b: cq.Shape) -> bool:
+    """Whether the common shape of a and b holds a piece with the whole volume of a solid of a (or b) that doesn't lie
+    inside b (or a): the sign of a boolean that missed the two parts' crossing faces. A solid can only lie wholly in the
+    common volume if its box lies within the other part's box, so other solids are passed over cheaply."""
+    pieces = None
+    for mine, other in ((a, b), (b, a)):
+        outer = _corners(_box(other))
+        for solid in _solids_of(mine.wrapped):
+            if not _box_within(_corners(_box(cq.Shape.cast(solid))), outer):
+                continue
+            if pieces is None:
+                pieces = [v for v in (_solid_volume(piece) for piece in _solids_of(common)) if v > CLASH_TOLERANCE]
+            whole = _solid_volume(solid)
+            if any(abs(piece - whole) <= WHOLE_VOLUME_REL * whole + CLASH_TOLERANCE for piece in pieces) \
+                    and not _within(solid, other.wrapped):
+                return True
+    return False
+
+
+def _within(solid, other) -> bool:
+    """Whether a solid lies inside (or on) the solids of `other`: points of its surface, a few on every face (the nodes of
+    a meshed copy, which lie on the faces), each classified against `other`. One point outside says no; so does a
+    solid none of whose faces could be meshed (unsure)."""
+    from OCP.BRep import BRep_Tool
+    from OCP.BRepBuilderAPI import BRepBuilderAPI_Copy
+    from OCP.BRepClass3d import BRepClass3d_SolidClassifier
+    from OCP.BRepMesh import BRepMesh_IncrementalMesh
+    from OCP.TopAbs import TopAbs_FACE, TopAbs_OUT
+    from OCP.TopExp import TopExp_Explorer
+    from OCP.TopLoc import TopLoc_Location
+    from OCP.TopoDS import TopoDS
+    try:
+        classifiers = [BRepClass3d_SolidClassifier(s) for s in _solids_of(other)]
+        if not classifiers:
+            return False
+        copy = BRepBuilderAPI_Copy(solid, False).Shape()
+        BRepMesh_IncrementalMesh(copy, MESH_DEFLECTION_MM, False, MESH_ANGLE, False)
+        sampled, faces = 0, TopExp_Explorer(copy, TopAbs_FACE)
+        while faces.More():
+            location = TopLoc_Location()
+            mesh = BRep_Tool.Triangulation_s(TopoDS.Face(faces.Current()), location)
+            faces.Next()
+            if mesh is None or mesh.NbNodes() < 1:
+                continue
+            move, count = location.Transformation(), mesh.NbNodes()
+            for i in sorted({1 + (count - 1) * k // (SAMPLES_PER_FACE - 1) for k in range(SAMPLES_PER_FACE)}):
+                point = mesh.Node(i).Transformed(move)
+                for classifier in classifiers:
+                    classifier.Perform(point, INSIDE_TOLERANCE_MM)
+                    if classifier.State() != TopAbs_OUT:
+                        break
+                else:
+                    return False
+                sampled += 1
+        return sampled > 0
+    except Exception:  # noqa: BLE001 - unsure: not confirmed inside
+        return False
+
+
+SAMPLES_PER_FACE = 8  # _within: points of each face classified, spread over its mesh nodes
 
 
 def _thickness(inertia, volume: float) -> float:
