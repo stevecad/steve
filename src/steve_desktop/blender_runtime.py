@@ -4,15 +4,21 @@ import os
 import platform
 import re
 import shutil
+import stat
 import subprocess
 import tarfile
 import tempfile
 import urllib.request
 import zipfile
-from pathlib import Path
+from pathlib import Path, PurePosixPath
 
 VERSION = '4.5.9'
 RELEASE = 'https://download.blender.org/release/Blender4.5/'
+# Official 4.5.9 archives are a few hundred megabytes. These caps stop a
+# redirected or truncated response from filling the disk before the SHA-256
+# check can reject it, and reject a zip-bomb header after the hash matches.
+MAX_DOWNLOAD = 2 * 1024**3
+MAX_UNPACKED = 8 * 1024**3
 PACKAGES = {
     ('Windows', 'AMD64'): ('windows-x64.zip', '41da973b9bf95bb312cbeff4d1982feb13259b43c821686b9bafea4dfe5477cf'),
     ('Windows', 'ARM64'): ('windows-arm64.zip', '1415f53f483a8d9040f459ab8c3a330c4523ef8f76f5f2db5a95fb2d5be54d4d'),
@@ -84,27 +90,40 @@ def install(root, cancel, progress):
     try:
         digest = hashlib.sha256()
         with urllib.request.urlopen(RELEASE + name, timeout=30) as response, archive.open('wb') as out:
-            total = int(response.headers.get('Content-Length', 0))
+            total = int(response.headers.get('Content-Length', 0) or 0)
+            if total > MAX_DOWNLOAD:
+                raise ValueError('Blender download exceeds the size limit.')
             done = 0
             while chunk := response.read(1024 * 1024):
                 if cancel.is_set():
                     raise ValueError('Blender installation cancelled.')
+                done += len(chunk)
+                if done > MAX_DOWNLOAD:
+                    raise ValueError('Blender download exceeds the size limit.')
                 out.write(chunk)
                 digest.update(chunk)
-                done += len(chunk)
                 progress(f'Downloading Blender: {done // (1024 * 1024)} MB' + (f' / {total // (1024 * 1024)} MB' if total else ''))
         if digest.hexdigest() != expected:
             raise ValueError('Blender download failed its SHA-256 verification.')
         progress('Extracting verified Blender runtime…')
         if name.endswith('.zip'):
             with zipfile.ZipFile(archive) as source:
+                if sum(entry.file_size for entry in source.infolist()) > MAX_UNPACKED:
+                    raise ValueError('Blender archive expands too far.')
                 for entry in source.infolist():
                     if cancel.is_set():
                         raise ValueError('Blender installation cancelled.')
-                    if not (staging / entry.filename).resolve().is_relative_to(staging.resolve()):
+                    filename = entry.filename.replace('\\', '/')
+                    path = PurePosixPath(filename)
+                    if (stat.S_ISLNK(entry.external_attr >> 16) or ':' in filename or
+                            path.is_absolute() or '..' in path.parts or
+                            not (staging / filename).resolve().is_relative_to(staging.resolve())):
                         raise ValueError('Unsafe Blender archive path.')
                     source.extract(entry, staging)
         else:
+            with tarfile.open(archive) as source:
+                if sum(member.size for member in source.getmembers()) > MAX_UNPACKED:
+                    raise ValueError('Blender archive expands too far.')
             with tarfile.open(archive) as source:
                 source.extractall(staging, filter='data')
         if cancel.is_set():

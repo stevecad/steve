@@ -15,6 +15,7 @@ from steve_desktop.update_manifest import public_key_list
 from steve_desktop.vault import Vault
 from steve_desktop.cad_server import LocalCadServer
 from steve_desktop.cad_document import bracket
+from steve_desktop.local_git import LocalGit
 from tests.update_signing import expires_in, keypair, sign
 
 
@@ -181,3 +182,22 @@ class GitTests(unittest.TestCase):
                 for path in ['../escape','.git/config']:
                     with self.assertRaises(ValueError):service.safe_file(checkout,path)
             finally:server.close()
+
+    def test_symlink_above_the_checkout_is_not_an_escape(self):
+        with tempfile.TemporaryDirectory() as folder:
+            base = Path(folder)
+            real = base / 'real-home'
+            (real / 'Steve' / 'repositories').mkdir(parents=True)
+            home = base / 'home-link'
+            home.symlink_to(real, target_is_directory=True)
+            checkout = home / 'Steve' / 'repositories' / 'uuid'
+            checkout.mkdir()
+            (checkout / 'main.py').write_text('print(1)\n')
+            self.assertEqual(LocalGit.safe_file(checkout, 'main.py'), checkout / 'main.py')
+            self.assertEqual(LocalGit.safe_file(checkout, 'components/plate.py'), checkout / 'components/plate.py')
+            linked = checkout / 'alias'
+            linked.symlink_to(checkout / 'main.py')
+            for path in ('alias', '../uuid-outside', '.git/config'):
+                with self.subTest(path=path):
+                    with self.assertRaises(ValueError):
+                        LocalGit.safe_file(checkout, path)

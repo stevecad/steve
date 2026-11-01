@@ -114,8 +114,17 @@ class LocalGit:
 
     @staticmethod
     def safe_file(root, relative):
-        target=root/relative
-        if '.git' in Path(relative).parts or not target.resolve().is_relative_to(root.resolve()) or any(p.is_symlink() for p in [target,*target.parents] if p!=root.parent):
+        root, target = Path(root), Path(root) / relative
+        # A symlink above the checkout (a home directory on another disk) is normal.
+        # Links inside the repository are not: they can redirect a read or write.
+        if '.git' in Path(relative).parts or not target.resolve().is_relative_to(root.resolve()):
+            raise ValueError('Repository source path escapes its document folder')
+        current = target
+        while current != root:
+            if current.is_symlink() or current == current.parent:
+                raise ValueError('Repository source path escapes its document folder')
+            current = current.parent
+        if root.is_symlink():
             raise ValueError('Repository source path escapes its document folder')
         return target
 
