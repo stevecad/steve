@@ -45,3 +45,26 @@ The Windows build downloads the sketch solver's Node.js runtime with
   use disposable keys and neutral example names.
 - The STEVE name and logo are trademarks and are not licensed under Apache 2.0
   (see `README.md`).
+
+## Issues and pull requests
+
+Steve Desktop is a local CAD app, and it gets fixes for things that don't work. We don't add new features to it; for
+more features, try Steve Studio (https://stevecad.studio). Support for a new platform (another operating system or
+architecture) is welcome, but please open an issue to discuss it before you start: a maintainer decides each one.
+
+**One problem per issue.** If you've found several things, open one issue for each. An issue that covers several
+unrelated problems will be asked to be split before anything else happens.
+
+**One change per pull request.** Keep each pull request to a single fix with its tests, and within these limits:
+
+- at most **400 changed lines** (additions plus deletions), and
+- at most **25 changed files**.
+
+Lockfiles, vendored code (`vendor/`, `pdf-fonts/`, `bundled-skills/`, `THIRD-PARTY-LICENSES/`) and generated files
+don't count toward either limit. A pull request over a limit, or one that bundles unrelated changes, will be asked to be
+split; it stays open meanwhile.
+
+Pull requests contain **text files only**: no binaries, images, archives, fonts, compiled or minified files, and no
+long encoded strings. Changes to dependencies, `.github/` workflows, packaging and installers, the updater and its
+signing, the version, or vendored code are reviewed by a maintainer by hand; please open an issue first if you'd like
+to change any of those. Every pull request is reviewed and merged by a person.
