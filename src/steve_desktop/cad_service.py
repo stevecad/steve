@@ -19,6 +19,18 @@ _locks = {}
 _locks_guard = threading.Lock()
 
 
+def rename_when_released(source, destination, attempts=50):
+    """Rename a just-built folder. Windows refuses (WinError 32) while a worker or a virus scanner still holds a file
+    in it open, and those handles go a moment later."""
+    for attempt in range(attempts):
+        try:
+            return Path(source).rename(destination)
+        except PermissionError:
+            if attempt == attempts - 1:
+                raise
+            time.sleep(.05)
+
+
 def atomic_json(path, value):
     path = Path(path)
     temp = path.with_name(path.name + '.' + uuid.uuid4().hex + '.tmp')
@@ -111,7 +123,7 @@ class CadProject:
                 entry = {'id': revision, 'parent': actual, 'message': message[:200],
                          'time': datetime.now(timezone.utc).isoformat(), 'name': document['name']}
                 destination = self.revision_folder(revision)
-                staging.rename(destination)
+                rename_when_released(staging, destination)
                 state['revisions'].append(entry)
                 state['cursor'] = len(state['revisions']) - 1
                 state['name'] = document['name']

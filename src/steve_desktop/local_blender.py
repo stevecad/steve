@@ -204,7 +204,8 @@ class LocalBlender:
                 if cancel.is_set():
                     raise ValueError('Blender build cancelled.')
                 cache.parent.mkdir(parents=True, exist_ok=True)
-                staging.rename(cache)
+                from steve_desktop.cad_service import rename_when_released
+                rename_when_released(staging, cache)
                 entry['cached'] = False
             else:
                 entry['cached'] = True
