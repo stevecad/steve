@@ -1,0 +1,49 @@
+name: Bug report
+description: Something in Steve Desktop doesn't work. One problem per issue, please.
+labels: []
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Thanks for taking the time to report this! Please describe **one problem** here. If you've found several,
+        open one issue for each, so each can be looked at and fixed on its own.
+
+        Don't include passwords, keys, personal data or private files.
+  - type: textarea
+    id: what
+    attributes:
+      label: What happened
+      description: What did you do, and what went wrong?
+    validations:
+      required: true
+  - type: textarea
+    id: expected
+    attributes:
+      label: What you expected
+    validations:
+      required: true
+  - type: textarea
+    id: steps
+    attributes:
+      label: Steps to reproduce
+      description: The smallest steps that show the problem, with a neutral example if you can.
+      placeholder: |
+        1. Open a new part
+        2. ...
+  - type: input
+    id: version
+    attributes:
+      label: Steve version
+      description: The version of Steve you are running, for example 0.4.3.
+    validations:
+      required: true
+  - type: dropdown
+    id: platform
+    attributes:
+      label: Platform
+      options:
+        - Windows 10/11 x64
+        - Linux x86-64
+        - Running from source
+    validations:
+      required: true
