@@ -1,0 +1,20 @@
+name: Feature request
+description: Looking for more features? Steve Studio is the place.
+labels: []
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Thanks for the idea! Steve Desktop focuses on CAD and gets fixes for things that don't work, so we aren't
+        adding new features to it. For more features, try **Steve Studio**: https://stevecad.studio
+
+        If something that already exists in Steve Desktop is missing or broken, please use the **Bug report**
+        template instead. If you'd like Steve Desktop on a new platform, describe it below and a maintainer will
+        review it. One request per issue, please.
+  - type: textarea
+    id: request
+    attributes:
+      label: New platform or missing behaviour
+      description: Which platform (operating system and architecture), or which existing behaviour is missing?
+    validations:
+      required: true
