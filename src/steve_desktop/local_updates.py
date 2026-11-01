@@ -23,13 +23,18 @@ DOWNLOAD_PAGE='https://dl.stevecad.studio/'
 
 
 def update_platform():
-    if platform.machine().lower() not in ('x86_64', 'amd64'):
+    machine = platform.machine().lower()
+    # Apple Silicon only. Intel macOS stays unidentified; there is no Mac build to name.
+    if sys.platform == 'darwin':
+        return 'macos-arm64' if machine == 'arm64' else None
+    if machine not in ('x86_64', 'amd64'):
         return None
     return {'win32':'windows-x64', 'linux':'linux-x64'}.get(sys.platform)
 
 
 def supports_portable_updates():
-    return update_platform() is not None
+    # macos-arm64 is a platform id for desktop features. Packaged update feeds remain Windows and Linux.
+    return update_platform() in ('windows-x64', 'linux-x64')
 
 
 def shipped_channel():

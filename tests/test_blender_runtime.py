@@ -6,11 +6,11 @@ import threading
 import tempfile
 import unittest
 import zipfile
-from pathlib import Path
+from pathlib import Path, PosixPath
 from types import SimpleNamespace
 from unittest.mock import patch
 
-from steve_desktop.blender_runtime import probe, PACKAGES, install, environment
+from steve_desktop.blender_runtime import probe, PACKAGES, install, environment, discover
 from steve_desktop.cad_document import validate
 from steve_desktop.local_blender import BlenderResult
 
@@ -32,9 +32,14 @@ class BlenderRuntimeTests(unittest.TestCase):
         with tempfile.TemporaryDirectory() as folder:
             response=io.BytesIO(b'not the official executable')
             response.headers={'Content-Length':str(len(response.getvalue()))}
-            with patch('steve_desktop.blender_runtime.urllib.request.urlopen',return_value=response):
+            # Pin a packaged platform. Darwin has no archive, so an unmocked Mac host
+            # raises before the download is hashed.
+            with patch('steve_desktop.blender_runtime.platform.system',return_value='Linux'), \
+                 patch('steve_desktop.blender_runtime.platform.machine',return_value='x86_64'), \
+                 patch('steve_desktop.blender_runtime.urllib.request.urlopen',return_value=response) as opened:
                 with self.assertRaisesRegex(ValueError,'SHA-256'):
                     install(Path(folder),threading.Event(),lambda message:None)
+                self.assertIn('linux-x64', opened.call_args.args[0])
             self.assertEqual(list(Path(folder).iterdir()),[])
 
     def _response(self, payload):
@@ -44,13 +49,18 @@ class BlenderRuntimeTests(unittest.TestCase):
 
     def test_oversized_download_is_rejected_before_hashing(self):
         # A zero Content-Length must not bypass the byte cap.
+        # Pin a packaged platform. Darwin has no archive, so an unmocked Mac host
+        # raises before the size cap is reached.
         response = self._response(b'x' * 32)
         response.headers = {'Content-Length': '0'}
         with tempfile.TemporaryDirectory() as folder:
-            with patch('steve_desktop.blender_runtime.MAX_DOWNLOAD', 8), \
-                 patch('steve_desktop.blender_runtime.urllib.request.urlopen', return_value=response):
+            with patch('steve_desktop.blender_runtime.platform.system', return_value='Linux'), \
+                 patch('steve_desktop.blender_runtime.platform.machine', return_value='x86_64'), \
+                 patch('steve_desktop.blender_runtime.MAX_DOWNLOAD', 8), \
+                 patch('steve_desktop.blender_runtime.urllib.request.urlopen', return_value=response) as opened:
                 with self.assertRaisesRegex(ValueError, 'size limit'):
                     install(Path(folder), threading.Event(), lambda message: None)
+                self.assertIn('linux-x64', opened.call_args.args[0])
             self.assertEqual(list(Path(folder).iterdir()), [])
 
     def test_symlink_and_traversal_entries_are_rejected(self):
@@ -127,6 +137,95 @@ class BlenderRuntimeTests(unittest.TestCase):
             with self.assertRaises(ValueError):result.export('BLEND')
             (Path(folder)/'result.blend').write_bytes(b'BLENDER')
             self.assertTrue(Path(result.export('BLEND')['path']).is_file())
+
+    def _candidates(self, root, system, probe_fn, name='posix', home=None, environ=None, configured='', path_type=None):
+        """Run discover with platform and filesystem checks mocked. Returns (result, probed paths)."""
+        seen=[]
+        def record(path):
+            seen.append(str(path))
+            return probe_fn(str(path))
+        env={'STEVE_BLENDER':''}
+        if environ:env.update(environ)
+        # Python 3.13 refuses to construct WindowsPath when os.name is nt on Linux.
+        # The Windows branch still runs; PosixPath stands in for the filesystem.
+        path_type=path_type or Path
+        with patch('steve_desktop.blender_runtime.platform.system',return_value=system), \
+             patch('steve_desktop.blender_runtime.os.name',name), \
+             patch('steve_desktop.blender_runtime.shutil.which',return_value=None), \
+             patch('steve_desktop.blender_runtime.Path',path_type), \
+             patch('steve_desktop.blender_runtime.Path.home',return_value=home or Path('/Users/cad')), \
+             patch('steve_desktop.blender_runtime.probe',side_effect=record), \
+             patch.dict(os.environ,env):
+            return discover(root,configured), seen
+
+    def test_darwin_discover_probes_system_then_user_blender_app(self):
+        home=Path('/Users/cad')
+        system=str(Path('/Applications/Blender.app')/'Contents'/'MacOS'/'Blender')
+        user=str(home/'Applications'/'Blender.app'/'Contents'/'MacOS'/'Blender')
+        accepted={'path':user,'version':'4.5.9','build':'user'}
+        def fake_probe(path):
+            if path==user:return accepted
+            raise ValueError('not blender')
+        with tempfile.TemporaryDirectory() as folder:
+            found,seen=self._candidates(Path(folder),'Darwin',fake_probe,home=home)
+        self.assertEqual(found,accepted)
+        self.assertEqual(seen,[system,user])
+
+    def test_darwin_discover_stops_at_the_system_blender_app(self):
+        home=Path('/Users/cad')
+        system=str(Path('/Applications/Blender.app')/'Contents'/'MacOS'/'Blender')
+        accepted={'path':system,'version':'4.5.9','build':'system'}
+        def fake_probe(path):
+            if path==system:return accepted
+            raise ValueError('not blender')
+        with tempfile.TemporaryDirectory() as folder:
+            found,seen=self._candidates(Path(folder),'Darwin',fake_probe,home=home)
+        self.assertEqual(found,accepted)
+        self.assertEqual(seen,[system])
+
+    def test_darwin_discover_returns_none_when_no_app_is_blender_4_5(self):
+        home=Path('/Users/cad')
+        system=str(Path('/Applications/Blender.app')/'Contents'/'MacOS'/'Blender')
+        user=str(home/'Applications'/'Blender.app'/'Contents'/'MacOS'/'Blender')
+        def reject(path):
+            raise ValueError('not blender')
+        with tempfile.TemporaryDirectory() as folder:
+            found,seen=self._candidates(Path(folder),'Darwin',reject,home=home)
+        self.assertIsNone(found)
+        self.assertEqual(seen,[system,user])
+
+    def test_linux_discover_keeps_distro_executables(self):
+        def reject(path):
+            raise ValueError('not blender')
+        with tempfile.TemporaryDirectory() as folder:
+            found,seen=self._candidates(Path(folder),'Linux',reject)
+        self.assertIsNone(found)
+        self.assertEqual(seen,['/usr/bin/blender','/snap/bin/blender'])
+
+    def test_windows_discover_keeps_program_files_layout(self):
+        with tempfile.TemporaryDirectory() as folder:
+            root=Path(folder)
+            executable=root/'Program Files'/'Blender Foundation'/'Blender 4.5'/'blender.exe'
+            executable.parent.mkdir(parents=True)
+            executable.write_bytes(b'fixture')
+            accepted={'path':str(executable),'version':'4.5.9','build':'win'}
+            def fake_probe(path):
+                # os.name is nt for this call, so pathlib.Path would be a WindowsPath and miss the file.
+                self.assertTrue(PosixPath(path).is_file())
+                return accepted
+            found,seen=self._candidates(root/'runtime','Windows',fake_probe,name='nt',environ={'PROGRAMFILES':str(root/'Program Files')},path_type=PosixPath)
+        self.assertEqual(found,accepted)
+        self.assertEqual(seen,[str(executable)])
+
+    def test_darwin_automatic_install_stays_unavailable(self):
+        self.assertNotIn(('Darwin','arm64'),PACKAGES)
+        with tempfile.TemporaryDirectory() as folder, \
+             patch('steve_desktop.blender_runtime.platform.system',return_value='Darwin'), \
+             patch('steve_desktop.blender_runtime.platform.machine',return_value='arm64'), \
+             patch('steve_desktop.blender_runtime.urllib.request.urlopen') as opened:
+            with self.assertRaisesRegex(ValueError,'manually'):
+                install(Path(folder),threading.Event(),lambda message:None)
+            opened.assert_not_called()
 
 
 if __name__=='__main__':unittest.main()

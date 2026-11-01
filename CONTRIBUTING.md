@@ -16,6 +16,7 @@ cd cad-web; npm ci; npm run build; cd ..
 You need Python 3.13 and Node.js with npm. On Linux use the same steps with
 `python3.13` and `.venv/bin/python`; see `docs/LINUX.md` for system packages
 (a working Secret Service is required; there is no plaintext credential fallback).
+On Apple Silicon use the same steps; see `docs/MACOS.md`.
 
 ## Tests
 

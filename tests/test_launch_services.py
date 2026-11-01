@@ -10,7 +10,7 @@ import hashlib
 from types import SimpleNamespace
 import httpx
 from fastapi import FastAPI
-from steve_desktop.local_updates import verify_manifest,extract_package,LocalUpdates,default_channel
+from steve_desktop.local_updates import verify_manifest,extract_package,LocalUpdates,default_channel,update_platform,supports_portable_updates
 from steve_desktop.update_manifest import public_key_list
 from steve_desktop.vault import Vault
 from steve_desktop.cad_server import LocalCadServer
@@ -145,6 +145,47 @@ class UnsupportedUpdateTests(unittest.TestCase):
             updater=LocalUpdates(SimpleNamespace(folder=Path(folder)/'cad',app=FastAPI()))
             try:
                 updater.check()
+                self.assertFalse(updater.status()['supports_updates'])
+                self.assertFalse(updater.status()['automatic'])
+                self.assertFalse(updater.status()['ready'])
+                self.assertIn('Download',updater.status()['message'])
+                client.assert_not_called()
+            finally:updater.close()
+
+
+class PlatformIdTests(unittest.TestCase):
+    def _ids(self, system, machine):
+        with patch('steve_desktop.local_updates.sys.platform',system), \
+             patch('steve_desktop.local_updates.platform.machine',return_value=machine):
+            return update_platform(), supports_portable_updates()
+
+    def test_reported_platforms_keep_their_ids(self):
+        cases=(
+            ('win32','AMD64','windows-x64',True),
+            ('win32','x86_64','windows-x64',True),
+            ('linux','x86_64','linux-x64',True),
+            ('linux','amd64','linux-x64',True),
+            ('win32','ARM64',None,False),
+            ('linux','aarch64',None,False),
+            ('darwin','x86_64',None,False),
+            ('darwin','arm64','macos-arm64',False),
+            ('darwin','ARM64','macos-arm64',False),
+        )
+        for system,machine,platform_id,portable in cases:
+            with self.subTest(system=system,machine=machine):
+                self.assertEqual(self._ids(system,machine),(platform_id,portable))
+
+    def test_apple_silicon_id_does_not_download_updates(self):
+        with tempfile.TemporaryDirectory() as folder, \
+             patch('steve_desktop.local_updates.sys.platform','darwin'), \
+             patch('steve_desktop.local_updates.platform.machine',return_value='arm64'), \
+             patch('steve_desktop.local_updates.httpx.Client') as client:
+            self.assertEqual(update_platform(),'macos-arm64')
+            self.assertFalse(supports_portable_updates())
+            updater=LocalUpdates(SimpleNamespace(folder=Path(folder)/'cad',app=FastAPI()))
+            try:
+                updater.check()
+                self.assertEqual(updater.platform,'macos-arm64')
                 self.assertFalse(updater.status()['supports_updates'])
                 self.assertFalse(updater.status()['automatic'])
                 self.assertFalse(updater.status()['ready'])

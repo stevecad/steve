@@ -65,7 +65,8 @@ Signed updates from https://dl.stevecad.studio and how a release is produced:
 
 Linux x64 AppImage/tarball builds, dependencies and verification:
 [docs/LINUX.md](docs/LINUX.md). Linux uses the shared PyInstaller spec and a pinned
-Linux build environment. macOS packaging remains future work.
+Linux build environment. Running from source on Apple Silicon:
+[docs/MACOS.md](docs/MACOS.md). macOS packaging remains future work.
 
 Studio connection and projects
 ------------------------------

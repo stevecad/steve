@@ -1,4 +1,4 @@
-"""Optional official Blender runtime, shared by Windows and Linux desktop builds."""
+"""Optional Blender 4.5 runtime: pinned archives on Windows and Linux, Blender.app on macOS."""
 import hashlib
 import os
 import platform
@@ -62,6 +62,9 @@ def discover(root, configured=''):
     candidates += [shutil.which('blender') or '']
     if os.name == 'nt':
         candidates += [str(p) for p in (Path(os.environ.get('PROGRAMFILES', 'C:/Program Files')) / 'Blender Foundation').glob('Blender 4.5*/blender.exe')]
+    elif platform.system() == 'Darwin':
+        bundles = (Path('/Applications/Blender.app'), Path.home() / 'Applications' / 'Blender.app')
+        candidates += [str(bundle / 'Contents' / 'MacOS' / 'Blender') for bundle in bundles]
     else:
         candidates += ['/usr/bin/blender', '/snap/bin/blender']
     for candidate in filter(None, candidates):
