@@ -512,8 +512,33 @@ export class ApiError extends Error {
 
 let termsReload = false;
 
+/** A request that never got an answer (the local CAD service was restarting, or the computer slept). */
+export const NETWORK_ERROR = 'Couldn’t reach Steve’s local CAD service. Try again; the work already done is kept.';
+export const unreachable = (error: unknown) => error instanceof ApiError && error.code === 'network';
+
+/**
+ * `request` again while the CAD service can't be reached (`unreachable`), waiting 1 s, 2 s, 4 s … up to 10 s between tries, for
+ * at most `windowMs`; an answer (any status) or another error ends it at once. Only for requests that are safe to
+ * repeat: status reads, and starts the server answers with the job already running.
+ */
+export async function reachable<T>(request: () => Promise<T>, windowMs = 5 * 60_000): Promise<T> {
+  const until = Date.now() + windowMs;
+  for (let wait = 1000; ; wait = Math.min(wait * 2, 10_000)) {
+    try { return await request(); } catch (error) {
+      if (!unreachable(error) || Date.now() + wait > until) throw error;
+      await new Promise((resolve) => setTimeout(resolve, wait));
+    }
+  }
+}
+
 export async function api<T>(url: string, options: RequestInit = {}): Promise<T> {
-  const response = await fetch(url, options);
+  let response: Response;
+  try { response = await fetch(url, options); } catch (error) {
+    // Cancelled on purpose: the caller's to handle. Anything else is the browser's bare "Failed to fetch": say what it means.
+    if ((error as Error)?.name === 'AbortError' || options.signal?.aborted) throw error;
+    recordFailedRequest(options.method ?? 'GET', url, 0, 'no answer');
+    throw new ApiError(NETWORK_ERROR, 0, 'network');
+  }
   let body: unknown = null;
   let readable = true;
   try { body = await response.json(); } catch { readable = false; /* Non-JSON error bodies fall through to the status message. */ }
@@ -794,13 +819,14 @@ export const bodyMeshes = (build: Build, resolution: MeshResolution = 'fine'): B
  */
 export async function withPrintMeshes(build: Build, resolution: MeshResolution = 'fine'): Promise<Build> {
   if (bodyMeshes(build, resolution)) return build;
-  let job = await Api.printMesh(build.id, true, resolution);
+  // A dropped connection mid-wait doesn't end it: the job carries on on the server (asking to start it again returns it).
+  let job = await reachable(() => Api.printMesh(build.id, true, resolution));
   while (job.status === 'queued' || job.status === 'running') {
     await new Promise((resolve) => setTimeout(resolve, 1000));
-    job = await Api.printMesh(build.id, false, resolution);
+    job = await reachable(() => Api.printMesh(build.id, false, resolution));
   }
   if (job.status !== 'succeeded') throw new Error(job.error?.trim().split('\n').pop() || 'The print meshes couldn’t be made for this model.');
-  return Api.build(build.id);
+  return reachable(() => Api.build(build.id));
 }
 
 export function forgetTopology(build: Build) {

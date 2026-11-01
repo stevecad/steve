@@ -3,7 +3,7 @@ import { rememberStoppedBuild } from './stoppedBuild';
 import { BLENDER_TEMPLATE, builtFrom, CIRCUIT_MAIN, DESIGN_FILES, fileLabel, filesOf, hasFiles, imagePath, isImage, keepsFiles, MAIN, modelBuiltFrom, opened, SHOP_FILES, sourceFiles, stored, tablePath, withComponent, withLink, withoutComponent, latestModelBuild, manufactureBuild, showsModel } from './design';
 import { CIRCUIT_TEMPLATE } from '@/workspaces/electronics/template';
 import * as THREE from 'three';
-import { api, Api, ApiError, json, bodyMeshes, buildProgress, fetchTopology, forgetTopology, serverCapabilities, shopMetadata, withPrintMeshes, type Build, type CadDocument, type Kind, type LinkRef, type MeshResolution, type PackageDocument } from '@/lib/api';
+import { api, Api, ApiError, json, bodyMeshes, buildProgress, fetchTopology, forgetTopology, reachable, serverCapabilities, shopMetadata, withPrintMeshes, type Build, type CadDocument, type Kind, type LinkRef, type MeshResolution, type PackageDocument } from '@/lib/api';
 import { ModelRuntime, loadGltf } from '@/viewport/model';
 import { tween, viewer, VIEW_DIRECTIONS, type CameraPose } from '@/viewport/viewer';
 import {
@@ -889,15 +889,16 @@ export async function fullBuildFor(build: Build, fresh = false): Promise<Build> 
 /** The full build of a source, waited for: an identical one already made is reused (the build cache). */
 async function fullBuildOf(source: SheetSource): Promise<Build> {
   let full = await Api.submit({ ...source, mode: source.kind === 'blender' ? 'save' : 'full' });
+  // A dropped connection while waiting doesn't end the wait: the build carries on on the server (lib/api reachable).
   while (full.status !== 'succeeded' && full.status !== 'failed') {
     await statusChange(full.id, full.status, generation);
-    full = await Api.build(full.id);
+    full = await reachable(() => Api.build(full.id));
   }
   if (full.status === 'failed') throw new Error(full.error?.trim().split('\n').pop() || 'The full build failed.');
   // A cache hit answers the submit with the finished build but without its source. Shown like that (Manufacture's
   // ensureNamedGeometry), it would never match the open document (builtFrom), and the automatic build would ask again
   // forever; fetch it whole.
-  if (full.code === undefined) full = await Api.build(full.id);
+  if (full.code === undefined) full = await reachable(() => Api.build(full.id));
   return full;
 }
 
