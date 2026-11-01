@@ -9,7 +9,7 @@
  * Export menu remembers (exportFormat.ts): fine is the print-grade mesh; medium and coarse are smaller files for large
  * curved models, made on demand like it (?resolution=…).
  */
-import { bodyMeshes, type BodyMesh, type MeshResolution } from '@/lib/api';
+import { bodyMeshes, NETWORK_ERROR, type BodyMesh, type MeshResolution } from '@/lib/api';
 import { pretty } from '@/lib/format';
 import { surfaceNote } from '@/lib/modeling';
 import { zip } from '@/lib/zip';
@@ -89,7 +89,13 @@ const meshQueue: (() => void)[] = [];
 
 async function meshResponse(url: string): Promise<Response> {
   for (let attempt = 0; ; attempt++) {
-    const response = await fetch(url);
+    let response: Response;
+    // No answer at all (the connection dropped): wait and ask again too, then say so plainly, not "Failed to fetch".
+    try { response = await fetch(url); } catch {
+      if (attempt >= 5) throw new Error(NETWORK_ERROR);
+      await new Promise((resolve) => setTimeout(resolve, 1000 * Math.min(5, 2 ** attempt)));
+      continue;
+    }
     if (![429, 503].includes(response.status) || attempt >= 5) return response;
     const requested = Number(response.headers.get('Retry-After')) || 2 ** attempt;
     await response.body?.cancel();
