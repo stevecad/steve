@@ -26,6 +26,10 @@ STUDY_LISTED = 200    # colliding poses a study lists one by one (sampling="pose
 STUDY_MAP_BINS = 20   # a random study's map: bins per joint
 COLLISION_SHAPES = ("box", "sphere", "capsule")
 CLASH_TOLERANCE = 1e-3  # mm³: touching faces have no common volume
+# mm: two parts this close touch. The exact distance of curved faces that touch along a line or at a point (a bar on a
+# tube, two crossing tubes) comes from a numeric search, and placements through rotations add rounding, so a seat can
+# read a hair above zero; a deliberate gap (a tenth of a millimetre and up) stays far above it.
+TOUCH_MM = 1e-4
 CONTACTS = ("seated", "press_fit", "threaded")
 FIT_LISTED = 100      # pairs a fit check lists
 MODES_MAX = 32        # named limit sets (design.mode) a design declares
@@ -1857,8 +1861,8 @@ class Design:
             volume, distance = m["volume"], m["distance"]
             over = volume is None or volume > (contact["allowance"] if contact else 0.0) + CLASH_TOLERANCE
             close = not m["bound"] and distance < gap - 1e-9
-            touching = contact is not None and not m["bound"] and ((volume or 0.0) > CLASH_TOLERANCE or distance <= 1e-6)
-            if contact is None and not (over or close) and not m["bound"] and distance <= 1e-6 and pair not in touched:
+            touching = contact is not None and not m["bound"] and ((volume or 0.0) > CLASH_TOLERANCE or distance <= TOUCH_MM)
+            if contact is None and not (over or close) and not m["bound"] and distance <= TOUCH_MM and pair not in touched:
                 a, b = pair
                 touched[pair] = {"a": a, "b": b, "overlap_mm3": round(volume, 3), "min_distance_mm": round(distance, 4), "points": m["points"],
                                  "when": when, **({"approximate": True} if a in invalid or b in invalid else {})}
@@ -1894,12 +1898,15 @@ class Design:
                     return {"volume": None, "distance": 0.0, "bound": False, "points": None}
                 if common[0] > CLASH_TOLERANCE:
                     return {"volume": common[0], "distance": 0.0, "bound": False, "points": [common[2]]}
-            if not reach and rules[(a, b)][0] is None and exact.apart(motions, a, b):
-                # No gap to keep, no declared contact, and the overlap's mesh pre-check found them more than PROXIMITY_MM
-                # apart: not touching, so nothing reads the distance and it isn't measured (the exact distance is most of
-                # a fit check's time). Pairs it couldn't rule out are measured: record() lists those that touch. A sweep
-                # asks with reach = gap + its step, zero only when the step is (its pairs then settle at any distances).
-                # The same answer as boxes apart.
+            if not reach and rules[(a, b)][0] is None and exact.apart(motions, a, b) and exact.faces_apart(motions, a, b):
+                # No gap to keep, no declared contact, the overlap's mesh pre-check found them more than PROXIMITY_MM
+                # apart, and no face of one comes near a face of the other (their exact oriented boxes, which hold the
+                # faces themselves, not their meshes: a mesh of a round face lies inside it, so a bar resting on a tube
+                # or two crossing tubes can look apart to the meshes alone): not touching, so nothing reads the
+                # distance and it isn't measured (the exact distance is most of a fit check's time). Pairs either
+                # couldn't rule out are measured: record() lists those that touch. A sweep asks with reach = gap + its
+                # step, zero only when the step is (its pairs then settle at any distances). The same answer as boxes
+                # apart.
                 return {"volume": 0.0, "distance": reach, "bound": True, "points": None}
             closest = exact.closest(placed, motions, a, b, deadline)
             if unanswered(closest, (a, b)):  # No overlap, the distance unknown: unverified only where a clearance needs it.
@@ -1920,7 +1927,7 @@ class Design:
             if state["touching"] or m["volume"] is None:
                 return
             if not m["bound"]:
-                if m["volume"] > CLASH_TOLERANCE or m["distance"] <= 1e-6:
+                if m["volume"] > CLASH_TOLERANCE or m["distance"] <= TOUCH_MM:
                     state["touching"] = True
                 elif math.isfinite(m["distance"]) and (state["closest"] is None or m["distance"] < state["closest"]["distance"]):
                     state["closest"] = {"distance": m["distance"], "pair": pair, "points": m["points"], "when": when}
@@ -2061,7 +2068,7 @@ class Design:
             if isinstance(closest, _NoAnswer) or not math.isfinite(closest[0]):
                 if state["closest"] is None:  # Unmeasured: at least as far apart as the boxes.
                     state["closest"] = {"distance": apart["boxes"], "pair": apart["pair"], "points": None, "when": apart["when"], "at_least": True}
-            elif closest[0] <= 1e-6:
+            elif closest[0] <= TOUCH_MM:
                 state["touching"] = True
             elif state["closest"] is None or closest[0] < state["closest"]["distance"]:
                 state["closest"] = {"distance": closest[0], "pair": apart["pair"], "points": closest[1], "when": apart["when"]}
@@ -2645,6 +2652,7 @@ class _Exact:
         self.probing = False  # `_each`: an answer not kept yet raises _Unknown instead of being measured
         self.fresh: list[tuple] = []  # keys kept since a worker of `_each` began its item
         self.meshes: dict[str, object] = {}  # instance → meshed copy of its solids at rest, or None (`_mesh`)
+        self.boxes: dict[str, tuple | None] = {}  # instance → oriented boxes of its solids and faces at rest (`_faces`)
 
     def _apart(self, motions: dict, a: str, b: str) -> bool:
         """Whether a and b, where `motions` puts them, are certainly apart, so they share no volume and the exact
@@ -2696,6 +2704,44 @@ class _Exact:
                 faces.Next()
             self.meshes[name] = copy
         return self.meshes[name]
+
+    def _faces(self, name: str):
+        """(oriented box of the whole instance, oriented box of each face) at rest, or None when any came out empty.
+        Made from the exact geometry, never a triangulation (a mesh of a round face lies inside the face), with the
+        shapes' tolerances: each box holds its face. Made once per build."""
+        if name not in self.boxes:
+            from OCP.Bnd import Bnd_OBB
+            from OCP.BRepBndLib import BRepBndLib
+
+            def box(shape):
+                out = Bnd_OBB()
+                BRepBndLib.AddOBB_s(shape, out, False, True, True)
+                return None if out.IsVoid() else out
+
+            try:
+                whole = box(self.shapes[name].wrapped)
+                faces = [box(face.wrapped) for face in self.shapes[name].Faces()]
+                self.boxes[name] = None if whole is None or not faces or None in faces else (whole, faces)
+            except Exception:  # noqa: BLE001 - unsure: the pair is measured
+                self.boxes[name] = None
+        return self.boxes[name]
+
+    def faces_apart(self, motions: dict, a: str, b: str) -> bool:
+        """Whether, where `motions` puts them, no face of a comes within FACE_MARGIN_MM of a face of b, by the faces'
+        exact oriented boxes (`_faces`): then the parts are certainly not touching. Faces that lie inside the other
+        part's box at all are compared pair by pair; anything unsure says no, and the exact distance answers."""
+        try:
+            first, second = self._faces(a), self._faces(b)
+            if first is None or second is None:
+                return False
+            here, there = motions.get(a), motions.get(b)
+            whole_a, whole_b = _moved_obb(first[0], here, FACE_MARGIN_MM), _moved_obb(second[0], there, FACE_MARGIN_MM)
+            near_a = [_moved_obb(box, here, FACE_MARGIN_MM) for box in first[1]]
+            near_a = [box for box in near_a if not box.IsOut(whole_b)]
+            near_b = [box for box in (_moved_obb(box, there, 0.0) for box in second[1]) if not box.IsOut(whole_a)]
+            return not any(not p.IsOut(q) for p in near_a for q in near_b)
+        except Exception:  # noqa: BLE001 - unsure: the exact distance answers
+            return False
 
     def overlap(self, placed: dict, motions: dict, a: str, b: str, deadline: float | None):
         """`_overlap(placed[a], placed[b])` through `_bounded`: (volume, depth, centre), None or a `_NoAnswer`."""
@@ -2759,6 +2805,22 @@ MESH_DEFLECTION_MM = 0.1
 MESH_ANGLE = 0.3  # radians
 PROXIMITY_MM = 1.0
 _NO_COMMON = (0.0, 0.0, (0.0, 0.0, 0.0))  # `_exact_overlap` of two solids that share no volume
+# _Exact.faces_apart: how far apart (mm) two faces' boxes must stay for the faces to be certainly not touching, many
+# times TOUCH_MM and the rounding of moving a box.
+FACE_MARGIN_MM = 0.01
+
+
+def _moved_obb(box, motion, margin: float):
+    """A copy of an oriented box (Bnd_OBB) moved by an instance's motion (a gp_Trsf, or None: where it is) and grown by
+    `margin` on every side: it then holds everything within `margin` of what the box held."""
+    from OCP.Bnd import Bnd_OBB
+    from OCP.gp import gp_Dir, gp_Pnt
+    centre = gp_Pnt(box.Center())
+    axes = [gp_Dir(box.XDirection()), gp_Dir(box.YDirection()), gp_Dir(box.ZDirection())]
+    if motion is not None:
+        centre = centre.Transformed(motion)
+        axes = [axis.Transformed(motion) for axis in axes]
+    return Bnd_OBB(centre, *axes, box.XHSize() + margin, box.YHSize() + margin, box.ZHSize() + margin)
 
 
 def _box_within(inner: tuple, outer: tuple, slack: float = PROXIMITY_MM) -> bool:
