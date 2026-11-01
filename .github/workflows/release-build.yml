@@ -33,11 +33,19 @@ permissions:
 jobs:
   linux:
     uses: ./.github/workflows/linux-package.yml
+    permissions:
+      contents: read
+      id-token: write   # the release build proves who it is to the build drop; grants nothing else
     with:
       source-ref: ${{ github.event.pull_request.head.sha || github.sha }}
+    secrets:
+      BUILD_DROP_URL: ${{ secrets.BUILD_DROP_URL }}
 
   windows:
     runs-on: windows-2025
+    permissions:
+      contents: read
+      id-token: write   # the release build proves who it is to the build drop; grants nothing else
     timeout-minutes: 40
     env:
       PYTHONUTF8: '1'
@@ -99,17 +107,30 @@ jobs:
           ./tools/build-installer.ps1 -Compiler $compiler -Version $version
           python tools/package_release.py --platform windows-x64 --output dist/windows
           if ($LASTEXITCODE -ne 0) { throw 'Release indexing failed' }
-      # Packages are stored only for release builds (workflow_dispatch from the release machine), never for pull
-      # requests: ~1 GB per platform and build is what filled the account's Actions storage on 2026-10-31.
-      - uses: actions/upload-artifact@v7
-        if: github.event_name != 'pull_request'
-        with:
-          name: Steve-windows-x64
-          path: dist/windows/*
-          if-no-files-found: error
-          compression-level: 0
-          retention-days: 2
-          overwrite: true
+      # Release builds (workflow_dispatch from the release machine) hand their packages to the release machine through
+      # the build drop, not GitHub's artifact storage (~1 GB per platform filled it on 2026-10-31). The drop accepts only
+      # this workflow's own OIDC token for this run. Pull requests store nothing.
+      - name: Hand the unsigned packages to the release machine
+        if: github.event_name == 'workflow_dispatch'
+        env:
+          BUILD_DROP_URL: ${{ secrets.BUILD_DROP_URL }}
+          PLATFORM: windows-x64
+        run: |
+          $ErrorActionPreference = 'Stop'
+          $PSNativeCommandUseErrorActionPreference = $true
+          if (-not $env:BUILD_DROP_URL) { throw 'BUILD_DROP_URL is not set' }
+          $base = $env:BUILD_DROP_URL.TrimEnd('/')
+          function Send-File([string]$Path) {
+            $token = (Invoke-RestMethod -Uri "$($env:ACTIONS_ID_TOKEN_REQUEST_URL)&audience=build-drop" `
+                        -Headers @{ Authorization = "bearer $($env:ACTIONS_ID_TOKEN_REQUEST_TOKEN)" }).value
+            Write-Host "::add-mask::$token"
+            "Authorization: Bearer $token" | curl.exe -sS --fail-with-body --retry 3 `
+              -H '@-' --upload-file $Path "$base/v1/runs/$($env:GITHUB_RUN_ID)/$($env:PLATFORM)/$(Split-Path -Leaf $Path)"
+            Write-Host ''
+          }
+          Set-Location dist/windows
+          foreach ($artifact in (Get-Content -Raw release-build.json | ConvertFrom-Json).artifacts) { Send-File $artifact.name }
+          Send-File release-build.json   # last: marks this platform complete
       - uses: actions/upload-artifact@v7
         if: always()
         with:

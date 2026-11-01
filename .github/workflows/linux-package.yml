@@ -7,6 +7,9 @@ on:
         type: string
         required: false
         default: ''
+    secrets:
+      BUILD_DROP_URL:
+        required: false
   workflow_dispatch:
 
 permissions:
@@ -71,16 +74,29 @@ jobs:
           docker run --rm --init --mount type=bind,src="${PWD}/${steve_images[0]}",dst=/opt/Steve.AppImage,readonly --mount type=bind,src="${PWD}/tools/linux_session.py",dst=/opt/linux_session.py,readonly steve-linux-runtime-check:local > build/verification/clean-ubuntu-appimage.log 2>&1
       - name: Index unsigned artifacts for local signing
         run: python tools/package_release.py --platform linux-x64 --output dist/linux
-      # Packages are stored only for release builds, never for pull requests (see release-build.yml).
-      - uses: actions/upload-artifact@v7
-        if: github.event_name != 'pull_request'
-        with:
-          name: Steve-linux-x86_64
-          path: dist/linux/*
-          if-no-files-found: error
-          compression-level: 0
-          retention-days: 2
-          overwrite: true
+      # Release builds hand their packages to the release machine through the build drop (see release-build.yml).
+      # Only when called by the release workflow: the drop refuses this workflow run on its own.
+      - name: Hand the unsigned packages to the release machine
+        if: github.event_name == 'workflow_dispatch' && github.workflow == 'Unsigned release builds'
+        env:
+          BUILD_DROP_URL: ${{ secrets.BUILD_DROP_URL }}
+          PLATFORM: linux-x64
+        run: |
+          set -euo pipefail
+          test -n "$BUILD_DROP_URL" || { echo "BUILD_DROP_URL is not set"; exit 1; }
+          upload() {  # a fresh token per file; the header goes on stdin, never on the command line
+            local token
+            token=$(curl -sSf -H "Authorization: bearer $ACTIONS_ID_TOKEN_REQUEST_TOKEN" \
+                      "$ACTIONS_ID_TOKEN_REQUEST_URL&audience=build-drop" | jq -r .value)
+            [[ -n "$token" && "$token" != null ]] || { echo "no OIDC token"; exit 1; }
+            echo "::add-mask::$token"
+            printf 'Authorization: Bearer %s\n' "$token" | curl -sS --fail-with-body --retry 3 -H @- --upload-file "$1" \
+              "${BUILD_DROP_URL%/}/v1/runs/${GITHUB_RUN_ID}/${PLATFORM}/$(basename "$1")"
+            echo
+          }
+          cd dist/linux
+          jq -r '.artifacts[].name' release-build.json | while IFS= read -r name; do upload "$name"; done
+          upload release-build.json   # last: marks this platform complete
       - uses: actions/upload-artifact@v7
         if: always()
         with:
