@@ -141,7 +141,7 @@ class StudioAssistantTests(unittest.TestCase):
         self.assertEqual((turn['user'],turn['assistant']),('Long task','Partial'))
 
     def test_images_reach_model_and_persist_in_conversation(self):
-        from test_chat_images import png
+        from tests.test_chat_images import png
         from pydantic_ai.messages import ModelRequest, UserPromptPart, ModelResponse, TextPart, BinaryContent
         image = self.bridge.images.save(png(), 'Bracket.png')
         received = []
@@ -174,7 +174,7 @@ class StudioAssistantTests(unittest.TestCase):
     def test_attachment_http_validation_and_session_protection(self):
         import httpx
         from concurrent.futures import ThreadPoolExecutor
-        from test_chat_images import png
+        from tests.test_chat_images import png
         server = self.window.cad_panel.server
         def requests():
             with httpx.Client(base_url=server.url, timeout=12) as client:
