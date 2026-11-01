@@ -49,13 +49,18 @@ class BlenderRuntimeTests(unittest.TestCase):
 
     def test_oversized_download_is_rejected_before_hashing(self):
         # A zero Content-Length must not bypass the byte cap.
+        # Pin a packaged platform. Darwin has no archive, so an unmocked Mac host
+        # raises before the size cap is reached.
         response = self._response(b'x' * 32)
         response.headers = {'Content-Length': '0'}
         with tempfile.TemporaryDirectory() as folder:
-            with patch('steve_desktop.blender_runtime.MAX_DOWNLOAD', 8), \
-                 patch('steve_desktop.blender_runtime.urllib.request.urlopen', return_value=response):
+            with patch('steve_desktop.blender_runtime.platform.system', return_value='Linux'), \
+                 patch('steve_desktop.blender_runtime.platform.machine', return_value='x86_64'), \
+                 patch('steve_desktop.blender_runtime.MAX_DOWNLOAD', 8), \
+                 patch('steve_desktop.blender_runtime.urllib.request.urlopen', return_value=response) as opened:
                 with self.assertRaisesRegex(ValueError, 'size limit'):
                     install(Path(folder), threading.Event(), lambda message: None)
+                self.assertIn('linux-x64', opened.call_args.args[0])
             self.assertEqual(list(Path(folder).iterdir()), [])
 
     def test_symlink_and_traversal_entries_are_rejected(self):
