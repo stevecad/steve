@@ -99,6 +99,8 @@ export const pyString = (value: string) => JSON.stringify(value);
 const linkedItem = (alias: string, key: string) => (/^[A-Za-z_]\w*$/.test(key) ? `${alias}.${key}` : `${alias}.shop[${pyString(key)}]`);
 /** One line of text for a comment. */
 const oneLine = (value: string) => value.replace(/[\r\n]+/g, ' ').trim();
+/** `value` matched literally inside a RegExp (whatever characters a key, name or alias has). */
+const escapeRegExp = (value: string) => value.replace(/[.*+?^${}()|[\]\\/-]/g, '\\$&');
 
 /** A key nothing in the shop uses yet: lowercase letters, digits and _, from a name ("Haas VF-2" → haas_vf_2). */
 export function freeKey(name: string, taken: Iterable<string>, suffixes: string[] = [], prefix = 'm'): string {
@@ -131,7 +133,7 @@ export function withImport(source: string, line: string): string {
 export function withShopAdd(main: string, module: string, name: string): string {
   let next = withImport(main.trim() ? main : 'from steve.shop import *  # noqa: F403\n\nshop = Shop()\n', `from ${module} import ${name}`);
   if (!/^\s*shop\s*=\s*Shop\(/m.test(next)) next = `${next.replace(/\n*$/, '\n')}shop = Shop()\n`;
-  if (!new RegExp(String.raw`^shop\.add\(\s*${name}\s*\)`, 'm').test(next)) next = `${next.replace(/\n*$/, '\n')}shop.add(${name})\n`;
+  if (!new RegExp(String.raw`^shop\.add\(\s*${escapeRegExp(name)}\s*\)`, 'm').test(next)) next = `${next.replace(/\n*$/, '\n')}shop.add(${name})\n`;
   return next;
 }
 
@@ -150,7 +152,7 @@ export function withShopLink(source: ShopSource, documentId: string, name: strin
     for (let n = 2; links[alias] || RESERVED_ALIASES.has(alias); n++) alias = `${base}_${n}`;
   }
   links[alias] = { document_id: documentId, revision };
-  const code = new RegExp(String.raw`^\s*from\s+links\s+import\b.*\b${alias}\b`, 'm').test(source.code) ? source.code : withImport(source.code, `from links import ${alias}`);
+  const code = new RegExp(String.raw`^\s*from\s+links\s+import\b.*\b${escapeRegExp(alias)}\b`, 'm').test(source.code) ? source.code : withImport(source.code, `from links import ${alias}`);
   return { source: { ...source, code, links }, alias };
 }
 
@@ -302,7 +304,7 @@ function callArgs(source: string, open: number): { args: Arg[]; close: number } 
 /** The `(` of the call that makes the item keyed `key` (its first argument is that string): on `line` when it is there,
  *  else the only such call in the file. */
 function callOf(source: string, key: string, line: number): number | null {
-  const pattern = new RegExp(String.raw`\(\s*(["'])${key.replace(/[-]/g, '\\-')}\1\s*[,)]`, 'g');
+  const pattern = new RegExp(String.raw`\(\s*(["'])${escapeRegExp(key)}\1\s*[,)]`, 'g');
   const hits = [...source.matchAll(pattern)].map((match) => match.index!);
   if (!hits.length) return null;
   const lineStart = source.split('\n').slice(0, Math.max(0, line - 1)).join('\n').length + (line > 1 ? 1 : 0);
