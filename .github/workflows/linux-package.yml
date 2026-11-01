@@ -18,6 +18,9 @@ permissions:
 jobs:
   linux-x64:
     runs-on: ubuntu-24.04
+    permissions:
+      contents: read
+      id-token: write   # release builds prove who they are to the build drop (the workflow-level read-only setting withholds it)
     timeout-minutes: 30
     steps:
       - uses: actions/checkout@v7
