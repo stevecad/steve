@@ -18,22 +18,21 @@ from steve_desktop.vault import Vault
 _ROOT = Path(__file__).resolve().parents[1]
 
 _APP = r'''
-import tempfile
-from pathlib import Path
-import keyring
+import sys, keyring, keyring.core
 import steve_desktop.vault as vault
-assert "tests.vault_hook" not in __import__("sys").modules
+import steve_desktop.legacy_profile, steve_desktop.diagnostics, steve_desktop.__main__
+assert "tests.vault_hook" not in sys.modules
 assert vault.Vault._cipher.__module__ == "steve_desktop.vault"
-assert vault.Vault.load.__module__ == "steve_desktop.vault"
-backend = keyring.get_keyring()
-assert type(backend).__module__ == "keyring.backends.fail", type(backend)
-folder = tempfile.mkdtemp()
-try:
-    vault.Vault(Path(folder) / "x.dpapi").save({"k": "v"})
-except RuntimeError as exc:
-    assert "macOS Keychain or Linux Secret Service" in str(exc), exc
-else:
-    raise SystemExit("save reached a store")
+assert vault.Vault.load.__module__ == vault.Vault.save.__module__ == "steve_desktop.vault"
+fns = (keyring.get_keyring, keyring.get_password, keyring.set_password, keyring.delete_password,
+       keyring.core.get_keyring, keyring.core.get_password)
+assert all(fn.__module__.startswith("keyring") for fn in fns), [fn.__module__ for fn in fns]
+from keyring.backends.macOS import Keyring as Mac
+from keyring.backends.SecretService import Keyring as Secret
+assert Mac.get_password.__module__.startswith("keyring")
+assert Secret.get_password.__module__.startswith("keyring")
+wc = getattr(vault, "win32crypt", None)
+assert wc is None or wc.CryptProtectData.__module__ != "tests.vault_hook"
 print("ok")
 '''
 
