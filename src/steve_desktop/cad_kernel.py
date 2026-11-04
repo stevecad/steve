@@ -3,8 +3,30 @@
 from steve_desktop.paths import RESOURCE_ROOT
 import json
 import sys
+import time
 from pathlib import Path
 from steve_desktop.cad_document import validate
+
+
+def when_released(operation, attempts=50):
+    """Run a file operation. Windows refuses (WinError 32) while a virus scanner still holds the file open, and those
+    handles go a moment later."""
+    for attempt in range(attempts):
+        try:
+            return operation()
+        except PermissionError:
+            if attempt == attempts - 1:
+                raise
+            time.sleep(.05)
+
+
+def publish(path, text):
+    """Atomically hand a small file to the parent process, which polls for it."""
+    temporary = path.with_suffix('.tmp')
+    def write():
+        temporary.write_text(text, encoding='utf-8')
+        temporary.replace(path)
+    when_released(write)
 
 
 def native_meshing():
@@ -194,7 +216,6 @@ def serve(directory):
     import gc
     import importlib
     import os
-    import time
     import cadquery
     from cadquery import occ_compat
     occ_compat.enable()
@@ -205,7 +226,7 @@ def serve(directory):
     environment = dict(os.environ)
     original_cwd = Path.cwd()
     original_stdout, original_stderr = sys.stdout, sys.stderr
-    (folder / 'ready').write_text(str(os.getpid()))
+    publish(folder / 'ready', str(os.getpid()))
     while True:
         request = folder / 'request.json'
         if not request.exists():
@@ -224,14 +245,11 @@ def serve(directory):
         started = time.monotonic()
         code = main(args)
         error_file = job_root / 'worker-error.txt'
-        error = error_file.read_text(encoding='utf-8') if error_file.exists() else ''
+        error = when_released(lambda: error_file.read_text(encoding='utf-8')) if error_file.exists() else ''
         # The pool retires this process after its operation. Publish completed
         # work before legacy reuse cleanup so callers do not wait for garbage
         # collection of an interpreter they will immediately discard.
-        response = folder / (payload['id'] + '.json')
-        temporary = response.with_suffix('.tmp')
-        temporary.write_text(json.dumps({'code': code, 'error': error, 'seconds': time.monotonic()-started}), encoding='utf-8')
-        temporary.replace(response)
+        publish(folder / (payload['id'] + '.json'), json.dumps({'code': code, 'error': error, 'seconds': time.monotonic()-started}))
         # Retain loaded CAD binaries and numerical libraries, reset document runtime
         # registries and user modules. Each job still has its own source namespace.
         sys.stdout, sys.stderr = original_stdout, original_stderr
@@ -318,14 +336,16 @@ def main(args):
                       'bounds_mm': [box[3]-box[0], box[4]-box[1], box[5]-box[2]], 'volume_mm3': shape.Volume(), 'format': imports.kind(ref)}
             Path(args[2]).write_text(json.dumps(report), encoding='utf-8')
         return 0
-    except Exception as exc:
+    except (Exception, SystemExit) as exc:
+        # Document source can call sys.exit: that fails its job, not the worker reporting it.
+        message = f'The code called sys.exit({exc.code!r}) instead of finishing.' if isinstance(exc, SystemExit) else str(exc)
         # Windowed executables may not have inherited console streams. Keep the
         # diagnostic beside this job so the parent can always display it.
         if len(args) > 1:
             folder = Path(args[2]).parent if args[0] == 'inspect-import' else Path(args[1])
             if folder.is_dir():
-                (folder / 'worker-error.txt').write_text(str(exc)[-4000:], encoding='utf-8')
-        print(str(exc), file=sys.stderr)
+                (folder / 'worker-error.txt').write_text(message[-4000:], encoding='utf-8')
+        print(message, file=sys.stderr)
         return 1
 
 

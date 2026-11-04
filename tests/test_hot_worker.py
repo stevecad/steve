@@ -30,6 +30,10 @@ class HotWorkerTests(unittest.TestCase):
             with self.assertRaises(ValueError):
                 project.build(crash, recovered['revision'])
             self.assertEqual(project.read()['revision'], recovered['revision'])
+            exits = {**bracket(), 'code': 'import sys\nsys.exit(3)\n'}
+            with self.assertRaisesRegex(ValueError, r'sys\.exit\(3\)'):
+                project.build(exits, recovered['revision'])
+            self.assertEqual(project.read()['revision'], recovered['revision'])
             final = project.build(bracket(), recovered['revision'])
             self.assertEqual(final['size'], [80, 50, 40])
 

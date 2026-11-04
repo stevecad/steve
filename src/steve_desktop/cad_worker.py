@@ -14,6 +14,18 @@ from steve_desktop.cad_process import run
 from steve_desktop.cad_resources import CpuBudget
 
 
+def exit_detail(folder):
+    """What a dead worker left behind: the error it recorded, else the end of its output."""
+    for name in ('worker-error.txt', 'worker.log'):
+        try:
+            text = (folder/name).read_text(encoding='utf-8', errors='replace').strip()
+        except OSError:
+            continue
+        if text:
+            return text[-2000:]
+    return ''
+
+
 class HotCadWorker:
     def __init__(self, budget=None):
         self.budget = budget
@@ -39,7 +51,9 @@ class HotCadWorker:
                 try:
                     with (folder/'worker.log').open('wb') as log:
                         code = run(command + ['serve', str(folder)], log, stop, timeout=None, budget=self.budget)
-                    if code: self.failure = f'CAD worker exited ({code}).'
+                    # Read now: retiring this worker deletes its folder. The cause goes last,
+                    # since failure reports quote an error's last line.
+                    if code: self.failure = '\n'.join(filter(None, (f'CAD worker exited ({code}).', exit_detail(folder))))
                 except Exception as exc:
                     self.failure = str(exc)
             self.thread = threading.Thread(target=supervise, name='hot-cad-supervisor', daemon=True)
@@ -77,13 +91,14 @@ class HotCadWorker:
             self.warm()
             started = time.monotonic()
             folder = self.folder
-            def check():
+            def interrupted():
                 if self.closed: raise ValueError('CAD workspace is closed.')
                 if cancel and cancel.is_set(): raise ValueError('Build cancelled.')
                 if timeout is not None and time.monotonic()-started > timeout: raise ValueError(f'CAD operation exceeded the {timeout}-second limit.')
+            def check():
+                interrupted()
                 if not self.thread.is_alive():
-                    detail = (folder/'worker.log').read_text(encoding='utf-8', errors='replace')[-2000:]
-                    raise ValueError(self.failure or detail or 'CAD worker stopped.')
+                    raise ValueError(self.failure or exit_detail(folder) or 'CAD worker stopped.')
             try:
                 while not (folder/'ready').exists():
                     check(); time.sleep(.01)
@@ -96,11 +111,15 @@ class HotCadWorker:
                 temporary.replace(request)
                 response = folder/f'{identifier}.json'
                 while True:
-                    check()
+                    interrupted()
+                    # Sampled before reading: a worker can publish its response and
+                    # die in its cleanup afterwards, and that response still counts.
+                    alive = self.thread.is_alive()
                     try:
                         result = json.loads(response.read_text(encoding='utf-8'))
                         break
                     except (FileNotFoundError, PermissionError):
+                        if not alive: check()
                         # Windows can briefly retain a sharing lock after the
                         # worker atomically publishes its response.
                         time.sleep(.01)
