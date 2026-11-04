@@ -18,8 +18,8 @@ and Linux ARM are not targets of this build.
 Make the downloaded AppImage executable, then run it:
 
 ```sh
-chmod +x Steve-0.4.3-linux-x86_64.AppImage
-./Steve-0.4.3-linux-x86_64.AppImage
+chmod +x Steve-0.4.4-linux-x86_64.AppImage
+./Steve-0.4.4-linux-x86_64.AppImage
 ```
 
 Use an ordinary desktop user session with a running, unlocked Secret Service
@@ -34,13 +34,13 @@ than its temporary mount path, so it remains usable after relaunching Steve.
 If FUSE mounting is unavailable, use extraction mode:
 
 ```sh
-./Steve-0.4.3-linux-x86_64.AppImage --appimage-extract-and-run
+./Steve-0.4.4-linux-x86_64.AppImage --appimage-extract-and-run
 ```
 
 Alternatively, extract the tarball on a filesystem that supports symbolic links:
 
 ```sh
-tar -xzf Steve-0.4.3-linux-x86_64.tar.gz
+tar -xzf Steve-0.4.4-linux-x86_64.tar.gz
 ./Steve/AppRun
 ```
 
@@ -176,7 +176,7 @@ formats against a real local HTTPS feed:
 .venv/bin/python tools/linux_session.py -- .venv/bin/python checks/check_linux_updates.py \
   --old-package build/update-fixture/dist/Steve \
   --old-appimage build/update-fixture/dist/linux/Steve-0.3.4-linux-x86_64.AppImage \
-  --new-bundle dist/linux/Steve-0.4.3-linux-x86_64.tar.gz
+  --new-bundle dist/linux/Steve-0.4.4-linux-x86_64.tar.gz
 ```
 
 The check uses disposable signing/TLS keys and a private test profile. It verifies

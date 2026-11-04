@@ -6,7 +6,7 @@
   #define ReleaseDir "..\dist\installer"
 #endif
 #ifndef AppVersion
-  #define AppVersion "0.4.3"
+  #define AppVersion "0.4.4"
 #endif
 #ifndef InstallerAppId
   #define InstallerAppId "{{759EF3A7-5048-44D4-B75C-3BDF8DE3FB66}"

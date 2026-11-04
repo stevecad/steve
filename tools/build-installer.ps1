@@ -2,7 +2,7 @@ param(
     [Parameter(Mandatory=$true)][string]$Compiler,
     [string]$PackageDir,
     [string]$OutputDir,
-    [string]$Version='0.4.3'
+    [string]$Version='0.4.4'
 )
 $ErrorActionPreference='Stop'
 $project=(Resolve-Path -LiteralPath (Join-Path $PSScriptRoot '..')).Path

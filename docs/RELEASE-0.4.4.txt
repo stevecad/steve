@@ -1,0 +1,11 @@
+Steve 0.4.4
+
+- Shop editor: match item keys literally (#8)
+- Fit check: parts resting on round faces are listed as touching (#9)
+- Linked documents: helper modules with the same name no longer collide (#10)
+- Fit check: a shallow press never reads as a whole-solid clash (#13)
+- Waits survive a moment without an answer from the CAD service (#11)
+- Tabs: a design that no longer exists closes its tab instead of failing on every start (#12)
+- Windows: wait for a build folder to be released before renaming it (#14)
+- Run from source on Apple Silicon macOS (#15)
+- Keep unit tests off the OS keychain (#16)

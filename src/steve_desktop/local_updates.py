@@ -18,7 +18,7 @@ from packaging.version import Version
 from steve_desktop.vault import Vault
 from steve_desktop.update_manifest import channel_trust, public_key_list, verify_manifest, verify_stored
 
-VERSION='0.4.3'
+VERSION='0.4.4'
 DOWNLOAD_PAGE='https://dl.stevecad.studio/'
 
 
