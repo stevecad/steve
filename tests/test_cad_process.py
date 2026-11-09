@@ -14,6 +14,31 @@ from steve_desktop.cad_process import run
 
 
 class CadProcessTests(unittest.TestCase):
+    def test_output_limit_is_checked_when_the_worker_exits_before_the_first_poll(self):
+        from contextlib import ExitStack
+        with tempfile.TemporaryDirectory() as directory, ExitStack() as stack:
+            if os.name == 'nt':
+                import win32event
+                wait = win32event.WaitForSingleObject
+                # Completion can be signalled before the first polling interval.
+                stack.enter_context(patch('win32event.WaitForSingleObject',
+                    side_effect=lambda handle, timeout: wait(handle, 5000)))
+            else:
+                popen = subprocess.Popen
+                def completed(*args, **kwargs):
+                    process = popen(*args, **kwargs)
+                    process.wait(timeout=5)
+                    return process
+                stack.enter_context(patch('steve_desktop.cad_process.subprocess.Popen', side_effect=completed))
+            for count, limit in ((32, 16), (16, 16), (32, None)):
+                with self.subTest(count=count, limit=limit), Path(directory, 'log').open('wb') as log:
+                    command = [sys.executable, '-c', f'import sys; sys.stdout.write("x" * {count})']
+                    if limit is not None and count > limit:
+                        with self.assertRaisesRegex(ValueError, 'output limit'):
+                            run(command, log, threading.Event(), output_limit=limit)
+                    else:
+                        self.assertEqual(run(command, log, threading.Event(), output_limit=limit), 0)
+
     @unittest.skipUnless(sys.platform=='linux','Linux process guardian')
     def test_controller_crash_terminates_the_whole_worker_tree(self):
         with tempfile.TemporaryDirectory() as directory:

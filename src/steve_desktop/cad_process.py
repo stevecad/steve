@@ -53,13 +53,16 @@ def run(command, log, cancel, timeout=None, budget=None, cwd=None, output_limit=
     env = command_environment(external, budget)
     start = time.monotonic()
 
+    def check_output():
+        if output_limit is not None and os.fstat(log.fileno()).st_size > output_limit:
+            raise ValueError('CAD operation exceeded the output limit.')
+
     def check():
         if cancel and cancel.is_set():
             raise ValueError('Build cancelled.')
         if timeout is not None and time.monotonic() - start > timeout:
             raise ValueError(f'CAD operation exceeded the {timeout}-second limit.')
-        if output_limit is not None and os.fstat(log.fileno()).st_size > output_limit:
-            raise ValueError('CAD operation exceeded the output limit.')
+        check_output()
 
     if os.name != 'nt':
         watched=command
@@ -71,6 +74,7 @@ def run(command, log, cancel, timeout=None, budget=None, cwd=None, output_limit=
             while process.poll() is None:
                 check()
                 time.sleep(.05)
+            check_output()
             return process.returncode
         finally:
             try:
@@ -113,6 +117,7 @@ def run(command, log, cancel, timeout=None, budget=None, cwd=None, output_limit=
             win32process.ResumeThread(thread)
             while win32event.WaitForSingleObject(process, 50) == win32con.WAIT_TIMEOUT:
                 check()
+            check_output()
             return win32process.GetExitCodeProcess(process)
     finally:
         win32job.TerminateJobObject(job, 1)
