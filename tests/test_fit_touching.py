@@ -23,6 +23,9 @@ def build(files, main):
     import upstream_runtime as run
     import steve.design as d
     import steve.model as m
+    if os.name == 'nt':
+        from steve_desktop.cad_kernel import local_runtime
+        local_runtime(run)
     for name in [n for n in sys.modules if n in {'params', 'components'} or n.startswith('components.')]:
         del sys.modules[name]
     d._DESIGNS.clear(); d._COMPONENTS.clear(); m._ACTIVE.clear(); run._REFS.clear(); run._OWNERS.clear()
@@ -78,7 +81,8 @@ class RoundFaceTouchingTests(unittest.TestCase):
         real = d._workers
         reports = []
         try:
-            for workers in (1, 3):  # one process, and forked workers: the same touching pairs
+            # POSIX uses forked workers; the Windows desktop adapter keeps checks serial.
+            for workers in (1, 3):
                 d._workers = lambda workers=workers: workers
                 reports.append(build(files, CURVED)['modeling']['design']['kinematics']['fits'][0])
         finally:
