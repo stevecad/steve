@@ -20,6 +20,10 @@ On Apple Silicon use the same steps; see `docs/MACOS.md`.
 
 ## Tests
 
+The unit-test vault guard imports `keyring` on every platform. In a Windows
+development environment, install it before running tests:
+`python -m pip install "keyring>=25.6"`.
+
 Run focused tests with `python -m unittest tests.<test_module>`, for example
 `python -m unittest tests.test_service tests.test_runtime tests.test_features`,
 and the offline desktop smoke check with `python -m steve_desktop --smoke-test`.
