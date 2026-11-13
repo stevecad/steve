@@ -326,6 +326,12 @@ export interface Build {
   step?: StepFileState | null;
 }
 
+/** An entry of the builds list (GET /v1/builds): what the build is and how it went, with the small metadata entries the
+ *  list is filtered by. Its source, files, logs, artifacts and the rest of its metadata come with the build itself
+ *  (Api.build). */
+export type BuildSummary = Pick<Build, 'id' | 'name' | 'kind' | 'status' | 'created_at' | 'started_at' | 'finished_at' | 'error' | 'mode' | 'route'>
+  & { metadata?: { routing?: CircuitRouting } | null };
+
 export type StepFileState = 'ready' | 'making' | 'failed' | 'none';
 
 /** POST/GET /v1/builds/{id}/step: a full build's STEP file, made on demand (app/step_files.py). */
@@ -576,7 +582,7 @@ export const requestId = () => Array.from(crypto.getRandomValues(new Uint8Array(
 export const Api = {
   examples: () => api<Record<string, string>>('/v1/examples').then((examples) => ({ plate: localPlate, design: localDesign, ...examples })),
   exampleCatalog: () => api<{ examples: { id: string; name: string; description: string; kind: Kind; code: string; files?: Record<string, string> }[] }>('/v1/examples/catalog'),
-  builds: (limit = 100) => api<{ builds: Build[] }>(`/v1/builds?limit=${limit}`),
+  builds: (limit = 100) => api<{ builds: BuildSummary[] }>(`/v1/builds?limit=${limit}`),
   build: (id: string) => api<Build>(`/v1/builds/${id}`),
   /** A full build's print meshes (metadata.body_meshes), made on demand: starts the job (POST) or reads it (GET). */
   printMesh: (id: string, start = false, resolution: MeshResolution = 'fine') => api<{ status: 'none' | 'queued' | 'running' | 'succeeded' | 'failed'; error: string | null }>(
