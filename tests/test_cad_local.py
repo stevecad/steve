@@ -34,6 +34,33 @@ class LocalCadTests(unittest.TestCase):
         self.assertEqual(json.loads(self.server.path.read_text())['settings']['local.cpu_percent'], 50)
         self.assertEqual(self.client.put('/v1/local/performance', json={'cpu_percent': 80}).json()['cpu_percent'], 80)
 
+    def test_builds_list_is_a_summary_and_one_build_is_whole(self):
+        stamp = '2026-01-01T00:00:00+00:00'
+        part = {**bracket(), 'files': {'params.py': 'width = 10\n'}, 'id': 'part-build', 'status': 'succeeded', 'mode': 'full',
+                'created_at': stamp, 'started_at': stamp, 'finished_at': stamp, 'error': None, 'logs': 'built',
+                'artifacts': {'preview': '/v1/builds/part-build/artifacts/preview'}, 'timing': {'total_s': 1},
+                '_revision': 'abc', 'metadata': {'body_meshes': [{'name': 'body'}] * 50, 'parameters': [{'name': 'width'}]}}
+        board = {'name': 'Board', 'kind': 'circuit', 'code': 'board = 1\n', 'route': True, 'id': 'board-build',
+                 'status': 'running', 'mode': 'preview', 'created_at': stamp, 'started_at': stamp, 'finished_at': None,
+                 'error': None, 'artifacts': {}, 'metadata': {'routing': {'requested': True, 'status': 'routing'}, 'circuit': ['x'] * 50}}
+        queued = {**bracket(), 'id': 'queued-build', 'status': 'queued', 'mode': 'preview', 'created_at': stamp,
+                  'started_at': None, 'finished_at': None, 'error': None, 'artifacts': {}, 'metadata': None}
+        self.server.state['builds'].update({'part-build': part, 'board-build': board, 'queued-build': queued})
+        listed = self.client.get('/v1/builds').json()['builds']
+        self.assertEqual([entry['id'] for entry in listed], ['queued-build', 'board-build', 'part-build'])
+        by_id = {entry['id']: entry for entry in listed}
+        self.assertEqual(by_id['part-build'], {'id': 'part-build', 'name': part['name'], 'kind': 'part', 'mode': 'full',
+                                               'status': 'succeeded', 'created_at': stamp, 'started_at': stamp,
+                                               'finished_at': stamp, 'error': None, 'metadata': {}})
+        self.assertEqual(by_id['board-build']['metadata'], {'routing': {'requested': True, 'status': 'routing'}})
+        self.assertIs(by_id['board-build']['route'], True)
+        self.assertIsNone(by_id['queued-build']['metadata'])
+        for entry in listed:
+            self.assertFalse({'code', 'files', 'links', 'logs', 'artifacts', 'timing', '_revision'} & set(entry))
+        self.assertEqual(len(self.client.get('/v1/builds?limit=1').json()['builds']), 1)
+        whole = self.client.get('/v1/builds/part-build').json()
+        self.assertEqual(whole, part)
+
     def test_studio_source_file_limit(self):
         from steve_desktop.cad_document import validate
         doc = {**bracket(), 'files': {f'components/part_{i}.py': '# component\n' for i in range(200)}}

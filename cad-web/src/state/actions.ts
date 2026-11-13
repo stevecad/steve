@@ -3,7 +3,7 @@ import { rememberStoppedBuild } from './stoppedBuild';
 import { BLENDER_TEMPLATE, builtFrom, CIRCUIT_MAIN, DESIGN_FILES, fileLabel, filesOf, hasFiles, imagePath, isImage, keepsFiles, MAIN, modelBuiltFrom, opened, SHOP_FILES, sourceFiles, stored, tablePath, withComponent, withLink, withoutComponent, latestModelBuild, manufactureBuild, showsModel } from './design';
 import { CIRCUIT_TEMPLATE } from '@/workspaces/electronics/template';
 import * as THREE from 'three';
-import { api, Api, ApiError, json, bodyMeshes, buildProgress, fetchTopology, forgetTopology, reachable, serverCapabilities, shopMetadata, withPrintMeshes, type Build, type CadDocument, type Kind, type LinkRef, type MeshResolution, type PackageDocument } from '@/lib/api';
+import { api, Api, ApiError, json, bodyMeshes, buildProgress, fetchTopology, forgetTopology, reachable, serverCapabilities, shopMetadata, withPrintMeshes, type Build, type BuildSummary, type CadDocument, type Kind, type LinkRef, type MeshResolution, type PackageDocument } from '@/lib/api';
 import { ModelRuntime, loadGltf } from '@/viewport/model';
 import { tween, viewer, VIEW_DIRECTIONS, type CameraPose } from '@/viewport/viewer';
 import {
@@ -1338,7 +1338,7 @@ export async function boot(resume?: () => Promise<boolean>) {
   phase('opening', 'Opening workspace');
   try {
     // The builds list only picks what to open when nothing else does: once retried, a failure doesn't stop the documents loading.
-    const recentBuilds = () => Api.builds(100).catch(() => Api.builds(100)).catch(() => ({ builds: [] as Build[] }));
+    const recentBuilds = () => Api.builds(100).catch(() => Api.builds(100)).catch(() => ({ builds: [] as BuildSummary[] }));
     const [loaded, documents, builds] = await Promise.all([Api.examples(), Api.documents(), recentBuilds()]);
     examples = loaded;
     const draft = readDraft();

@@ -10,7 +10,7 @@
  * build runs per workspace: asking again while one runs shows it.
  */
 import { create } from 'zustand';
-import { Api, serverCapabilities, type Build, type CircuitRouting } from '@/lib/api';
+import { Api, serverCapabilities, type Build, type BuildSummary, type CircuitRouting } from '@/lib/api';
 import { get as getApp, toast, useApp } from '@/state/store';
 import { showFinishedBuild } from '@/state/actions';
 import { builtFrom, stored } from '@/state/design';
@@ -22,8 +22,8 @@ export type { CircuitRouting };
 export const routingOf = (build: { metadata?: unknown } | null | undefined): CircuitRouting | null =>
   ((build?.metadata as { routing?: CircuitRouting } | null)?.routing ?? null);
 
-const isRouteBuild = (build: Build) => build.kind === 'circuit' && (build.route === true || routingOf(build)?.requested === true);
-export const isRunning = (build: Build | null | undefined) => !!build && (build.status === 'queued' || build.status === 'running');
+const isRouteBuild = (build: BuildSummary) => build.kind === 'circuit' && (build.route === true || routingOf(build)?.requested === true);
+export const isRunning = (build: Pick<Build, 'status'> | null | undefined) => !!build && (build.status === 'queued' || build.status === 'running');
 
 interface RouteState {
   /** The routing build this workspace is running, or the last one followed here, as last read. */
@@ -177,7 +177,7 @@ async function finished(build: Build) {
  */
 export async function findRouting(): Promise<Build | null> {
   if (!await routingSupported()) return null;
-  let candidates: Build[] = [];
+  let candidates: BuildSummary[] = [];  // The list is a summary: the one picked is read whole below.
   try { candidates = (await Api.builds(30)).builds.filter(isRouteBuild); } catch { /* Offline: nothing to follow yet. */ }
   const running = candidates.find(isRunning);
   const last = remembered();

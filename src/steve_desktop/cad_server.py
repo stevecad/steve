@@ -30,6 +30,21 @@ def now():
     return datetime.now(timezone.utc).isoformat()
 
 
+# What the builds list says about each build: what it is and how it went. Its source, files, logs, artifacts and the
+# rest of its metadata are read with the build itself (GET /v1/builds/{build_id}).
+SUMMARY_FIELDS = ('id', 'name', 'kind', 'mode', 'status', 'created_at', 'started_at', 'finished_at', 'error', 'route')
+# The small metadata entries the list's callers choose a build by.
+SUMMARY_METADATA = ('routing',)
+
+
+def build_summary(entry):
+    summary = {key: entry[key] for key in SUMMARY_FIELDS if key in entry}
+    metadata = entry.get('metadata')
+    summary['metadata'] = ({key: metadata[key] for key in SUMMARY_METADATA if key in metadata}
+                           if isinstance(metadata, dict) else None)
+    return summary
+
+
 class LocalCadServer:
     def __init__(self, folder):
         self.folder = Path(folder)
@@ -359,7 +374,9 @@ class LocalCadServer:
 
         @app.get('/v1/builds')
         def builds(limit: int = 100):
-            return {'builds': list(reversed(list(self.state['builds'].values())))[:min(limit,100)]}
+            with self.lock:
+                recent = list(reversed(list(self.state['builds'].values())))[:min(limit,100)]
+                return {'builds': [build_summary(entry) for entry in recent]}
 
         @app.post('/v1/builds', status_code=202)
         def submit(body: dict):
